@@ -127,7 +127,7 @@ kopiert die Datei `accounts.json` – zu finden über **Einstellungen → Ordner
 
 ## Aktualisierungen
 
-Beim Start sieht M2Hub nach, ob eine neuere Fassung vorliegt, und weist einmal
+Beim Start sieht M2Hub nach, ob eine neuere Version vorliegt, und weist einmal
 darauf hin. Heruntergeladen wird nichts von selbst; der Hinweis öffnet auf
 Wunsch die Download-Seite. Wer das nicht möchte, schaltet die Prüfung in den
 Einstellungen ab.
@@ -136,7 +136,7 @@ Einstellungen ab.
 
 Fehler, Wünsche und Anmerkungen gehören in die
 [Issues](https://github.com/EinfachFabsTV/Metin2Hub/issues). Besonders hilfreich
-sind Bildschirmfotos und die Angabe, welche Fassung du nutzt – sie steht unter
+sind Bildschirmfotos und die Angabe, welche Version du nutzt – sie steht unter
 Einstellungen.
 
 ## Hinweis
