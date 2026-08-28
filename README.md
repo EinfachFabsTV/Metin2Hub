@@ -1,10 +1,17 @@
 <div align="center">
 
-# M2Hub
+<img src="assets/banner.png" alt="M2Hub" width="100%">
 
-**Dein Überblick für Metin2 – Accounts, Events und Itemshop in einem Programm.**
+<br>
 
-[**Herunterladen**](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest) · Windows · kostenlos · ohne Anmeldung
+[![Version](https://img.shields.io/github/v/release/EinfachFabsTV/Metin2Hub?label=Version&color=3b82f6&style=for-the-badge)](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/EinfachFabsTV/Metin2Hub/total?label=Downloads&color=10b981&style=for-the-badge)](https://github.com/EinfachFabsTV/Metin2Hub/releases)
+[![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-a855f7?style=for-the-badge)](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest)
+[![Lizenz](https://img.shields.io/github/license/EinfachFabsTV/Metin2Hub?label=Lizenz&color=64748b&style=for-the-badge)](LICENSE)
+
+### [⬇️ &nbsp; M2Hub herunterladen](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest)
+
+**Kostenlos · ohne Installation · ohne Konto · ohne Werbung**
 
 </div>
 
@@ -15,25 +22,52 @@ Forenreiter, Notizzettel und Excel-Tabellen verteilt: welche Events gerade
 laufen, was im Itemshop ansteht, und wie es um die eigenen Accounts und
 Charaktere steht.
 
-Kein Konto, keine Registrierung, keine Werbung.
-
 ## Was M2Hub kann
 
-**Accounts & Charaktere**
-Alle Accounts auf einen Blick – mit Charakteren, Leveln und gespendeten
-Medaillen. Wer die Orkzahn-Bio schon erledigt hat, ist ebenso zu sehen wie die
-Meley-Charaktere und die, die noch leveln. Medaillen trägt man mit einem Klick
-nach, auch für viele Charaktere auf einmal. Wer Clients in mehreren Sprachen
-nutzt, ordnet jedem Account seine Sprache zu und erkennt sie an der Farbe.
+<table>
+<tr>
+<td width="33%" valign="top">
 
-**Events**
-Der Eventkalender je Server und die weltweiten Ankündigungen, jeweils mit Bild
-und Zeitraum. Was gerade läuft, steht oben im Fenster – auch dann, wenn man
-gerade bei den Accounts ist.
+### 👤 &nbsp;Accounts
 
-**Itemshop**
-Die laufenden und kommenden Aktionen, nach Zeitpunkt sortiert. Happy Hours
-werden oben angezeigt, solange sie laufen.
+Alle Accounts auf einen Blick, mit Charakteren, Leveln und gespendeten
+Medaillen.
+
+Wer die **Orkzahn-Bio** schon erledigt hat, ist ebenso zu sehen wie die
+**Meley-Charaktere** und die, die noch **leveln**. Medaillen trägt man mit einem
+Klick nach, auch für viele Charaktere auf einmal.
+
+Wer Clients in mehreren **Sprachen** nutzt, ordnet jedem Account seine Sprache
+zu und erkennt sie an der Farbe.
+
+</td>
+<td width="33%" valign="top">
+
+### 📅 &nbsp;Events
+
+Der **Eventkalender je Server** – Ruby/Sapphire und Tigerghost jeweils als
+eigener Reiter, mit Symbol zu jedem Eintrag.
+
+Dazu die **weltweiten Ankündigungen** mit Bild, Zeitraum und Text.
+
+Was gerade läuft, steht **oben im Fenster** – auch dann, wenn man gerade bei
+den Accounts ist.
+
+</td>
+<td width="33%" valign="top">
+
+### 🛒 &nbsp;Itemshop
+
+Die **laufenden und kommenden Aktionen**, nach Zeitpunkt sortiert.
+
+**Happy Hours** erscheinen oben im Fenster, solange sie laufen.
+
+Abgelaufenes lässt sich mit einem Haken einblenden, wenn man nachsehen möchte,
+was zuletzt war.
+
+</td>
+</tr>
+</table>
 
 ## Erste Schritte
 
@@ -58,18 +92,19 @@ Beim ersten Öffnen erscheint ein blaues Fenster:
 Zunächst gibt es dort nur den Knopf **„Nicht ausführen"**. Der Weg zum Start
 führt über den Link:
 
-1. Auf **„Weitere Informationen"** klicken (der Link unter dem Text).
-2. Das Fenster klappt auf und zeigt `App: M2Hub.exe` und
-   `Herausgeber: Unbekannter Herausgeber`.
-3. Auf **„Trotzdem ausführen"** klicken.
+| Schritt | Was zu tun ist |
+|:--:|---|
+| 1 | Auf **„Weitere Informationen"** klicken – den Link unter dem Text |
+| 2 | Das Fenster klappt auf und zeigt `App: M2Hub.exe` und `Herausgeber: Unbekannter Herausgeber` |
+| 3 | Auf **„Trotzdem ausführen"** klicken |
 
 Das war es – die Warnung erscheint nur beim ersten Mal. Danach startet M2Hub
 mit einem Doppelklick.
 
-**Falls „Weitere Informationen" fehlt** oder der Download schon vorher blockiert
-wurde: Rechtsklick auf `M2Hub.exe` → **Eigenschaften** → unten bei „Sicherheit"
-den Haken bei **„Zulassen"** setzen → **OK**. Anschließend startet das Programm
-normal.
+> [!TIP]
+> **Falls „Weitere Informationen" fehlt** oder der Download schon vorher
+> blockiert wurde: Rechtsklick auf `M2Hub.exe` → **Eigenschaften** → unten bei
+> „Sicherheit" den Haken bei **„Zulassen"** setzen → **OK**.
 
 ### Warum kommt diese Warnung?
 
@@ -100,20 +135,17 @@ Herausgeber geschuldet – es ist ein Fehlalarm. Wenn du unsicher bist, lade die
 Datei bei [VirusTotal](https://www.virustotal.com) hoch und sieh dir das
 Ergebnis an, bevor du sie startest.
 
-## Deine Daten bleiben auf deinem Rechner
+## 🔒 &nbsp;Deine Daten bleiben auf deinem Rechner
 
 Das ist keine Beteuerung, sondern eine Bauentscheidung: **M2Hub hat keinen
 Server.** Es gibt keine Stelle, an die Daten fließen könnten.
 
-- **Kein Konto, keine Anmeldung, kein Passwort.** Es gibt nichts anzulegen und
-  nichts zu verlieren.
-- **Deine Accounts, Charaktere und Medaillen liegen ausschließlich bei dir**, in
-  einer Datei in deinem Windows-Benutzerordner. Sie werden nirgendwohin
-  übertragen – auch nicht zu uns.
-- **Keine Sammlung von Nutzungsdaten**, keine Werbung, keine Zählpixel.
-- **Nach Zugangsdaten wird nie gefragt.** M2Hub braucht dein Spiel-Passwort
-  nicht und würde es nicht speichern. Sollte dich jemals ein Programm danach
-  fragen, das sich als M2Hub ausgibt, ist es nicht M2Hub.
+|  | |
+|:--:|---|
+| 🚫 | **Kein Konto, keine Anmeldung, kein Passwort.** Es gibt nichts anzulegen und nichts zu verlieren. |
+| 💾 | **Accounts, Charaktere und Medaillen liegen ausschließlich bei dir**, in einer Datei in deinem Windows-Benutzerordner. Sie werden nirgendwohin übertragen – auch nicht zu uns. |
+| 👁️ | **Keine Sammlung von Nutzungsdaten**, keine Werbung, keine Zählpixel. |
+| 🔑 | **Nach Zugangsdaten wird nie gefragt.** M2Hub braucht dein Spiel-Passwort nicht und würde es nicht speichern. Sollte dich jemals ein Programm danach fragen, das sich als M2Hub ausgibt, ist es nicht M2Hub. |
 
 Ins Netz greift das Programm nur an einer Stelle: Es liest den öffentlichen
 Eventkalender und die Ankündigungen im offiziellen Metin2-Forum – dieselben
@@ -127,10 +159,11 @@ kopiert die Datei `accounts.json` – zu finden über **Einstellungen → Ordner
 
 ## Aktualisierungen
 
-Beim Start sieht M2Hub nach, ob eine neuere Version vorliegt, und weist einmal
-darauf hin. Heruntergeladen wird nichts von selbst; der Hinweis öffnet auf
-Wunsch die Download-Seite. Wer das nicht möchte, schaltet die Prüfung in den
-Einstellungen ab.
+Beim Start sieht M2Hub nach, ob eine neuere Version vorliegt. Auf Knopfdruck
+lädt die App sie herunter, ersetzt sich selbst und startet neu – ein erneutes
+Herunterladen von Hand ist nicht nötig.
+
+Wer das nicht möchte, schaltet die Prüfung in den Einstellungen ab.
 
 ## Rückmeldungen
 
@@ -139,12 +172,12 @@ Fehler, Wünsche und Anmerkungen gehören in die
 sind Bildschirmfotos und die Angabe, welche Version du nutzt – sie steht unter
 Einstellungen.
 
-## Hinweis
+## ⚠️ &nbsp;Hinweis
 
-**M2Hub ist ein Projekt aus der Community und steht in keiner Verbindung zu
-Gameforge oder zu Metin2.** Es ist kein offizielles Angebot, wird von Gameforge
-weder betrieben noch unterstützt oder geprüft, und spricht nicht für das
-Unternehmen.
+> **M2Hub ist ein Projekt aus der Community und steht in keiner Verbindung zu
+> Gameforge oder zu Metin2.** Es ist kein offizielles Angebot, wird von
+> Gameforge weder betrieben noch unterstützt oder geprüft, und spricht nicht für
+> das Unternehmen.
 
 Das Programm liest ausschließlich öffentlich einsehbare Forenbeiträge und zeigt
 sie übersichtlicher an. Es greift nicht in das Spiel ein, verändert nichts am
@@ -159,3 +192,8 @@ die offizielle Ankündigung.
 ## Lizenz
 
 [GNU General Public License v3.0](LICENSE)
+
+<div align="center">
+<br>
+<sub>Gemacht für die deutschsprachige Metin2-Community.</sub>
+</div>
