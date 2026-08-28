@@ -40,12 +40,65 @@ werden oben angezeigt, solange sie laufen.
 1. Auf der [Download-Seite](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest)
    die Datei `M2Hub.exe` herunterladen.
 2. Doppelklick – fertig. Es gibt keine Installation und keine Einrichtung.
-3. Beim ersten Start meldet sich der SmartScreen-Filter von Windows, weil das
-   Programm keine kostenpflichtige Signatur trägt: „Weitere Informationen" →
-   „Trotzdem ausführen".
+3. Beim ersten Start zeigt Windows eine blaue Warnung. Das ist normal und unten
+   Schritt für Schritt erklärt: [Die blaue Windows-Warnung beim ersten
+   Start](#die-blaue-windows-warnung-beim-ersten-start).
 
 Vorausgesetzt wird Windows 10 oder neuer. Weitere Software ist nicht nötig –
 das Programm bringt alles mit, was es braucht.
+
+## Die blaue Windows-Warnung beim ersten Start
+
+Beim ersten Öffnen erscheint ein blaues Fenster:
+
+> **Der Computer wurde durch Windows geschützt**
+> Von Microsoft Defender SmartScreen wurde der Start einer unbekannten App
+> verhindert.
+
+Zunächst gibt es dort nur den Knopf **„Nicht ausführen"**. Der Weg zum Start
+führt über den Link:
+
+1. Auf **„Weitere Informationen"** klicken (der Link unter dem Text).
+2. Das Fenster klappt auf und zeigt `App: M2Hub.exe` und
+   `Herausgeber: Unbekannter Herausgeber`.
+3. Auf **„Trotzdem ausführen"** klicken.
+
+Das war es – die Warnung erscheint nur beim ersten Mal. Danach startet M2Hub
+mit einem Doppelklick.
+
+**Falls „Weitere Informationen" fehlt** oder der Download schon vorher blockiert
+wurde: Rechtsklick auf `M2Hub.exe` → **Eigenschaften** → unten bei „Sicherheit"
+den Haken bei **„Zulassen"** setzen → **OK**. Anschließend startet das Programm
+normal.
+
+### Warum kommt diese Warnung?
+
+Sie sagt nichts über den Inhalt der Datei aus. Windows kennt das Programm
+schlicht noch nicht: SmartScreen warnt bei jeder Anwendung, die weder eine
+gekaufte Signatur trägt noch bereits von vielen Menschen heruntergeladen wurde.
+Eine solche Signatur kostet jährlich mehrere hundert Euro – für ein kostenloses
+Projekt aus der Community ist das nicht angemessen.
+
+Es ist also **keine Virenmeldung**, sondern ein Hinweis auf einen unbekannten
+Herausgeber. Mit steigender Zahl an Downloads verschwindet sie mit der Zeit von
+selbst.
+
+### Sicher bleiben
+
+- **Lade M2Hub nur von der
+  [offiziellen Download-Seite](https://github.com/EinfachFabsTV/Metin2Hub/releases/latest).**
+  Dateien aus Foren, von Filehostern oder aus Discord-Anhängen können verändert
+  sein – dort ist die Warnung dann berechtigt.
+- Die Datei heißt immer `M2Hub.exe` und ist rund 92 MB groß. Deutlich kleinere
+  Dateien oder Varianten mit Zusätzen im Namen stammen nicht von hier.
+- Wer ganz sicher gehen will, vergleicht die Prüfsumme: Auf der Release-Seite
+  steht neben der Datei ein `sha256:…`-Wert. In PowerShell liefert
+  `Get-FileHash .\M2Hub.exe` denselben Wert, wenn die Datei unverändert ist.
+
+Sollte dein Virenscanner anschlagen, ist das ebenfalls dem unbekannten
+Herausgeber geschuldet – es ist ein Fehlalarm. Wenn du unsicher bist, lade die
+Datei bei [VirusTotal](https://www.virustotal.com) hoch und sieh dir das
+Ergebnis an, bevor du sie startest.
 
 ## Deine Daten bleiben auf deinem Rechner
 
