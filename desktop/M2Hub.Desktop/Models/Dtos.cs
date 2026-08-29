@@ -64,8 +64,12 @@ public sealed class CharacterDto
     /// Balathor-Char. Wie Meley eine eigene Rolle, unabhaengig davon.
     public bool IsBalathor { get; set; }
 
-    /// Serpent-Segment-Char, ebenfalls eigenstaendig.
+    /// Schlangenrun-Char, ebenfalls eigenstaendig.
     public bool IsSerpent { get; set; }
+
+    /// Spenden-Char: auf ihn werden die Medaillen der Gilde gutgeschrieben.
+    /// Die Sammelvergabe kann sich auf diese Rolle beschraenken.
+    public bool IsDonate { get; set; }
 
     /// Traegt die Orkzahn-Bio dieses Accounts. Sie muss einmal je Account auf
     /// einem Char erledigt werden, weil die Tombola je Account gilt.

@@ -51,6 +51,10 @@ public sealed class AccountsViewModel : ViewModelBase
         AddLanguageCommand = new RelayCommand(_ => AddLanguage());
         EditMedalsCommand = new RelayCommand(p => { if (p is CharacterItemViewModel c) c.EditingMedals = true; });
         SetMedalsCommand = new RelayCommand(p => SetMedals(p as CharacterItemViewModel));
+        EditLevelCommand = new RelayCommand(p => { if (p is CharacterItemViewModel c) c.EditingLevel = true; });
+        SetLevelCommand = new RelayCommand(p => SetLevel(p as CharacterItemViewModel));
+        CancelLevelCommand = new RelayCommand(p => CancelLevel(p as CharacterItemViewModel));
+        CancelMedalsCommand = new RelayCommand(p => CancelMedals(p as CharacterItemViewModel));
         SaveLanguageCommand = new RelayCommand(p => SaveLanguage(p as LanguageItemViewModel));
         DeleteLanguageCommand = new AsyncRelayCommand(p => DeleteLanguageAsync(p as LanguageItemViewModel));
 
@@ -161,6 +165,7 @@ public sealed class AccountsViewModel : ViewModelBase
         new("meley", Loc.T("char.form.meley")),
         new("balathor", Loc.T("char.form.balathor")),
         new("serpent", Loc.T("char.form.serpent")),
+        new("donate", Loc.T("char.form.donate")),
         new("grotte", Loc.T("char.form.grotte")),
     };
 
@@ -178,6 +183,15 @@ public sealed class AccountsViewModel : ViewModelBase
     }
 
     public bool ShowSettings { get => _showSettings; private set => Set(ref _showSettings, value); }
+
+    /// Escape auf der Seite: erst das Verwaltungsfeld schliessen, dann die
+    /// Suche leeren. Gibt zurueck, ob es etwas zu tun gab.
+    public bool Cancel()
+    {
+        if (ShowSettings) { ShowSettings = false; return true; }
+        if (_search.Length > 0) { Search = ""; return true; }
+        return false;
+    }
 
     private string _newGuildName = "";
     private int _newGuildLevel = 20;
@@ -208,8 +222,23 @@ public sealed class AccountsViewModel : ViewModelBase
 
     private int _bulkDelta = 12;
     private GuildItemViewModel? _bulkGuild;
+    private string _bulkScope = "all";
     public int BulkDelta { get => _bulkDelta; set => Set(ref _bulkDelta, value); }
     public GuildItemViewModel? BulkGuild { get => _bulkGuild; set => Set(ref _bulkGuild, value); }
+
+    /// Wer bei der Sammelvergabe bedacht wird: wirklich alle Charaktere oder
+    /// nur die Spenden-Chars. Die Gilde daneben schraenkt zusaetzlich ein.
+    public ObservableCollection<RunOption> BulkScopes { get; } = new()
+    {
+        new("all", Loc.T("accounts.bulk.scope.all")),
+        new("donate", Loc.T("accounts.bulk.scope.donate")),
+    };
+
+    public RunOption BulkScope
+    {
+        get => BulkScopes.FirstOrDefault(o => o.Key == _bulkScope) ?? BulkScopes[0];
+        set => Set(ref _bulkScope, value?.Key ?? "all");
+    }
 
     /* ---------- Kennzahlen (wie in der Vorlage) ---------- */
 
@@ -250,6 +279,14 @@ public sealed class AccountsViewModel : ViewModelBase
     /// Doppelklick auf die Medaillen einer Zeile bzw. das Uebernehmen danach.
     public RelayCommand EditMedalsCommand { get; }
     public RelayCommand SetMedalsCommand { get; }
+
+    /// Dasselbe fuer das Level.
+    public RelayCommand EditLevelCommand { get; }
+    public RelayCommand SetLevelCommand { get; }
+
+    /// Escape: die Eingabe verwerfen und den gespeicherten Wert zurueckholen.
+    public RelayCommand CancelLevelCommand { get; }
+    public RelayCommand CancelMedalsCommand { get; }
     public RelayCommand SaveLanguageCommand { get; }
     public AsyncRelayCommand DeleteLanguageCommand { get; }
     public AsyncRelayCommand BulkMedalsCommand { get; }
@@ -378,8 +415,16 @@ public sealed class AccountsViewModel : ViewModelBase
         FilterRuns.Add(new RunOption("meley", Loc.T("char.form.meley")));
         FilterRuns.Add(new RunOption("balathor", Loc.T("char.form.balathor")));
         FilterRuns.Add(new RunOption("serpent", Loc.T("char.form.serpent")));
+        FilterRuns.Add(new RunOption("donate", Loc.T("char.form.donate")));
         FilterRuns.Add(new RunOption("grotte", Loc.T("char.form.grotte")));
         FilterRun = FilterRuns.FirstOrDefault(o => o.Key == run) ?? FilterRuns[0];
+
+        var scope = _bulkScope;
+        BulkScopes.Clear();
+        BulkScopes.Add(new RunOption("all", Loc.T("accounts.bulk.scope.all")));
+        BulkScopes.Add(new RunOption("donate", Loc.T("accounts.bulk.scope.donate")));
+        _bulkScope = scope;
+        Raise(nameof(BulkScope));
 
         NoGuild.Name = Loc.T("accounts.noGuild");
         AllGuilds.Name = Loc.T("accounts.filter.allGuilds");
@@ -438,6 +483,7 @@ public sealed class AccountsViewModel : ViewModelBase
         "meley" => character.IsMeley,
         "balathor" => character.IsBalathor,
         "serpent" => character.IsSerpent,
+        "donate" => character.IsDonate,
         "grotte" => character.IsGrotte,
         _ => true,
     };
@@ -650,6 +696,7 @@ public sealed class AccountsViewModel : ViewModelBase
             IsGrotte = model.IsGrotte,
             IsBalathor = model.IsBalathor,
             IsSerpent = model.IsSerpent,
+            IsDonate = model.IsDonate,
             IsBio = model.IsBio,
             BioDone = model.BioDone,
             Sort = accountDto.Characters.Count,
@@ -680,6 +727,7 @@ public sealed class AccountsViewModel : ViewModelBase
         dto.IsGrotte = model.IsGrotte;
         dto.IsBalathor = model.IsBalathor;
         dto.IsSerpent = model.IsSerpent;
+        dto.IsDonate = model.IsDonate;
         dto.IsBio = model.IsBio;
         dto.BioDone = model.BioDone;
 
@@ -691,6 +739,7 @@ public sealed class AccountsViewModel : ViewModelBase
         character.IsGrotte = dto.IsGrotte;
         character.IsBalathor = dto.IsBalathor;
         character.IsSerpent = dto.IsSerpent;
+        character.IsDonate = dto.IsDonate;
         character.IsBio = dto.IsBio;
         character.BioDone = dto.BioDone;
         character.Refresh();
@@ -736,6 +785,34 @@ public sealed class AccountsViewModel : ViewModelBase
         Save();
     }
 
+    private void SetLevel(CharacterItemViewModel? character)
+    {
+        if (character is null) return;
+        character.EditingLevel = false;
+
+        if (Dto(character) is not { } dto || dto.Level == character.Level) return;
+
+        dto.Level = Math.Clamp(character.Level, 1, 120);
+        character.SetLevel(dto.Level);
+        ApplyFilter();
+        Save();
+    }
+
+    /// Abbrechen heisst: den Stand aus der Ablage wieder anzeigen.
+    private void CancelLevel(CharacterItemViewModel? character)
+    {
+        if (character is null) return;
+        character.EditingLevel = false;
+        if (Dto(character) is { } dto) character.SetLevel(dto.Level);
+    }
+
+    private void CancelMedals(CharacterItemViewModel? character)
+    {
+        if (character is null) return;
+        character.EditingMedals = false;
+        if (Dto(character) is { } dto) character.SetMedals(dto.Medals);
+    }
+
     private Task QuickMedals(CharacterItemViewModel character, int delta)
     {
         if (Dto(character) is not { } dto) return Task.CompletedTask;
@@ -750,26 +827,38 @@ public sealed class AccountsViewModel : ViewModelBase
 
     private async Task BulkMedalsAsync()
     {
-        if (BulkDelta == 0) { Error = "Bitte einen Betrag angeben."; return; }
+        if (BulkDelta == 0) { Error = Loc.T("accounts.bulk.needAmount"); return; }
 
         var guildId = RealId(BulkGuild);
-        var scope = guildId is null ? "alle Charaktere" : $"die Charaktere der Gilde „{BulkGuild!.Name}“";
+        var onlyDonate = _bulkScope == "donate";
+
+        // Der Satz nennt beides: die Rolle und, falls gesetzt, die Gilde -
+        // sonst weiss man vor dem Bestaetigen nicht, wen es trifft.
+        var scope = (onlyDonate, guildId is null) switch
+        {
+            (true, false) => Loc.T("accounts.bulk.scope.donateGuild", BulkGuild!.Name),
+            (true, true) => Loc.T("accounts.bulk.scope.donateChars"),
+            (false, false) => Loc.T("accounts.bulk.scope.allGuild", BulkGuild!.Name),
+            _ => Loc.T("accounts.bulk.scope.allChars"),
+        };
+
         var ok = await _dialogs.ConfirmAsync(
-            "Medaillen vergeben",
-            $"{(BulkDelta > 0 ? "+" : "")}{BulkDelta} Medaillen auf {scope} anwenden?",
-            "Anwenden");
+            Loc.T("accounts.bulk.title"),
+            Loc.T("accounts.bulk.confirm", $"{(BulkDelta > 0 ? "+" : "")}{BulkDelta}", scope),
+            Loc.T("common.apply"));
         if (!ok) return;
 
         var changed = 0;
         foreach (var dto in _store.Accounts.Accounts.SelectMany(a => a.Characters))
         {
             if (guildId is int gid && dto.GuildId != gid) continue;
+            if (onlyDonate && !dto.IsDonate) continue;
             dto.Medals = Math.Max(0, dto.Medals + BulkDelta);
             changed++;
         }
 
         Load();
-        Save($"{changed} Charaktere angepasst.");
+        Save(Loc.T("accounts.bulk.done", changed));
     }
 
     /* ---------- Gilden ---------- */
@@ -777,7 +866,7 @@ public sealed class AccountsViewModel : ViewModelBase
     private void AddGuild()
     {
         var name = NewGuildName.Trim();
-        if (name.Length == 0) { Error = "Bitte einen Namen angeben."; return; }
+        if (name.Length == 0) { Error = Loc.T("form.needName"); return; }
 
         var dto = new GuildDto
         {
@@ -798,7 +887,7 @@ public sealed class AccountsViewModel : ViewModelBase
     {
         if (guild is null || Dto(guild) is not { } dto) return;
         var name = guild.Name.Trim();
-        if (name.Length == 0) { Error = "Bitte einen Namen angeben."; return; }
+        if (name.Length == 0) { Error = Loc.T("form.needName"); return; }
 
         dto.Name = Cut(name, 120);
         dto.Level = Math.Clamp(guild.Level, 1, 40);
@@ -826,7 +915,7 @@ public sealed class AccountsViewModel : ViewModelBase
     private void AddLanguage()
     {
         var name = NewLanguageName.Trim();
-        if (name.Length == 0) { Error = "Bitte einen Namen angeben."; return; }
+        if (name.Length == 0) { Error = Loc.T("form.needName"); return; }
 
         var dto = new LanguageDto
         {
@@ -847,7 +936,7 @@ public sealed class AccountsViewModel : ViewModelBase
     {
         if (language is null || Dto(language) is not { } dto) return;
         var name = language.Name.Trim();
-        if (name.Length == 0) { Error = "Bitte einen Namen angeben."; return; }
+        if (name.Length == 0) { Error = Loc.T("form.needName"); return; }
 
         dto.Name = Cut(name, 40);
         dto.Color = language.Color.Trim();

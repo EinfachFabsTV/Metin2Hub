@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using M2Hub.Desktop.Services;
 
 namespace M2Hub.Desktop.ViewModels;
 
@@ -20,8 +21,8 @@ public abstract class DialogViewModelBase : ViewModelBase
     }
 
     public string Title { get; }
-    public string ConfirmLabel { get; protected init; } = "Speichern";
-    public string CancelLabel { get; protected init; } = "Abbrechen";
+    public string ConfirmLabel { get; protected init; } = Loc.T("common.save");
+    public string CancelLabel { get; protected init; } = Loc.T("common.cancel");
 
     /// Zerstoerende Aktionen bekommen einen roten Knopf.
     public bool IsDestructive { get; protected init; }
@@ -119,7 +120,7 @@ public sealed class AccountEditViewModel : DialogViewModelBase
 
     protected override bool Validate()
     {
-        Error = string.IsNullOrWhiteSpace(Name) ? "Bitte einen Namen angeben." : null;
+        Error = string.IsNullOrWhiteSpace(Name) ? Loc.T("form.needName") : null;
         return !HasError;
     }
 }
@@ -135,6 +136,7 @@ public sealed class CharacterEditViewModel : DialogViewModelBase
     private bool _isGrotte;
     private bool _isBalathor;
     private bool _isSerpent;
+    private bool _isDonate;
     private bool _isBio;
     private bool _bioDone;
 
@@ -151,6 +153,7 @@ public sealed class CharacterEditViewModel : DialogViewModelBase
         _isGrotte = character?.IsGrotte ?? false;
         _isBalathor = character?.IsBalathor ?? false;
         _isSerpent = character?.IsSerpent ?? false;
+        _isDonate = character?.IsDonate ?? false;
         _isBio = character?.IsBio ?? false;
         _bioDone = character?.BioDone ?? false;
 
@@ -171,10 +174,13 @@ public sealed class CharacterEditViewModel : DialogViewModelBase
     /// Grotte: levelt fuer Meley und andere Laeufe, steht rot in der Kachel.
     public bool IsGrotte { get => _isGrotte; set => Set(ref _isGrotte, value); }
 
-    /// Balathor und Serpent Segment sind eigene Rollen neben Meley und lassen
+    /// Balathor und Schlangenrun sind eigene Rollen neben Meley und lassen
     /// sich frei damit kombinieren.
     public bool IsBalathor { get => _isBalathor; set => Set(ref _isBalathor, value); }
     public bool IsSerpent { get => _isSerpent; set => Set(ref _isSerpent, value); }
+
+    /// Spenden-Char: die Sammelvergabe kann sich auf diese Rolle beschraenken.
+    public bool IsDonate { get => _isDonate; set => Set(ref _isDonate, value); }
 
     /// Traegt die Orkzahn-Bio dieses Accounts.
     public bool IsBio
@@ -187,7 +193,7 @@ public sealed class CharacterEditViewModel : DialogViewModelBase
 
     protected override bool Validate()
     {
-        Error = string.IsNullOrWhiteSpace(Name) ? "Bitte einen Namen angeben." : null;
+        Error = string.IsNullOrWhiteSpace(Name) ? Loc.T("form.needName") : null;
         return !HasError;
     }
 }

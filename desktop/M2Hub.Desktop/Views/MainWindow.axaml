@@ -61,7 +61,10 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
 
-          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
+          <!-- Die Reiter sind mit den Pfeiltasten bedienbar: liegt die
+               Tastatur auf einem von ihnen, springt Links/Rechts zum
+               Nachbarn. -->
+          <StackPanel Grid.Column="2" Name="NavBar" Orientation="Horizontal" Spacing="4"
                       HorizontalAlignment="Center" VerticalAlignment="Center">
             <Button Classes="nav" Classes.active="{Binding IsAccounts}"
                     Command="{Binding ShowAccountsCommand}" Content="{loc:T nav.accounts}" />

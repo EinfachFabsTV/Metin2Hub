@@ -15,9 +15,11 @@ public sealed class CharacterItemViewModel : ViewModelBase
     private bool _isGrotte;
     private bool _isBalathor;
     private bool _isSerpent;
+    private bool _isDonate;
     private bool _isBio;
     private bool _bioDone;
     private bool _editingMedals;
+    private bool _editingLevel;
 
     public CharacterItemViewModel(CharacterDto dto, IReadOnlyList<GuildItemViewModel> guilds)
     {
@@ -30,6 +32,7 @@ public sealed class CharacterItemViewModel : ViewModelBase
         _isGrotte = dto.IsGrotte;
         _isBalathor = dto.IsBalathor;
         _isSerpent = dto.IsSerpent;
+        _isDonate = dto.IsDonate;
         _isBio = dto.IsBio;
         _bioDone = dto.BioDone;
         // Ohne Gilde greift der Platzhalter (Id 0) aus der Auswahlliste.
@@ -71,13 +74,24 @@ public sealed class CharacterItemViewModel : ViewModelBase
 
     public bool ShowingMedals => !_editingMedals;
 
+    /// Dasselbe fuer das Level: Doppelklick macht daraus ein Eingabefeld,
+    /// Eingabetaste uebernimmt, Escape bricht ab. Das Levelfeld ist beim
+    /// Pflegen genauso oft dran wie die Medaillen.
+    public bool EditingLevel
+    {
+        get => _editingLevel;
+        set { if (Set(ref _editingLevel, value)) Raise(nameof(ShowingLevel)); }
+    }
+
+    public bool ShowingLevel => !_editingLevel;
+
     public GuildItemViewModel? Guild
     {
         get => _guild;
         set { if (Set(ref _guild, value)) Raise(nameof(GuildName)); }
     }
 
-    public string GuildName => _guild is null || _guild.Id == 0 ? "ohne Gilde" : _guild.Name;
+    public string GuildName => _guild is null || _guild.Id == 0 ? Loc.T("accounts.noGuild") : _guild.Name;
 
     /* ---------- Rollen ---------- */
 
@@ -100,27 +114,45 @@ public sealed class CharacterItemViewModel : ViewModelBase
     public bool IsBalathor
     {
         get => _isBalathor;
-        set { if (Set(ref _isBalathor, value)) Raise(nameof(RunMark)); }
+        set { if (Set(ref _isBalathor, value)) RaiseRunMark(); }
     }
 
-    /// Serpent-Segment-Char, ebenso eigenstaendig.
+    /// Schlangenrun-Char, ebenso eigenstaendig.
     public bool IsSerpent
     {
         get => _isSerpent;
-        set { if (Set(ref _isSerpent, value)) Raise(nameof(RunMark)); }
+        set { if (Set(ref _isSerpent, value)) RaiseRunMark(); }
     }
 
-    /// Kuerzel der Laeufe neben dem Namen: „Ba", „Se", beides „Ba·Se".
-    /// Meley braucht keins - dort faerbt sich das Level.
-    public string RunMark => (_isBalathor, _isSerpent) switch
+    /// Spenden-Char: auf ihn wird gutgeschrieben, was die Gilde einsammelt.
+    /// Eine Rolle wie die anderen - optional und frei kombinierbar.
+    public bool IsDonate
     {
-        (true, true) => $"{Loc.T("accounts.role.balathor.short")}·{Loc.T("accounts.role.serpent.short")}",
-        (true, false) => Loc.T("accounts.role.balathor.short"),
-        (false, true) => Loc.T("accounts.role.serpent.short"),
-        _ => "",
-    };
+        get => _isDonate;
+        set { if (Set(ref _isDonate, value)) RaiseRunMark(); }
+    }
 
-    public bool HasRunMark => _isBalathor || _isSerpent;
+    /// Kuerzel der Rollen neben dem Namen: „Ba", „Se", „Sp", mehrere mit „·"
+    /// verbunden. Meley braucht keins - dort faerbt sich das Level.
+    public string RunMark
+    {
+        get
+        {
+            var marks = new List<string>(3);
+            if (_isBalathor) marks.Add(Loc.T("accounts.role.balathor.short"));
+            if (_isSerpent) marks.Add(Loc.T("accounts.role.serpent.short"));
+            if (_isDonate) marks.Add(Loc.T("accounts.role.donate.short"));
+            return string.Join("·", marks);
+        }
+    }
+
+    public bool HasRunMark => _isBalathor || _isSerpent || _isDonate;
+
+    private void RaiseRunMark()
+    {
+        Raise(nameof(RunMark));
+        Raise(nameof(HasRunMark));
+    }
 
     /// Traegt die Orkzahn-Bio dieses Accounts.
     public bool IsBio
@@ -159,6 +191,13 @@ public sealed class CharacterItemViewModel : ViewModelBase
     {
         _medals = medals;
         Raise(nameof(Medals));
+    }
+
+    /// Nach dem Abbrechen einer Eingabe den gespeicherten Stand zurueckholen.
+    public void SetLevel(int level)
+    {
+        _level = level;
+        Raise(nameof(Level));
     }
 
     public void Refresh()

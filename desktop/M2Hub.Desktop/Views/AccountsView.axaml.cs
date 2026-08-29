@@ -20,26 +20,38 @@ public partial class AccountsView : UserControl
             character.EditingMedals = true;
     }
 
-    /// Verlassen des Feldes uebernimmt den Wert.
-    private void MedalsCommitted(object? sender, RoutedEventArgs e) => Commit(sender);
-
-    /// Eingabetaste uebernimmt, Escape verwirft.
-    private void MedalsKeyDown(object? sender, KeyEventArgs e)
+    /// Dasselbe fuer das Level - beim Pflegen ist es genauso oft dran.
+    private void LevelDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (e.Key == Key.Enter) { Commit(sender); e.Handled = true; }
-        else if (e.Key == Key.Escape && (sender as Control)?.DataContext is CharacterItemViewModel c)
-        {
-            // Der alte Wert steht noch in den gespeicherten Daten - das
-            // Schliessen ohne Uebernahme genuegt, das naechste Laden zieht ihn.
-            c.EditingMedals = false;
-            e.Handled = true;
-        }
+        if ((sender as Control)?.DataContext is CharacterItemViewModel character)
+            character.EditingLevel = true;
     }
 
-    private void Commit(object? sender)
+    /// Verlassen des Feldes uebernimmt den Wert.
+    private void MedalsCommitted(object? sender, RoutedEventArgs e) => Run(sender, vm => vm.SetMedalsCommand);
+    private void LevelCommitted(object? sender, RoutedEventArgs e) => Run(sender, vm => vm.SetLevelCommand);
+
+    /// Eingabetaste uebernimmt, Escape verwirft und holt den alten Wert zurueck.
+    private void MedalsKeyDown(object? sender, KeyEventArgs e) =>
+        EditKeyDown(sender, e, vm => vm.SetMedalsCommand, vm => vm.CancelMedalsCommand);
+
+    private void LevelKeyDown(object? sender, KeyEventArgs e) =>
+        EditKeyDown(sender, e, vm => vm.SetLevelCommand, vm => vm.CancelLevelCommand);
+
+    private void EditKeyDown(
+        object? sender,
+        KeyEventArgs e,
+        Func<AccountsViewModel, RelayCommand> commit,
+        Func<AccountsViewModel, RelayCommand> cancel)
+    {
+        if (e.Key == Key.Enter) { Run(sender, commit); e.Handled = true; }
+        else if (e.Key == Key.Escape) { Run(sender, cancel); e.Handled = true; }
+    }
+
+    private void Run(object? sender, Func<AccountsViewModel, RelayCommand> pick)
     {
         if ((sender as Control)?.DataContext is not CharacterItemViewModel character) return;
-        if (DataContext is AccountsViewModel vm) vm.SetMedalsCommand.Execute(character);
+        if (DataContext is AccountsViewModel vm) pick(vm).Execute(character);
     }
 
     /* ---------- Kacheln ziehen ---------- */

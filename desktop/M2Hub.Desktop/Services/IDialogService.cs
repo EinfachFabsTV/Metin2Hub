@@ -4,7 +4,7 @@ namespace M2Hub.Desktop.Services;
 
 public interface IDialogService
 {
-    Task<bool> ConfirmAsync(string title, string message, string confirmLabel = "Löschen");
+    Task<bool> ConfirmAsync(string title, string message, string? confirmLabel = null);
 
     /// Zeigt die Maske und liefert true, wenn gespeichert wurde.
     Task<bool> EditAccountAsync(AccountEditViewModel model);

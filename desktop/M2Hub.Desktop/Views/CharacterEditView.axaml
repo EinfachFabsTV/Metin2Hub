@@ -42,6 +42,7 @@
       <CheckBox IsChecked="{Binding IsGrotte}" Content="{loc:T char.form.grotte}" />
       <CheckBox IsChecked="{Binding IsBalathor}" Content="{loc:T char.form.balathor}" />
       <CheckBox IsChecked="{Binding IsSerpent}" Content="{loc:T char.form.serpent}" />
+      <CheckBox IsChecked="{Binding IsDonate}" Content="{loc:T char.form.donate}" />
       <CheckBox IsChecked="{Binding IsBio}" Content="{loc:T char.form.bio}" />
       <CheckBox IsChecked="{Binding BioDone}" IsEnabled="{Binding IsBio}"
                 Content="{loc:T accounts.stats.bio}" Margin="22,0,0,0" />

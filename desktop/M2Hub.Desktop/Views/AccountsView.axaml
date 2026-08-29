@@ -146,7 +146,8 @@
               <Grid ColumnDefinitions="100,*" ColumnSpacing="6">
                 <NumericUpDown Grid.Column="0" Value="{Binding BulkDelta}" Minimum="-9999" Maximum="9999"
                                ShowButtonSpinner="False" />
-                <ComboBox Grid.Column="1" ItemsSource="{Binding FilterGuilds}" SelectedItem="{Binding BulkGuild}">
+                <ComboBox Grid.Column="1" ItemsSource="{Binding FilterGuilds}" SelectedItem="{Binding BulkGuild}"
+                          HorizontalAlignment="Stretch">
                   <ComboBox.ItemTemplate>
                     <DataTemplate DataType="vm:GuildItemViewModel">
                       <TextBlock Text="{Binding Name}" />
@@ -154,6 +155,17 @@
                   </ComboBox.ItemTemplate>
                 </ComboBox>
               </Grid>
+
+              <!-- Wirklich alle Charaktere oder nur die Spenden-Chars -->
+              <TextBlock Classes="muted" Text="{loc:T accounts.bulk.scope}" />
+              <ComboBox ItemsSource="{Binding BulkScopes}" SelectedItem="{Binding BulkScope}"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:RunOption">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
               <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                       Content="{loc:T common.apply}" Command="{Binding BulkMedalsCommand}" />
             </StackPanel>
@@ -377,10 +389,18 @@
                                          LostFocus="MedalsCommitted" KeyDown="MedalsKeyDown" />
                         </Panel>
 
-                        <Border Grid.Column="3" Classes="level" Classes.meley="{Binding LevelHighlight}"
-                                VerticalAlignment="Center">
-                          <TextBlock Text="{Binding Level}" FontSize="12" HorizontalAlignment="Center" />
-                        </Border>
+                        <Panel Grid.Column="3">
+                          <Border Classes="level" Classes.meley="{Binding LevelHighlight}"
+                                  IsVisible="{Binding ShowingLevel}" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Level}" FontSize="12" HorizontalAlignment="Center"
+                                       ToolTip.Tip="{loc:T accounts.level.edit}"
+                                       DoubleTapped="LevelDoubleTapped" />
+                          </Border>
+                          <NumericUpDown Value="{Binding Level, Mode=TwoWay}" IsVisible="{Binding EditingLevel}"
+                                         Minimum="1" Maximum="120" ShowButtonSpinner="False"
+                                         FontSize="12" Padding="4,1" VerticalAlignment="Center"
+                                         LostFocus="LevelCommitted" KeyDown="LevelKeyDown" />
+                        </Panel>
 
                         <Button Grid.Column="4" Classes="icon danger" Content="✕"
                                 VerticalAlignment="Center" ToolTip.Tip="{loc:T accounts.deleteChar}"

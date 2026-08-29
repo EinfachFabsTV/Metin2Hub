@@ -34,8 +34,8 @@ public sealed class DialogHost : ViewModelBase, IDialogService
         }
     }
 
-    public Task<bool> ConfirmAsync(string title, string message, string confirmLabel = "Löschen") =>
-        ShowAsync(new ConfirmDialogViewModel(title, message, confirmLabel));
+    public Task<bool> ConfirmAsync(string title, string message, string? confirmLabel = null) =>
+        ShowAsync(new ConfirmDialogViewModel(title, message, confirmLabel ?? Loc.T("common.delete")));
 
     public Task<bool> EditAccountAsync(AccountEditViewModel model) => ShowAsync(model);
 

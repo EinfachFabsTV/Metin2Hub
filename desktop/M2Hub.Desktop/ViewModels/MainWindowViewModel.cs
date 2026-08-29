@@ -188,6 +188,18 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public void Shutdown() => _timer.Stop();
 
+    /// Reihenfolge der Reiter fuer die Pfeiltasten.
+    private static readonly string[] PageOrder = ["accounts", "events", "itemshop", "settings"];
+
+    /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
+    public void ShowNeighbour(int step)
+    {
+        var at = Array.IndexOf(PageOrder, _currentKey);
+        if (at < 0) at = 0;
+        var next = ((at + step) % PageOrder.Length + PageOrder.Length) % PageOrder.Length;
+        Show(PageOrder[next]);
+    }
+
     private void Show(string key)
     {
         CurrentKey = key;
