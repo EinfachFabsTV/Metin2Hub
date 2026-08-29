@@ -133,6 +133,21 @@
     <Setter Property="CornerRadius" Value="999" />
   </Style>
 
+  <!-- Gewaehlter Chip: die Auswahl muss ohne Rahmenwechsel erkennbar sein -->
+  <Style Selector="Button.chip.active">
+    <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
+  <!-- Zeile im Ergebnis eines Rechners: Bezeichnung links, Wert rechts -->
+  <Style Selector="Border.statrow">
+    <Setter Property="Background" Value="#22111827" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10,7" />
+  </Style>
+
   <Style Selector="Border.badge">
     <Setter Property="Background" Value="#223B82F6" />
     <Setter Property="BorderBrush" Value="#443B82F6" />

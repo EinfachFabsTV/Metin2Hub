@@ -9,6 +9,7 @@
     <DataTemplate DataType="vm:AccountsViewModel"><views:AccountsView /></DataTemplate>
     <DataTemplate DataType="vm:EventsViewModel"><views:EventsView /></DataTemplate>
     <DataTemplate DataType="vm:ItemshopViewModel"><views:ItemshopView /></DataTemplate>
+    <DataTemplate DataType="vm:GuildCalcViewModel"><views:GuildCalcView /></DataTemplate>
     <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>
     <DataTemplate DataType="vm:UpdateDialogViewModel"><views:UpdateDialogView /></DataTemplate>

@@ -76,6 +76,8 @@
                     Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
             <Button Classes="nav" Classes.active="{Binding IsItemshop}"
                     Command="{Binding ShowItemshopCommand}" Content="{loc:T nav.itemshop}" />
+            <Button Classes="nav" Classes.active="{Binding IsCalc}"
+                    Command="{Binding ShowCalcCommand}" Content="{loc:T nav.calc}" />
             <Button Classes="nav" Classes.active="{Binding IsSettings}"
                     Command="{Binding ShowSettingsCommand}" Content="⚙" ToolTip.Tip="{loc:T nav.settings}" />
 

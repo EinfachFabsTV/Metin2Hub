@@ -1,0 +1,188 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.GuildCalcView"
+             x:DataType="vm:GuildCalcViewModel">
+
+  <ScrollViewer>
+    <!-- Aufbau nach 'Veraltet/UI Ideen/rechner.txt': Eingaben schmal links,
+         Ergebnis breit rechts - so bleibt die Ergebniskarte flach. -->
+    <Grid Margin="18" ColumnDefinitions="0.8*,1.2*" ColumnSpacing="14">
+
+      <!-- ===== Eingaben ===== -->
+      <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
+        <StackPanel Spacing="16">
+
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h1" Text="{loc:T calc.guild.title}" />
+            <TextBlock Classes="muted" Text="{loc:T calc.guild.subtitle}" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.guild.currentLevel}" />
+              <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                         Text="{Binding CurrentLevelLabel}" />
+            </Grid>
+            <Slider Minimum="{Binding MinLevel}" Maximum="{Binding MaxLevel}"
+                    TickFrequency="1" IsSnapToTickEnabled="True"
+                    Value="{Binding CurrentLevel}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.guild.targetLevel}" />
+              <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                         Text="{Binding TargetLevelLabel}" />
+            </Grid>
+            <Slider Minimum="{Binding MinLevel}" Maximum="{Binding MaxLevel}"
+                    TickFrequency="1" IsSnapToTickEnabled="True"
+                    Value="{Binding TargetLevel}" />
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{loc:T calc.guild.donationType}" />
+            <ItemsControl ItemsSource="{Binding DonationTypes}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:DonationOption">
+                  <Button Classes="chip" Classes.active="{Binding IsActive}"
+                          Margin="0,0,6,6" Content="{Binding Label}"
+                          Command="{Binding $parent[UserControl].DataContext.ChooseDonationCommand}"
+                          CommandParameter="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.guild.donatingChars}" />
+              <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                         Text="{Binding CharsLabel}" />
+            </Grid>
+            <Slider Minimum="1" Maximum="{Binding MaxMembers}"
+                    TickFrequency="1" IsSnapToTickEnabled="True"
+                    Value="{Binding Chars}" />
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                       Text="{Binding PerDayNote}" />
+          </StackPanel>
+
+        </StackPanel>
+      </Border>
+
+      <!-- ===== Ergebnis ===== -->
+      <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
+              BorderBrush="{StaticResource PrimaryBrush}">
+        <StackPanel Spacing="14">
+
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h2" Text="{loc:T calc.guild.resultTitle}" />
+            <TextBlock Classes="muted" Text="{Binding ResultSubtitle}" />
+          </StackPanel>
+
+          <!-- Die beiden Kernzahlen nebeneinander -->
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Border Grid.Column="0" Classes="panel" Padding="14">
+              <StackPanel HorizontalAlignment="Center">
+                <TextBlock Classes="statvalue" Foreground="{StaticResource AmberBrush}"
+                           HorizontalAlignment="Center" Text="{Binding Donations}" />
+                <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center"
+                           TextAlignment="Center" Text="{Binding DonationsCaption}" />
+              </StackPanel>
+            </Border>
+
+            <!-- Der Wert, an dem am Ende der Einkauf haengt -->
+            <Border Grid.Column="1" Classes="panel" Padding="14" IsVisible="{Binding Buyable}">
+              <StackPanel HorizontalAlignment="Center">
+                <TextBlock Classes="statvalue" Foreground="{StaticResource PrimaryBrush}"
+                           HorizontalAlignment="Center" Text="{Binding DragonCoinsPerAccount}" />
+                <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center"
+                           TextAlignment="Center" Text="{loc:T calc.guild.drPerAccount}" />
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center"
+                     TextAlignment="Center" IsVisible="{Binding Buyable}"
+                     Text="{Binding AccountsNote}" />
+
+          <!-- Zweispaltig: halbe Hoehe bei gleicher Information -->
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8" RowSpacing="6"
+                RowDefinitions="Auto,Auto,Auto,Auto">
+
+            <Border Grid.Row="0" Grid.Column="0" Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.guild.totalExp}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding TotalExp}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="0" Grid.Column="1" Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{Binding PerCharCaption}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding PerChar}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="0" Classes="statrow"
+                    IsVisible="{Binding NotBuyable}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.guild.donationsPerAccount}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding PerAccount}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="1" Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{Binding DaysCaption}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                           Foreground="{StaticResource SuccessBrush}" Text="{Binding Days}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Grid.Column="0" Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.guild.medals}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding Medals}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Grid.Column="1" Classes="statrow"
+                    IsVisible="{Binding Buyable}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.guild.drPerChar}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                           Foreground="{StaticResource AmberBrush}" Text="{Binding DragonCoinsPerChar}" />
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Grid.Column="0" Classes="statrow"
+                    IsVisible="{Binding Buyable}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.guild.totalCost}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                           Foreground="{StaticResource AmberBrush}" Text="{Binding DragonCoins}" />
+              </Grid>
+            </Border>
+          </Grid>
+
+          <!-- Wie weit das aktuelle Level auf dem Weg zum Ziel steht -->
+          <StackPanel Spacing="4">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{Binding ProgressLabel}" />
+              <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Text="{Binding ProgressPercent}" />
+            </Grid>
+            <ProgressBar Minimum="0" Maximum="100" Height="8" Value="{Binding Progress}" />
+          </StackPanel>
+
+          <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                     Text="{loc:T calc.guild.footnote}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

@@ -40,6 +40,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts = new AccountsViewModel(store, dialogs);
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
+        GuildCalc = new GuildCalcViewModel();
         Settings = new SettingsViewModel(
             store, dialogs, _updates, RefreshActiveNow, ReloadPages,
             info => dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart)));
@@ -47,6 +48,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowAccountsCommand = new RelayCommand(_ => Show("accounts"));
         ShowEventsCommand = new RelayCommand(_ => Show("events"));
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
+        ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
         OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
@@ -56,6 +58,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Loc.I.PropertyChanged += (_, _) =>
         {
             Accounts.RelabelAfterLanguageChange();
+            GuildCalc.RelabelAfterLanguageChange();
             Events.Reload();
             Itemshop.Reload();
         };
@@ -75,6 +78,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     public AccountsViewModel Accounts { get; }
     public EventsViewModel Events { get; }
     public ItemshopViewModel Itemshop { get; }
+
+    /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
+    public GuildCalcViewModel GuildCalc { get; }
     public SettingsViewModel Settings { get; }
 
     public object? CurrentPage { get => _currentPage; private set => Set(ref _currentPage, value); }
@@ -88,6 +94,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsAccounts));
             Raise(nameof(IsEvents));
             Raise(nameof(IsItemshop));
+            Raise(nameof(IsCalc));
             Raise(nameof(IsSettings));
         }
     }
@@ -95,6 +102,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsAccounts => _currentKey == "accounts";
     public bool IsEvents => _currentKey == "events";
     public bool IsItemshop => _currentKey == "itemshop";
+    public bool IsCalc => _currentKey == "calc";
     public bool IsSettings => _currentKey == "settings";
 
     public bool Busy { get => _busy; private set { if (Set(ref _busy, value)) Raise(nameof(NotBusy)); } }
@@ -116,6 +124,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string? RefreshError => _store.Cache.LastError;
     public bool HasRefreshError => !string.IsNullOrWhiteSpace(_store.Cache.LastError);
 
+    public RelayCommand ShowCalcCommand { get; }
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
     public RelayCommand ShowItemshopCommand { get; }
@@ -189,7 +198,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["accounts", "events", "itemshop", "settings"];
+    private static readonly string[] PageOrder = ["accounts", "events", "itemshop", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -207,6 +216,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             "accounts" => Accounts,
             "itemshop" => Itemshop,
+            "calc" => GuildCalc,
             "settings" => Settings,
             _ => Events,
         };
