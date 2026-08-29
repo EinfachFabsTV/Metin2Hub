@@ -18,7 +18,7 @@
          die App hielt sich damit fuer veraltet und wies bei jedem Start auf ein
          Update hin, das sie schon hatte. Ohne die beiden Zeilen folgen sie
          <Version>. -->
-    <Version>1.20.0</Version>
+    <Version>1.21.0</Version>
     <RootNamespace>M2Hub.Desktop</RootNamespace>
   </PropertyGroup>
 

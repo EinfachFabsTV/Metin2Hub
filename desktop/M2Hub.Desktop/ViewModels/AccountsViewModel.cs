@@ -59,6 +59,7 @@ public sealed class AccountsViewModel : ViewModelBase
         DeleteLanguageCommand = new AsyncRelayCommand(p => DeleteLanguageAsync(p as LanguageItemViewModel));
 
         BulkMedalsCommand = new AsyncRelayCommand(_ => BulkMedalsAsync());
+        BulkRolesCommand = new AsyncRelayCommand(_ => BulkRolesAsync());
         AddPresetRowCommand = new RelayCommand(_ => PresetRows.Add(new PresetEditViewModel("+1", 1)));
         RemovePresetRowCommand = new RelayCommand(p => { if (p is PresetEditViewModel row) PresetRows.Remove(row); });
         SavePresetsCommand = new RelayCommand(_ => SavePresets());
@@ -240,6 +241,50 @@ public sealed class AccountsViewModel : ViewModelBase
         set => Set(ref _bulkScope, value?.Key ?? "all");
     }
 
+    /* ---------- Rollen sammelweise vergeben ---------- */
+
+    private string _bulkRole = "meley";
+    private string _bulkRoleMode = "set";
+    private GuildItemViewModel? _bulkRoleGuild;
+    private int _bulkRoleFrom = 1;
+    private int _bulkRoleTo = 120;
+
+    /// Rollen, die sich sammelweise setzen lassen. Die Orkzahn-Bio fehlt
+    /// bewusst: sie gilt je Account und gehoert auf genau einen Char - eine
+    /// Sammelvergabe wuerde daraus Unsinn machen.
+    public ObservableCollection<RunOption> BulkRoles { get; } = new()
+    {
+        new("meley", Loc.T("char.form.meley")),
+        new("balathor", Loc.T("char.form.balathor")),
+        new("serpent", Loc.T("char.form.serpent")),
+        new("donate", Loc.T("char.form.donate")),
+        new("grotte", Loc.T("char.form.grotte")),
+    };
+
+    public RunOption BulkRole
+    {
+        get => BulkRoles.FirstOrDefault(o => o.Key == _bulkRole) ?? BulkRoles[0];
+        set => Set(ref _bulkRole, value?.Key ?? "meley");
+    }
+
+    /// Setzen oder wieder abnehmen - beides ueber denselben Weg.
+    public ObservableCollection<RunOption> BulkRoleModes { get; } = new()
+    {
+        new("set", Loc.T("accounts.roles.set")),
+        new("unset", Loc.T("accounts.roles.unset")),
+    };
+
+    public RunOption BulkRoleMode
+    {
+        get => BulkRoleModes.FirstOrDefault(o => o.Key == _bulkRoleMode) ?? BulkRoleModes[0];
+        set => Set(ref _bulkRoleMode, value?.Key ?? "set");
+    }
+
+    /// Wen es trifft: eine Gilde (oder alle) und ein Levelbereich.
+    public GuildItemViewModel? BulkRoleGuild { get => _bulkRoleGuild; set => Set(ref _bulkRoleGuild, value); }
+    public int BulkRoleFrom { get => _bulkRoleFrom; set => Set(ref _bulkRoleFrom, Math.Clamp(value, 1, 120)); }
+    public int BulkRoleTo { get => _bulkRoleTo; set => Set(ref _bulkRoleTo, Math.Clamp(value, 1, 120)); }
+
     /* ---------- Kennzahlen (wie in der Vorlage) ---------- */
 
     public int TotalMedals => _allAccounts.Sum(a => a.Medals);
@@ -290,6 +335,7 @@ public sealed class AccountsViewModel : ViewModelBase
     public RelayCommand SaveLanguageCommand { get; }
     public AsyncRelayCommand DeleteLanguageCommand { get; }
     public AsyncRelayCommand BulkMedalsCommand { get; }
+    public AsyncRelayCommand BulkRolesCommand { get; }
     public RelayCommand AddPresetRowCommand { get; }
     public RelayCommand RemovePresetRowCommand { get; }
     public RelayCommand SavePresetsCommand { get; }
@@ -390,6 +436,7 @@ public sealed class AccountsViewModel : ViewModelBase
         }
 
         BulkGuild ??= AllGuilds;
+        BulkRoleGuild ??= AllGuilds;
         FilterLanguage ??= AllLanguages;
         FilterServer = FilterServers.FirstOrDefault(o => o.Key == (_filterServer?.Key ?? "")) ?? AllServers;
         FilterRun ??= FilterRuns[0];
@@ -425,6 +472,23 @@ public sealed class AccountsViewModel : ViewModelBase
         BulkScopes.Add(new RunOption("donate", Loc.T("accounts.bulk.scope.donate")));
         _bulkScope = scope;
         Raise(nameof(BulkScope));
+
+        var role = _bulkRole;
+        BulkRoles.Clear();
+        BulkRoles.Add(new RunOption("meley", Loc.T("char.form.meley")));
+        BulkRoles.Add(new RunOption("balathor", Loc.T("char.form.balathor")));
+        BulkRoles.Add(new RunOption("serpent", Loc.T("char.form.serpent")));
+        BulkRoles.Add(new RunOption("donate", Loc.T("char.form.donate")));
+        BulkRoles.Add(new RunOption("grotte", Loc.T("char.form.grotte")));
+        _bulkRole = role;
+        Raise(nameof(BulkRole));
+
+        var mode = _bulkRoleMode;
+        BulkRoleModes.Clear();
+        BulkRoleModes.Add(new RunOption("set", Loc.T("accounts.roles.set")));
+        BulkRoleModes.Add(new RunOption("unset", Loc.T("accounts.roles.unset")));
+        _bulkRoleMode = mode;
+        Raise(nameof(BulkRoleMode));
 
         NoGuild.Name = Loc.T("accounts.noGuild");
         AllGuilds.Name = Loc.T("accounts.filter.allGuilds");
@@ -859,6 +923,56 @@ public sealed class AccountsViewModel : ViewModelBase
 
         Load();
         Save(Loc.T("accounts.bulk.done", changed));
+    }
+
+    /// Eine Rolle bei allen Charakteren setzen oder abnehmen, die zur Gilde
+    /// und in den Levelbereich passen - „alle Level-30-Chars der Gilde X".
+    /// Einzeln waere das bei achtzehn Accounts eine Klickstrecke.
+    private async Task BulkRolesAsync()
+    {
+        var from = Math.Min(_bulkRoleFrom, _bulkRoleTo);
+        var to = Math.Max(_bulkRoleFrom, _bulkRoleTo);
+
+        var guildId = RealId(BulkRoleGuild);
+        var set = _bulkRoleMode == "set";
+        var role = BulkRole;
+
+        // Der Satz nennt Gilde und Levelbereich, damit vor dem Bestaetigen
+        // klar ist, wen es trifft.
+        var scope = guildId is null
+            ? Loc.T("accounts.roles.scope.level", from, to)
+            : Loc.T("accounts.roles.scope.levelGuild", from, to, BulkRoleGuild!.Name);
+
+        var ok = await _dialogs.ConfirmAsync(
+            Loc.T("accounts.roles.title"),
+            Loc.T(set ? "accounts.roles.confirm.set" : "accounts.roles.confirm.unset", role.Label, scope),
+            Loc.T("common.apply"));
+        if (!ok) return;
+
+        var changed = 0;
+        foreach (var dto in _store.Accounts.Accounts.SelectMany(a => a.Characters))
+        {
+            if (guildId is int gid && dto.GuildId != gid) continue;
+            if (dto.Level < from || dto.Level > to) continue;
+            if (SetRole(dto, role.Key, set)) changed++;
+        }
+
+        Load();
+        Save(Loc.T("accounts.roles.done", changed));
+    }
+
+    /// Setzt die Rolle und meldet, ob sich dadurch etwas geaendert hat.
+    private static bool SetRole(CharacterDto dto, string role, bool value)
+    {
+        switch (role)
+        {
+            case "meley" when dto.IsMeley != value: dto.IsMeley = value; return true;
+            case "balathor" when dto.IsBalathor != value: dto.IsBalathor = value; return true;
+            case "serpent" when dto.IsSerpent != value: dto.IsSerpent = value; return true;
+            case "donate" when dto.IsDonate != value: dto.IsDonate = value; return true;
+            case "grotte" when dto.IsGrotte != value: dto.IsGrotte = value; return true;
+            default: return false;
+        }
     }
 
     /* ---------- Gilden ---------- */
