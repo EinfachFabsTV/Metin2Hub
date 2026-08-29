@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14" MaxWidth="760" HorizontalAlignment="Left">
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T nav.settings}" />
+        <TextBlock Classes="muted" Text="{loc:T settings.subtitle}" />
+      </StackPanel>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.language}" />
+          <TextBlock Classes="muted" Text="{loc:T settings.language.hint}" TextWrapping="Wrap" />
+          <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding Language}"
+                    MinWidth="320" HorizontalAlignment="Left">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="vm:LanguageOption">
+                <TextBlock Text="{Binding Label}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </Border>
+
+      <!-- Sichtbare Server -->
+      <Border Classes="card" IsVisible="{Binding HasServers}">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.servers}" />
+          <TextBlock Classes="muted" Text="{loc:T settings.servers.hint}" />
+          <ItemsControl ItemsSource="{Binding Servers}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:ServerVisibility">
+                <CheckBox Content="{Binding Label}" IsChecked="{Binding Visible, Mode=TwoWay}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.header}" />
+          <TextBlock Classes="muted"
+                     Text="{loc:T settings.header.hint}" />
+          <ComboBox ItemsSource="{Binding HeaderServers}" SelectedItem="{Binding HeaderServer}"
+                    MinWidth="320" HorizontalAlignment="Left">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="vm:HeaderServerOption">
+                <TextBlock Text="{Binding Label}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.update}" />
+          <TextBlock Classes="muted" Text="{Binding Version}" />
+          <CheckBox Content="{loc:T settings.update.check}"
+                    IsChecked="{Binding CheckUpdates}" />
+          <TextBlock Classes="muted" Text="{loc:T settings.update.hint}" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="{loc:T settings.update.now}" Command="{Binding CheckNowCommand}"
+                    IsEnabled="{Binding NotBusy}" />
+            <Button Content="{loc:T settings.update.page}" Command="{Binding OpenReleasesCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.data}" />
+          <TextBlock Classes="muted" Text="{Binding DataFolder}" TextWrapping="Wrap" />
+          <TextBlock Classes="muted"
+                     Text="{loc:T settings.data.hint}" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="{loc:T settings.data.open}" Command="{Binding OpenFolderCommand}" />
+            <Button Classes="danger" Content="{loc:T settings.data.clear}" Command="{Binding ClearCacheCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <TextBlock Classes="success" Text="{Binding Status}" IsVisible="{Binding HasStatus}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

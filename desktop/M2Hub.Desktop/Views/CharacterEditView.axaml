@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.CharacterEditView"
+             x:DataType="vm:CharacterEditViewModel">
+
+  <StackPanel Spacing="14">
+    <TextBlock Classes="h2" Text="{Binding Title}" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="muted" Text="{loc:T common.name}" />
+      <TextBox Text="{Binding Name}" />
+    </StackPanel>
+
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+      <StackPanel Grid.Column="0" Spacing="6">
+        <TextBlock Classes="muted" Text="{loc:T common.level}" />
+        <NumericUpDown Value="{Binding Level}" Minimum="1" Maximum="120" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="6">
+        <TextBlock Classes="muted" Text="{loc:T common.medals}" />
+        <NumericUpDown Value="{Binding Medals}" Minimum="0" Maximum="999999" />
+      </StackPanel>
+    </Grid>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="muted" Text="{loc:T common.guild}" />
+      <ComboBox ItemsSource="{Binding Guilds}" SelectedItem="{Binding Guild}"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate DataType="vm:GuildItemViewModel">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </StackPanel>
+
+    <StackPanel Spacing="7">
+      <TextBlock Classes="muted" Text="{loc:T char.form.roles}" />
+      <CheckBox IsChecked="{Binding IsMeley}" Content="{loc:T char.form.meley}" />
+      <CheckBox IsChecked="{Binding IsGrotte}" Content="{loc:T char.form.grotte}" />
+      <CheckBox IsChecked="{Binding IsBalathor}" Content="{loc:T char.form.balathor}" />
+      <CheckBox IsChecked="{Binding IsSerpent}" Content="{loc:T char.form.serpent}" />
+      <CheckBox IsChecked="{Binding IsBio}" Content="{loc:T char.form.bio}" />
+      <CheckBox IsChecked="{Binding BioDone}" IsEnabled="{Binding IsBio}"
+                Content="{loc:T accounts.stats.bio}" Margin="22,0,0,0" />
+    </StackPanel>
+
+    <TextBlock Classes="danger" Text="{Binding Error}" IsVisible="{Binding HasError}" />
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button Content="{Binding CancelLabel}" Command="{Binding CancelCommand}" />
+      <Button Classes="primary" Content="{Binding ConfirmLabel}" Command="{Binding ConfirmCommand}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

@@ -165,6 +165,55 @@ Herunterladen von Hand ist nicht nötig.
 
 Wer das nicht möchte, schaltet die Prüfung in den Einstellungen ab.
 
+## Quellcode
+
+Der vollständige Quellcode der App liegt in diesem Repository unter
+[`desktop/`](desktop). Er wird bei jeder Veröffentlichung mit derselben
+Werkbank aktualisiert, die auch die `M2Hub.exe` baut – Programm und Quelle
+gehören immer zum selben Stand.
+
+Wer wissen will, was das Programm tut, muss also niemandem glauben:
+
+- **Kein Konto, kein Server.** Es gibt keine Anmeldung und keinen Dienst, der
+  Daten entgegennimmt. Nachzulesen in [`Services/LocalStore.cs`](desktop/M2Hub.Desktop/Services/LocalStore.cs):
+  alles liegt als JSON im eigenen Profil.
+- **Ein einziges Ziel im Netz** – das offizielle deutsche Forum. Die drei
+  Adressen stehen vollständig in
+  [`Services/Forum/ForumSource.cs`](desktop/M2Hub.Desktop/Services/Forum/ForumSource.cs);
+  andere Verbindungen baut die App nur zu GitHub auf, um nach einer neueren
+  Version zu sehen.
+- **Kein WebView, kein Chromium.** Gezeichnet wird über Avalonia/Skia; es gibt
+  keine Browser-Engine, in der fremder Code laufen könnte.
+
+### Selbst bauen
+
+Mit dem [.NET SDK 9](https://dotnet.microsoft.com/download) und ohne weitere
+Werkzeuge:
+
+```bash
+cd desktop/M2Hub.Desktop
+dotnet publish -c Release -r win-x64 --self-contained true \
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+### Heruntergeladene Datei prüfen
+
+Zu jeder Veröffentlichung steht die SHA256-Prüfsumme der `M2Hub.exe` in den
+Release-Notizen. Nachrechnen unter Windows:
+
+```powershell
+Get-FileHash .\M2Hub.exe -Algorithm SHA256
+```
+
+Stimmt der Wert überein, ist die Datei unverändert die, die aus dem hier
+sichtbaren Quellcode gebaut wurde.
+
+### Warum der SmartScreen-Filter meckert
+
+Die Datei ist nicht mit einem Zertifikat signiert – solche Zertifikate kosten
+Geld und sagen nichts über den Inhalt aus. Windows kennt die Datei deshalb
+nicht und warnt. Quellcode und Prüfsumme sagen mehr als eine Signatur.
+
 ## Rückmeldungen
 
 Fehler, Wünsche und Anmerkungen gehören in die

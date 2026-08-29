@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <AssemblyName>M2Hub</AssemblyName>
+    <ApplicationIcon>Assets\m2hub.ico</ApplicationIcon>
+    <Product>M2Hub</Product>
+    <AssemblyTitle>M2Hub</AssemblyTitle>
+    <!-- Die einzige Stelle mit der Versionsnummer. AssemblyVersion und
+         FileVersion standen frueher fest daneben und blieben auf 1.6.0 stehen -
+         die App hielt sich damit fuer veraltet und wies bei jedem Start auf ein
+         Update hin, das sie schon hatte. Ohne die beiden Zeilen folgen sie
+         <Version>. -->
+    <Version>1.18.0</Version>
+    <RootNamespace>M2Hub.Desktop</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Avalonia rendert selbst ueber Skia - keine Browser-Engine, kein WebView. -->
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+</Project>

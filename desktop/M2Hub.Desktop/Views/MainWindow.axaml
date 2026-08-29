@@ -1,0 +1,138 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:M2Hub.Desktop.ViewModels"
+        xmlns:loc="using:M2Hub.Desktop.Services"
+        x:Class="M2Hub.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="1400" Height="860" MinWidth="980" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://M2Hub/Assets/m2hub.ico"
+        Title="M2Hub"
+        Background="{StaticResource DeepBrush}"
+        TransparencyLevelHint="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+  <!-- Im Vollbild ragt der Rahmen sonst ueber den sichtbaren Bereich hinaus -->
+  <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
+    <!-- Hintergrund-Glow wie auf der Website -->
+    <Border Background="{StaticResource GlowBrush}" />
+
+    <DockPanel>
+      <!-- Kopfzeile -->
+      <Border Name="TitleBar" DockPanel.Dock="Top" Background="{StaticResource HeaderBrush}"
+              BorderBrush="{StaticResource SubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" VerticalAlignment="Center">
+
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <Image Source="avares://M2Hub/Assets/m2hub.png" Width="34" Height="34" />
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="M2Hub" FontWeight="Bold" FontSize="16" />
+              <TextBlock Classes="muted" Text="{Binding LastRefreshLabel}" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- Was gerade laeuft: globale Events und Happy Hours -->
+          <ItemsControl Grid.Column="1" ItemsSource="{Binding ActiveNow}"
+                        IsVisible="{Binding HasActiveNow}"
+                        HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:ActiveBadgeViewModel">
+                <Button Classes="live" Classes.happy="{Binding IsHappyHour}"
+                        Command="{Binding OpenCommand}" Margin="0,2,6,2"
+                        ToolTip.Tip="{Binding Title}">
+                  <StackPanel Orientation="Horizontal" Spacing="7">
+                    <Image Source="{Binding Icon}" Width="18" Height="18"
+                           IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
+                    <Ellipse Classes="dot" Classes.happy="{Binding IsHappyHour}"
+                             Width="7" Height="7" VerticalAlignment="Center"
+                             IsVisible="{Binding !HasIcon}" />
+                    <TextBlock Text="{Binding Title}" FontSize="12" MaxWidth="220"
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Remaining}" FontSize="11" Opacity="0.7"
+                               IsVisible="{Binding HasRemaining}" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Classes="nav" Classes.active="{Binding IsAccounts}"
+                    Command="{Binding ShowAccountsCommand}" Content="{loc:T nav.accounts}" />
+            <Button Classes="nav" Classes.active="{Binding IsEvents}"
+                    Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
+            <Button Classes="nav" Classes.active="{Binding IsItemshop}"
+                    Command="{Binding ShowItemshopCommand}" Content="{loc:T nav.itemshop}" />
+            <Button Classes="nav" Classes.active="{Binding IsSettings}"
+                    Command="{Binding ShowSettingsCommand}" Content="⚙" ToolTip.Tip="{loc:T nav.settings}" />
+
+            <!-- Nachschlagewerk und Handelsglas. Beide liegen ausserhalb der
+                 App und oeffnen im Standardbrowser - eine Browser-Engine hat
+                 das Programm bewusst nicht. Die Symbole sind selbst gezeichnet:
+                 so laedt die App nichts von fremden Servern nach. -->
+            <Button Classes="nav" Command="{Binding OpenLinkCommand}"
+                    CommandParameter="{x:Static vm:MainWindowViewModel.WikiUrl}"
+                    ToolTip.Tip="{loc:T nav.wiki}">
+              <Panel Width="17" Height="15">
+                <!-- aufgeschlagenes Buch -->
+                <Path Fill="#93C5FD"
+                      Data="M0,2 C3,0 6,0 8,1.6 L8,14 C6,12.4 3,12.4 0,14 Z" />
+                <Path Fill="#3B82F6"
+                      Data="M17,2 C14,0 11,0 9,1.6 L9,14 C11,12.4 14,12.4 17,14 Z" />
+              </Panel>
+            </Button>
+            <Button Classes="nav" Command="{Binding OpenLinkCommand}"
+                    CommandParameter="{x:Static vm:MainWindowViewModel.TradingGlassUrl}"
+                    ToolTip.Tip="{loc:T nav.tradingGlass}">
+              <Panel Width="16" Height="16">
+                <!-- Lupe ueber einer Muenze -->
+                <Ellipse Width="12" Height="12" Margin="0,0,4,4"
+                         Stroke="#FBBF24" StrokeThickness="2" />
+                <Rectangle Width="2" Height="7" Fill="#FBBF24" RadiusX="1" RadiusY="1"
+                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,1,0">
+                  <Rectangle.RenderTransform>
+                    <RotateTransform Angle="-45" />
+                  </Rectangle.RenderTransform>
+                </Rectangle>
+              </Panel>
+            </Button>
+          </StackPanel>
+
+          <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock Classes="danger" VerticalAlignment="Center" FontSize="12"
+                       Text="{Binding RefreshError}" IsVisible="{Binding HasRefreshError}"
+                       MaxWidth="320" TextTrimming="CharacterEllipsis" />
+            <Button Content="{loc:T header.refresh}" Classes="primary" Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding NotBusy}"
+                    ToolTip.Tip="{loc:T header.refresh.tip}" />
+
+            <!-- Fensterknoepfe im Stil des Programms statt der Windows-Leiste -->
+            <StackPanel Orientation="Horizontal" Spacing="2" Margin="10,0,0,0">
+              <Button Name="MinimizeButton" Classes="caption" Content="─" ToolTip.Tip="{loc:T window.minimize}" />
+              <Button Name="MaximizeButton" Classes="caption" Content="▢" ToolTip.Tip="{loc:T window.maximize}" />
+              <Button Name="CloseButton" Classes="caption close" Content="✕" ToolTip.Tip="{loc:T window.close}" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Inhalt -->
+      <ContentControl Content="{Binding CurrentPage}" Margin="0" />
+    </DockPanel>
+
+    <!-- Masken liegen ueber der Ansicht - kein zweites Fenster, keine
+         Fensterrahmen des Betriebssystems. -->
+    <Border Background="#D9020509" IsVisible="{Binding Dialogs.HasDialog}">
+      <Border Classes="dialog" Width="470" Padding="22" Margin="20"
+              VerticalAlignment="Center" HorizontalAlignment="Center">
+        <ContentControl Content="{Binding Dialogs.Current}" />
+      </Border>
+    </Border>
+  </Panel>
+</Window>

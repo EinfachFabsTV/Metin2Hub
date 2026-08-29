@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.ItemshopView"
+             x:DataType="vm:ItemshopViewModel">
+
+  <DockPanel Margin="18">
+
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+      <StackPanel Grid.Column="0" Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T nav.itemshop}" />
+        <TextBlock Classes="muted" Text="{loc:T itemshop.subtitle}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBox Width="220" Text="{Binding Search}" Watermark="{loc:T common.search}" />
+        <CheckBox Content="{loc:T itemshop.running}" IsChecked="{Binding ShowRunning}" VerticalAlignment="Center" />
+        <CheckBox Content="{loc:T itemshop.upcoming}" IsChecked="{Binding ShowUpcoming}" VerticalAlignment="Center" />
+        <CheckBox Content="{loc:T itemshop.expired}" IsChecked="{Binding ShowOver}" VerticalAlignment="Center" />
+        <Button Content="{loc:T header.refresh}" Command="{Binding ReloadCommand}" IsEnabled="{Binding NotBusy}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock DockPanel.Dock="Top" Classes="danger" Text="{Binding Error}" IsVisible="{Binding HasError}" Margin="0,0,0,8" />
+    <TextBlock DockPanel.Dock="Top" Classes="muted" IsVisible="{Binding Empty}"
+               Text="{loc:T itemshop.empty}" Margin="0,0,0,8" />
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:ItemshopItemViewModel">
+            <Border Classes="card" Margin="0,0,0,10">
+              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+
+                <Border Grid.Column="0" Width="150" Height="90" CornerRadius="10" ClipToBounds="True"
+                        IsVisible="{Binding HasImage}">
+                  <Image Source="{Binding Image}" Stretch="UniformToFill" />
+                </Border>
+
+                <StackPanel Grid.Column="1" Spacing="6">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="h2" Text="{Binding Title}" />
+                    <Border Classes="badge"><TextBlock FontSize="12" Text="{Binding Kind}" /></Border>
+                    <Border Classes="badge" IsVisible="{Binding IsNew}">
+                      <TextBlock FontSize="12" Foreground="#F59E0B" Text="{loc:T itemshop.new}" />
+                    </Border>
+                    <Border Classes="badge" IsVisible="{Binding Upcoming}">
+                      <TextBlock FontSize="12" Foreground="#F59E0B" Text="{loc:T events.upcoming}" />
+                    </Border>
+                    <Border Classes="badge" IsVisible="{Binding Running}">
+                      <TextBlock FontSize="12" Foreground="#10B981" Text="{loc:T events.running}" />
+                    </Border>
+                  </StackPanel>
+
+                  <TextBlock Classes="muted" Text="{Binding Range}" />
+                  <TextBlock Classes="muted" Text="{Binding State}" />
+
+                  <TextBlock Text="{Binding Text}" IsVisible="{Binding HasText}" MaxLines="6"
+                             TextTrimming="CharacterEllipsis" />
+
+                  <Button HorizontalAlignment="Left" Content="{loc:T common.openForum}"
+                          Command="{Binding $parent[ItemsControl].DataContext.OpenInBrowserCommand}"
+                          CommandParameter="{Binding Url}" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

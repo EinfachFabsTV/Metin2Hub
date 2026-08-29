@@ -1,0 +1,317 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Design-Tokens aus app/assets/css/main.css. Farben werden nur hier
+    definiert; in den Ansichten stehen ausschliesslich die Namen.
+  -->
+  <Styles.Resources>
+    <Color x:Key="DeepColor">#FF030712</Color>
+    <Color x:Key="PrimaryColor">#FF3B82F6</Color>
+    <Color x:Key="SecondaryColor">#FFA855F7</Color>
+
+    <SolidColorBrush x:Key="DeepBrush" Color="#FF030712" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#B3111827" />
+    <!-- Kopfzeile und Masken sind blickdicht: dahinter darf nichts durchscheinen -->
+    <SolidColorBrush x:Key="HeaderBrush" Color="#FF0B111F" />
+    <SolidColorBrush x:Key="DialogBrush" Color="#FF0E1524" />
+    <SolidColorBrush x:Key="CardBrush" Color="#661E293B" />
+    <SolidColorBrush x:Key="SubtleBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#FF3B82F6" />
+    <SolidColorBrush x:Key="PrimaryStrongBrush" Color="#FF1D4ED8" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#FFA855F7" />
+    <SolidColorBrush x:Key="AmberBrush" Color="#FFF59E0B" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#FF10B981" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#FFEF4444" />
+    <SolidColorBrush x:Key="MainBrush" Color="#FFF9FAFB" />
+    <SolidColorBrush x:Key="MutedBrush" Color="#FF9CA3AF" />
+
+    <!-- Der Radial-Glow des Webauftritts als statischer Verlauf -->
+    <RadialGradientBrush x:Key="GlowBrush" Center="30%,0%" GradientOrigin="30%,0%" RadiusX="80%" RadiusY="80%">
+      <GradientStop Offset="0" Color="#333B82F6" />
+      <GradientStop Offset="1" Color="#00030712" />
+    </RadialGradientBrush>
+
+    <x:Double x:Key="RadiusMd">8</x:Double>
+    <x:Double x:Key="RadiusLg">14</x:Double>
+  </Styles.Resources>
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource DeepBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <Style Selector="TextBlock.muted">
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="TextBlock.h1">
+    <Setter Property="FontSize" Value="26" />
+    <Setter Property="FontWeight" Value="Bold" />
+  </Style>
+
+  <Style Selector="TextBlock.h2">
+    <Setter Property="FontSize" Value="17" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="TextBlock.danger">
+    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.success">
+    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+  </Style>
+
+  <!-- Karte: Glasoptik des Webauftritts, ohne Blur (kein Browser im Spiel) -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{StaticResource CardBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+  </Style>
+
+  <Style Selector="Button">
+    <Setter Property="Background" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12,7" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <Style Selector="Button:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#22FFFFFF" />
+    <Setter Property="BorderBrush" Value="#33FFFFFF" />
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource PrimaryStrongBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryStrongBrush}" />
+  </Style>
+
+  <Style Selector="Button.danger">
+    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+  </Style>
+
+  <Style Selector="Button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.nav.active">
+    <Setter Property="Background" Value="#223B82F6" />
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+  </Style>
+
+  <Style Selector="Button.chip">
+    <Setter Property="Padding" Value="9,4" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="CornerRadius" Value="999" />
+  </Style>
+
+  <Style Selector="Border.badge">
+    <Setter Property="Background" Value="#223B82F6" />
+    <Setter Property="BorderBrush" Value="#443B82F6" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="999" />
+    <Setter Property="Padding" Value="9,3" />
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="#22111827" />
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="9,7" />
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="Background" Value="#22111827" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="MinHeight" Value="34" />
+  </Style>
+
+  <Style Selector="NumericUpDown">
+    <Setter Property="Background" Value="#22111827" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+
+  <!-- „Laeuft gerade": Event blau, Happy Hour bernstein -->
+  <Style Selector="Button.live">
+    <Setter Property="Background" Value="#1E3B82F6" />
+    <Setter Property="BorderBrush" Value="#553B82F6" />
+    <Setter Property="Padding" Value="10,5" />
+    <Setter Property="CornerRadius" Value="999" />
+  </Style>
+
+  <Style Selector="Button.live.happy">
+    <Setter Property="Background" Value="#1EF59E0B" />
+    <Setter Property="BorderBrush" Value="#55F59E0B" />
+  </Style>
+
+  <Style Selector="Button.live:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#333B82F6" />
+  </Style>
+
+  <Style Selector="Button.live.happy:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#33F59E0B" />
+  </Style>
+
+  <Style Selector="Ellipse.dot">
+    <Setter Property="Fill" Value="{StaticResource PrimaryBrush}" />
+  </Style>
+
+  <Style Selector="Ellipse.dot.happy">
+    <Setter Property="Fill" Value="{StaticResource AmberBrush}" />
+  </Style>
+
+  <!-- Maske: blickdicht, damit der Inhalt dahinter nicht stoert -->
+  <Style Selector="Border.dialog">
+    <Setter Property="Background" Value="{StaticResource DialogBrush}" />
+    <Setter Property="BorderBrush" Value="#22FFFFFF" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="BoxShadow" Value="0 20 70 0 #A0000000" />
+  </Style>
+
+  <!-- Fensterknoepfe der eigenen Titelleiste -->
+  <Style Selector="Button.caption">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Width" Value="34" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.caption:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#22FFFFFF" />
+    <Setter Property="TextElement.Foreground" Value="{StaticResource MainBrush}" />
+  </Style>
+
+  <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource DangerBrush}" />
+    <Setter Property="TextElement.Foreground" Value="{StaticResource MainBrush}" />
+  </Style>
+
+  <!-- „Laeuft gerade" im Serverkalender -->
+  <Style Selector="Border.nowbanner">
+    <Setter Property="Background" Value="#233B82F6" />
+    <Setter Property="BorderBrush" Value="#553B82F6" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </Style>
+
+  <!-- Roter Knopf mit Flaeche fuer zerstoerende Aktionen in Masken -->
+  <Style Selector="Button.danger.solid">
+    <Setter Property="Background" Value="{StaticResource DangerBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- Kennzahlen-Kacheln -->
+  <Style Selector="Border.stat">
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+
+  <Style Selector="TextBlock.statvalue">
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontWeight" Value="Bold" />
+  </Style>
+
+  <!-- Kleiner Knopf ohne Rahmen fuer Aktionen in der Kachel -->
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Padding" Value="6,2" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <!-- Charaktername als Verweis in die Bearbeiten-Maske -->
+  <Style Selector="Button.rowlink">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Padding" Value="0,1" />
+    <Setter Property="MinWidth" Value="0" />
+  </Style>
+
+  <Style Selector="Button.rowlink:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#18FFFFFF" />
+  </Style>
+
+  <!-- Levelfeld; Meley-Chars sind gruen hinterlegt wie in der Vorlage -->
+  <Style Selector="Border.level">
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="Padding" Value="4,1" />
+    <Setter Property="Background" Value="#14FFFFFF" />
+  </Style>
+
+  <Style Selector="Border.level.meley">
+    <Setter Property="Background" Value="#3310B981" />
+    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <!-- Kurzkennung unten in der Kachel -->
+  <Style Selector="TextBlock.shortlabel">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+  </Style>
+
+  <Style Selector="Border.badge.bio">
+    <Setter Property="Background" Value="#1EEF4444" />
+    <Setter Property="BorderBrush" Value="#55EF4444" />
+  </Style>
+
+  <!-- Kalenderzellen -->
+  <Style Selector="Border.cell">
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,1" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="MinHeight" Value="34" />
+  </Style>
+
+  <Style Selector="Border.cell.head">
+    <Setter Property="Background" Value="#22111827" />
+  </Style>
+
+  <Style Selector="Border.cell.active">
+    <Setter Property="Background" Value="#333B82F6" />
+  </Style>
+
+</Styles>

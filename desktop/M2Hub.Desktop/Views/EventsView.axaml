@@ -1,0 +1,190 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.EventsView"
+             x:DataType="vm:EventsViewModel">
+
+  <UserControl.Resources>
+
+    <!-- Ein Serverkalender. Wird von jedem Server-Reiter verwendet. -->
+    <DataTemplate x:Key="ServerCalendar" DataType="vm:ServerCalViewModel">
+      <ScrollViewer>
+        <Border Classes="card" Margin="0,10,0,0">
+          <StackPanel Spacing="10">
+
+            <TextBlock Classes="h2" Text="{Binding Label}" />
+
+            <!-- Was gerade laeuft, gross genug um es nicht zu uebersehen -->
+            <Border Classes="nowbanner" IsVisible="{Binding HasCurrent}">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Image Source="{Binding CurrentIcon}" Width="34" Height="34"
+                       IsVisible="{Binding HasCurrentIcon}" VerticalAlignment="Center" />
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentLine}" />
+                  <TextBlock Text="{Binding CurrentText}" FontSize="17" FontWeight="Bold" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Kopfzeile -->
+            <ItemsControl ItemsSource="{Binding Header.Cells}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:CalCellViewModel">
+                  <Border Classes="cell head">
+                    <TextBlock Text="{Binding Text}" FontWeight="SemiBold" FontSize="12" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Zeilen -->
+            <ItemsControl ItemsSource="{Binding Rows}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:CalRowViewModel">
+                  <ItemsControl ItemsSource="{Binding Cells}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:CalCellViewModel">
+                        <Border Classes="cell" Classes.active="{Binding Active}">
+                          <StackPanel Orientation="Horizontal" Spacing="7">
+                            <!-- Bild aus der mitgelieferten Sammlung, sofern zuzuordnen -->
+                            <Image Source="{Binding Icon}" Width="20" Height="20"
+                                   IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Text}" FontSize="12" VerticalAlignment="Center" />
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Zusatzevents des Beitrags -->
+            <StackPanel Spacing="3" IsVisible="{Binding HasSpecials}" Margin="0,4,0,0">
+              <TextBlock Classes="muted" Text="{loc:T events.specials}" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Specials}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Classes="muted" Text="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+          </StackPanel>
+        </Border>
+      </ScrollViewer>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <DockPanel Margin="18">
+
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+      <StackPanel Grid.Column="0" Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T nav.events}" />
+        <TextBlock Classes="muted" Text="{loc:T events.subtitle}" />
+        <TextBlock Classes="muted" FontSize="11" Text="{loc:T events.source}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding Month}" />
+        <Button Content="{loc:T header.refresh}" Command="{Binding ReloadCommand}" IsEnabled="{Binding NotBusy}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock DockPanel.Dock="Top" Classes="danger" Text="{Binding Error}" IsVisible="{Binding HasError}" Margin="0,0,0,8" />
+
+    <!-- Ein Reiter je Server. Welche es gibt, steht erst nach dem Abruf fest -
+         je Sprache und Monat sind es andere. -->
+    <TabControl ItemsSource="{Binding Tabs}"
+                SelectedItem="{Binding SelectedTab, Mode=TwoWay}">
+      <TabControl.ItemTemplate>
+        <DataTemplate DataType="vm:EventTabViewModel">
+          <TextBlock Text="{Binding Label}" />
+        </DataTemplate>
+      </TabControl.ItemTemplate>
+      <TabControl.ContentTemplate>
+        <DataTemplate DataType="vm:EventTabViewModel">
+          <Panel>
+
+            <!-- ===== Global ===== -->
+            <Panel IsVisible="{Binding IsGlobal}">
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
+              <CheckBox Content="{loc:T events.hideExpired}" IsChecked="{Binding $parent[UserControl].DataContext.OnlyRunning, Mode=TwoWay}" />
+              <CheckBox Content="{loc:T events.showUndated}" IsChecked="{Binding $parent[UserControl].DataContext.ShowUndated, Mode=TwoWay}"
+                        ToolTip.Tip="{loc:T events.showUndated.tip}" />
+              <TextBlock Classes="muted" VerticalAlignment="Center"
+                         Text="{loc:T events.hint}" />
+            </StackPanel>
+            <ScrollViewer>
+              <ItemsControl ItemsSource="{Binding $parent[UserControl].DataContext.GlobalEvents}" Margin="0,8,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:GlobalEventViewModel">
+                    <Border Classes="card" Margin="0,0,0,10">
+                      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+
+                        <Border Grid.Column="0" Width="150" Height="90" CornerRadius="10" ClipToBounds="True"
+                                IsVisible="{Binding HasImage}">
+                          <Image Source="{Binding Image}" Stretch="UniformToFill" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="6">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="h2" Text="{Binding Title}" />
+                            <Border Classes="badge"><TextBlock FontSize="12" Text="{Binding Kind}" /></Border>
+                            <Border Classes="badge" IsVisible="{Binding Running}">
+                              <TextBlock FontSize="12" Foreground="#10B981" Text="{loc:T events.running}" />
+                            </Border>
+                            <Border Classes="badge" IsVisible="{Binding Upcoming}">
+                              <TextBlock FontSize="12" Foreground="#F59E0B" Text="{loc:T events.upcoming}" />
+                            </Border>
+                          </StackPanel>
+
+                          <TextBlock Classes="muted" Text="{Binding Range}" />
+
+                          <ItemsControl ItemsSource="{Binding Parts}" IsVisible="{Binding HasParts}">
+                            <ItemsControl.ItemsPanel>
+                              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate>
+                                <Border Classes="badge" Margin="0,2,6,0">
+                                  <TextBlock FontSize="12" Text="{Binding}" />
+                                </Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+
+                          <TextBlock Text="{Binding Text}" IsVisible="{Binding HasText}" MaxLines="6"
+                                     TextTrimming="CharacterEllipsis" />
+
+                          <Button HorizontalAlignment="Left" Content="{loc:T common.openForum}"
+                                  Command="{Binding $parent[UserControl].DataContext.OpenInBrowserCommand}"
+                                  CommandParameter="{Binding Url}" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </DockPanel>
+            </Panel>
+
+            <!-- ===== Serverkalender ===== -->
+            <ContentControl Content="{Binding Server}"
+                            IsVisible="{Binding IsServer}"
+                            ContentTemplate="{StaticResource ServerCalendar}" />
+          </Panel>
+        </DataTemplate>
+      </TabControl.ContentTemplate>
+    </TabControl>
+  </DockPanel>
+</UserControl>

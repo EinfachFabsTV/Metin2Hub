@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.AccountEditView"
+             x:DataType="vm:AccountEditViewModel">
+
+  <StackPanel Spacing="14">
+    <TextBlock Classes="h2" Text="{Binding Title}" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="muted" Text="{loc:T account.form.name}" />
+      <TextBox Text="{Binding Name}" Watermark="z. B. fabsmet92096211" />
+      <TextBlock Classes="muted"
+                 Text="{loc:T account.form.nameHint}" />
+    </StackPanel>
+
+    <Grid ColumnDefinitions="*,150" ColumnSpacing="10">
+      <StackPanel Grid.Column="0" Spacing="6">
+        <TextBlock Classes="muted" Text="{loc:T account.form.language}" />
+        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}"
+                  HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate>
+            <DataTemplate DataType="vm:LanguageItemViewModel">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="10" Height="10" Fill="{Binding Brush}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Name}" />
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="6">
+        <TextBlock Classes="muted" Text="{loc:T account.form.coins}" />
+        <NumericUpDown Value="{Binding DragonCoins}" Minimum="0" Maximum="999999" Increment="10" />
+      </StackPanel>
+    </Grid>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="muted" Text="{loc:T account.form.server}" />
+      <Grid ColumnDefinitions="*,190" ColumnSpacing="8">
+        <ComboBox Grid.Column="0" ItemsSource="{Binding Servers}" SelectedItem="{Binding Server}"
+                  HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate>
+            <DataTemplate DataType="vm:ServerOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <!-- Wer auf einem Server spielt, der nicht in der Liste steht,
+             traegt ihn hier ein; er steht danach zur Wahl. -->
+        <TextBox Grid.Column="1" Text="{Binding NewServer}"
+                 Watermark="{loc:T account.form.ownServer}" />
+      </Grid>
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="muted" Text="{loc:T account.form.note}" />
+      <TextBox Text="{Binding Note}" AcceptsReturn="True" Height="70" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <TextBlock Classes="danger" Text="{Binding Error}" IsVisible="{Binding HasError}" />
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button Content="{Binding CancelLabel}" Command="{Binding CancelCommand}" />
+      <Button Classes="primary" Content="{Binding ConfirmLabel}" Command="{Binding ConfirmCommand}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>
