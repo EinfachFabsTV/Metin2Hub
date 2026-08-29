@@ -36,25 +36,29 @@
           <!-- Was gerade laeuft: globale Events und Happy Hours -->
           <ItemsControl Grid.Column="1" ItemsSource="{Binding ActiveNow}"
                         IsVisible="{Binding HasActiveNow}"
-                        HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0">
+                        HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="vm:ActiveBadgeViewModel">
                 <Button Classes="live" Classes.happy="{Binding IsHappyHour}"
-                        Command="{Binding OpenCommand}" Margin="0,2,6,2"
+                        Command="{Binding OpenCommand}" Margin="0,1,5,1"
                         ToolTip.Tip="{Binding Title}">
-                  <StackPanel Orientation="Horizontal" Spacing="7">
-                    <Image Source="{Binding Icon}" Width="18" Height="18"
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <Image Source="{Binding Icon}" Width="13" Height="13"
                            IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
                     <Ellipse Classes="dot" Classes.happy="{Binding IsHappyHour}"
-                             Width="7" Height="7" VerticalAlignment="Center"
+                             Width="6" Height="6" VerticalAlignment="Center"
                              IsVisible="{Binding !HasIcon}" />
-                    <TextBlock Text="{Binding Title}" FontSize="12" MaxWidth="220"
-                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Remaining}" FontSize="11" Opacity="0.7"
-                               IsVisible="{Binding HasRemaining}" VerticalAlignment="Center" />
+                    <!-- Eine Zeile, notfalls gekuerzt - der ganze Text steht im
+                         Tooltip und auf der Events-Seite. -->
+                    <TextBlock Text="{Binding Title}" FontSize="11" MaxWidth="200"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Remaining}" FontSize="10" Opacity="0.7"
+                               TextWrapping="NoWrap" IsVisible="{Binding HasRemaining}"
+                               VerticalAlignment="Center" />
                   </StackPanel>
                 </Button>
               </DataTemplate>
