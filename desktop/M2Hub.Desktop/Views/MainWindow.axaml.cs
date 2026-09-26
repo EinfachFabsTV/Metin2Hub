@@ -75,12 +75,14 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Reiter: mit den Pfeiltasten zum Nachbarn, solange die Eingabe auf
+        // Bereiche: mit den Pfeiltasten zum Nachbarn, solange die Eingabe auf
         // der Leiste selbst liegt. Sonst gehoeren die Pfeile dem Feld, in dem
-        // gerade geschrieben oder ausgewaehlt wird.
-        if (e.Key is Key.Left or Key.Right && OnNavBar())
+        // gerade geschrieben oder ausgewaehlt wird. Die Leiste steht seit dem
+        // Umbau links, deshalb Hoch/Runter - Links/Rechts bleibt daneben
+        // bedienbar, damit sich niemand umgewoehnen muss.
+        if (e.Key is Key.Up or Key.Left or Key.Down or Key.Right && OnNavBar())
         {
-            vm.ShowNeighbour(e.Key == Key.Left ? -1 : +1);
+            vm.ShowNeighbour(e.Key is Key.Up or Key.Left ? -1 : +1);
             e.Handled = true;
         }
     }
@@ -92,7 +94,7 @@ public partial class MainWindow : Window
     private bool OnNavBar()
     {
         if (FocusManager?.GetFocusedElement() is not Visual focused) return false;
-        var bar = this.FindControl<StackPanel>("NavBar");
+        var bar = this.FindControl<Border>("NavBar");
         for (var v = focused; v is not null; v = v.GetVisualParent())
             if (ReferenceEquals(v, bar)) return true;
         return false;

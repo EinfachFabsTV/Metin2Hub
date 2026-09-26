@@ -229,6 +229,20 @@ public sealed class SettingsData
     /// Standardmaessig aus - meist sind es gar keine Events.
     public bool ShowUndatedEvents { get; set; }
 
+    /// Startseite: "overview" zeigt nur zusammengefasst, "work" laesst auch
+    /// eintragen. Der Umschalter sitzt auf der Seite selbst.
+    public string DashboardMode { get; set; } = "overview";
+
+    /// Welche Abschnitte die Startseite zeigt, in dieser Reihenfolge - je
+    /// Betriebsart eine eigene Liste. So sind die beiden Arten zwei gespeicherte
+    /// Anordnungen, zwischen denen der Umschalter wechselt. Leer heisst: die
+    /// Vorgabe aus DashboardSections.Default.
+    public List<string> DashboardOverview { get; set; } = new();
+    public List<string> DashboardWork { get; set; } = new();
+
+    /// Welcher Bereich beim Start geoeffnet wird.
+    public string StartPage { get; set; } = "start";
+
     /// Im Itemshop nur die Beitraege des Teams zeigen. Im Board stehen
     /// gelegentlich Beitraege von Spielern; die sind keine Aktionen.
     public bool TeamPostsOnly { get; set; } = true;

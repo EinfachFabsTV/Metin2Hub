@@ -133,6 +133,31 @@
     <Setter Property="CornerRadius" Value="999" />
   </Style>
 
+  <!-- Bereichsknopf in der Seitenleiste: volle Breite, linksbuendig -->
+  <Style Selector="Button.side">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Padding" Value="11,7" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="Button.side:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#14FFFFFF" />
+  </Style>
+
+  <Style Selector="Button.side.active">
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="FontWeight" Value="Bold" />
+  </Style>
+
+  <Style Selector="Button.side.active /template/ ContentPresenter">
+    <Setter Property="Background" Value="#263B82F6" />
+  </Style>
+
   <!-- Gewaehlter Chip: die Auswahl muss ohne Rahmenwechsel erkennbar sein -->
   <Style Selector="Button.chip.active">
     <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />

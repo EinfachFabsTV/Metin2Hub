@@ -6,6 +6,35 @@ namespace M2Hub.Desktop.ViewModels;
 /// Ein Eintrag der Serverauswahl fuer die Kopfzeile.
 public sealed record HeaderServerOption(string Key, string Label);
 
+/// Ein Bereich, der beim Start geoeffnet werden kann.
+public sealed record StartPageOption(string Key, string Label);
+
+/// Eine Zeile der Abschnittsliste: Haken und Beschriftung. Das Umschalten
+/// meldet sich sofort, damit die Startseite nicht erst beim Verlassen der
+/// Einstellungen nachzieht.
+public sealed class DashboardSectionRow : ViewModelBase
+{
+    private readonly Action<DashboardSectionRow> _changed;
+    private bool _visible;
+
+    public DashboardSectionRow(string key, bool visible, Action<DashboardSectionRow> changed)
+    {
+        Key = key;
+        _visible = visible;
+        _changed = changed;
+        Label = DashboardSections.Label(key);
+    }
+
+    public string Key { get; }
+    public string Label { get; }
+
+    public bool Visible
+    {
+        get => _visible;
+        set { if (Set(ref _visible, value)) _changed(this); }
+    }
+}
+
 /// Ein Server mit dem Haken, ob er angezeigt wird.
 public sealed class ServerVisibility : ViewModelBase
 {
@@ -53,6 +82,10 @@ public sealed class SettingsViewModel : ViewModelBase
     private HeaderServerOption _headerServer;
     private bool _checkUpdates;
     private bool _teamPostsOnly;
+    private StartPageOption _startPage;
+
+    /// Betriebsart, fuer die die Abschnittsliste gerade gebaut ist.
+    private string _sectionsMode = "";
     private string _teamNames;
     private string? _status;
     private bool _busy;
@@ -74,6 +107,13 @@ public sealed class SettingsViewModel : ViewModelBase
 
         _checkUpdates = store.Settings.CheckUpdates;
         _teamPostsOnly = store.Settings.TeamPostsOnly;
+
+        StartPages = BuildStartPages();
+        _startPage = StartPages.FirstOrDefault(o => o.Key == store.Settings.StartPage)
+                     ?? StartPages[0];
+        RebuildSections();
+        MoveSectionCommand = new RelayCommand(p => MoveSection(p as DashboardSectionRow, -1));
+        MoveSectionDownCommand = new RelayCommand(p => MoveSection(p as DashboardSectionRow, +1));
         _teamNames = string.Join(", ", store.Settings.TeamNames);
         _language = LanguageOptions.FirstOrDefault(o => o.Code == store.Settings.Language)
                     ?? LanguageOptions[0];
@@ -212,6 +252,109 @@ public sealed class SettingsViewModel : ViewModelBase
             _store.Settings.CheckUpdates = value;
             _store.SaveSettings();
         }
+    }
+
+    /* ---------- Startseite ---------- */
+
+    /// Die Abschnitte der Startseite in ihrer Reihenfolge, samt Haken. Welche
+    /// Anordnung bearbeitet wird, sagt die Betriebsart, die auf der Startseite
+    /// eingestellt ist - hier steht nur, dass sie es ist.
+    public ObservableCollection<DashboardSectionRow> Sections { get; } = new();
+
+    public RelayCommand MoveSectionCommand { get; private set; } = null!;
+    public RelayCommand MoveSectionDownCommand { get; private set; } = null!;
+
+    public string EditingMode => Loc.T("settings.start.editing",
+        Loc.T(_store.Settings.DashboardMode == DashboardSections.Work
+            ? "start.mode.work"
+            : "start.mode.overview"));
+
+    /// Welcher Bereich beim Start geoeffnet wird.
+    public List<StartPageOption> StartPages { get; private set; } = new();
+
+    public StartPageOption StartPage
+    {
+        get => _startPage;
+        set
+        {
+            if (!Set(ref _startPage, value)) return;
+            _store.Settings.StartPage = value?.Key ?? "start";
+            _store.SaveSettings();
+        }
+    }
+
+    private static List<StartPageOption> BuildStartPages() =>
+    [
+        new("start", Loc.T("nav.start")),
+        new("accounts", Loc.T("nav.accounts")),
+        new("events", Loc.T("nav.events")),
+        new("itemshop", Loc.T("nav.itemshop")),
+        new("calc", Loc.T("nav.calc")),
+    ];
+
+    /// Die gespeicherte Reihenfolge, um alles ergaenzt, was noch fehlt - so
+    /// stehen auch abgewaehlte Abschnitte in der Liste.
+    /// Nach einem Wechsel der Betriebsart auf der Startseite: die Liste zeigt
+    /// dann die andere Anordnung. Waehrend des Anklickens wird sie nicht neu
+    /// gebaut - sonst sprangen die Zeilen unter der Maus weg.
+    public void RefreshSections()
+    {
+        if (_sectionsMode == _store.Settings.DashboardMode) return;
+        RebuildSections();
+    }
+
+    private void RebuildSections()
+    {
+        _sectionsMode = _store.Settings.DashboardMode;
+        var chosen = Current();
+
+        Sections.Clear();
+        foreach (var key in chosen)
+            Sections.Add(new DashboardSectionRow(key, true, OnSectionToggled));
+
+        foreach (var key in DashboardSections.All)
+            if (!chosen.Contains(key))
+                Sections.Add(new DashboardSectionRow(key, false, OnSectionToggled));
+
+        Raise(nameof(EditingMode));
+    }
+
+    private List<string> Current()
+    {
+        var saved = _store.Settings.DashboardMode == DashboardSections.Work
+            ? _store.Settings.DashboardWork
+            : _store.Settings.DashboardOverview;
+
+        return saved.Count == 0
+            ? [.. DashboardSections.Default(_store.Settings.DashboardMode)]
+            : saved.Where(k => DashboardSections.All.Contains(k)).ToList();
+    }
+
+    private void OnSectionToggled(DashboardSectionRow _) => SaveSections();
+
+    private void MoveSection(DashboardSectionRow? row, int step)
+    {
+        if (row is null) return;
+
+        var at = Sections.IndexOf(row);
+        var to = at + step;
+        if (at < 0 || to < 0 || to >= Sections.Count) return;
+
+        Sections.Move(at, to);
+        SaveSections();
+    }
+
+    private void SaveSections()
+    {
+        var chosen = Sections.Where(r => r.Visible).Select(r => r.Key).ToList();
+
+        if (_store.Settings.DashboardMode == DashboardSections.Work)
+            _store.Settings.DashboardWork = chosen;
+        else
+            _store.Settings.DashboardOverview = chosen;
+
+        _store.SaveSettings();
+        _cacheCleared();
     }
 
     /// Im Itemshop stehen gelegentlich Beitraege von Spielern. Gefiltert wird

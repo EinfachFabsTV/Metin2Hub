@@ -77,6 +77,10 @@ public sealed class AccountsViewModel : ViewModelBase
     /// Die Kacheln in der aktuellen Sortierung und Filterung.
     public ObservableCollection<AccountItemViewModel> Accounts { get; } = new();
 
+    /// Alle Accounts, ungefiltert - die Startseite rechnet ueber den ganzen
+    /// Bestand, nicht ueber das, was gerade eingeblendet ist.
+    public IReadOnlyList<AccountItemViewModel> AllAccounts => _allAccounts;
+
     public ObservableCollection<GuildItemViewModel> Guilds { get; } = new();
     public ObservableCollection<LanguageItemViewModel> Languages { get; } = new();
     public ObservableCollection<PresetEditViewModel> PresetRows { get; } = new();

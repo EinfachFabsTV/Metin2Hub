@@ -6,6 +6,7 @@
              RequestedThemeVariant="Dark">
 
   <Application.DataTemplates>
+    <DataTemplate DataType="vm:DashboardViewModel"><views:DashboardView /></DataTemplate>
     <DataTemplate DataType="vm:AccountsViewModel"><views:AccountsView /></DataTemplate>
     <DataTemplate DataType="vm:EventsViewModel"><views:EventsView /></DataTemplate>
     <DataTemplate DataType="vm:ItemshopViewModel"><views:ItemshopView /></DataTemplate>

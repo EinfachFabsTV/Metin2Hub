@@ -59,6 +59,43 @@
         </StackPanel>
       </Border>
 
+      <!-- Welche Abschnitte die Startseite zeigt, in welcher Reihenfolge -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.start}" />
+          <TextBlock Classes="muted" Text="{loc:T settings.start.hint}" TextWrapping="Wrap" />
+          <TextBlock Classes="muted" FontSize="11" Text="{Binding EditingMode}" />
+
+          <ItemsControl ItemsSource="{Binding Sections}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:DashboardSectionRow">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5" Margin="0,0,0,5">
+                  <CheckBox Grid.Column="0" IsChecked="{Binding Visible}" Content="{Binding Label}" />
+                  <Button Grid.Column="1" Content="↑" ToolTip.Tip="{loc:T settings.start.up}"
+                          Command="{Binding $parent[UserControl].DataContext.MoveSectionCommand}"
+                          CommandParameter="{Binding}" />
+                  <Button Grid.Column="2" Content="↓" ToolTip.Tip="{loc:T settings.start.down}"
+                          Command="{Binding $parent[UserControl].DataContext.MoveSectionDownCommand}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{loc:T settings.start.open}" />
+            <ComboBox ItemsSource="{Binding StartPages}" SelectedItem="{Binding StartPage}"
+                      HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate DataType="vm:StartPageOption">
+                  <TextBlock Text="{Binding Label}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
       <!-- Im Itemshop-Board stehen gelegentlich Beitraege von Spielern -->
       <Border Classes="card">
         <StackPanel Spacing="10">

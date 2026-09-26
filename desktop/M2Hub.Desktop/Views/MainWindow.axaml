@@ -65,21 +65,10 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
 
-          <!-- Die Reiter sind mit den Pfeiltasten bedienbar: liegt die
-               Tastatur auf einem von ihnen, springt Links/Rechts zum
-               Nachbarn. -->
-          <StackPanel Grid.Column="2" Name="NavBar" Orientation="Horizontal" Spacing="4"
+          <!-- Nachschlagewerk und Handelsglas bleiben in der Kopfzeile: sie
+               fuehren aus der App heraus und gehoeren nicht zu den Bereichen. -->
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
                       HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Classes="nav" Classes.active="{Binding IsAccounts}"
-                    Command="{Binding ShowAccountsCommand}" Content="{loc:T nav.accounts}" />
-            <Button Classes="nav" Classes.active="{Binding IsEvents}"
-                    Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
-            <Button Classes="nav" Classes.active="{Binding IsItemshop}"
-                    Command="{Binding ShowItemshopCommand}" Content="{loc:T nav.itemshop}" />
-            <Button Classes="nav" Classes.active="{Binding IsCalc}"
-                    Command="{Binding ShowCalcCommand}" Content="{loc:T nav.calc}" />
-            <Button Classes="nav" Classes.active="{Binding IsSettings}"
-                    Command="{Binding ShowSettingsCommand}" Content="⚙" ToolTip.Tip="{loc:T nav.settings}" />
 
             <!-- Nachschlagewerk und Handelsglas. Beide liegen ausserhalb der
                  App und oeffnen im Standardbrowser - eine Browser-Engine hat
@@ -129,6 +118,29 @@
             </StackPanel>
           </StackPanel>
         </Grid>
+      </Border>
+
+      <!-- Bereiche links. Liegt die Tastatur auf der Leiste, springt
+           Hoch/Runter zum Nachbarn. -->
+      <Border DockPanel.Dock="Left" Name="NavBar" Background="{StaticResource HeaderBrush}"
+              BorderBrush="{StaticResource SubtleBrush}" BorderThickness="0,0,1,0"
+              Padding="8,12" Width="152">
+        <DockPanel>
+          <Button DockPanel.Dock="Bottom" Classes="side" Classes.active="{Binding IsSettings}"
+                  Command="{Binding ShowSettingsCommand}" Content="{loc:T nav.settings}" />
+          <StackPanel Spacing="2">
+            <Button Classes="side" Classes.active="{Binding IsStart}"
+                    Command="{Binding ShowStartCommand}" Content="{loc:T nav.start}" />
+            <Button Classes="side" Classes.active="{Binding IsAccounts}"
+                    Command="{Binding ShowAccountsCommand}" Content="{loc:T nav.accounts}" />
+            <Button Classes="side" Classes.active="{Binding IsEvents}"
+                    Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
+            <Button Classes="side" Classes.active="{Binding IsItemshop}"
+                    Command="{Binding ShowItemshopCommand}" Content="{loc:T nav.itemshop}" />
+            <Button Classes="side" Classes.active="{Binding IsCalc}"
+                    Command="{Binding ShowCalcCommand}" Content="{loc:T nav.calc}" />
+          </StackPanel>
+        </DockPanel>
       </Border>
 
       <!-- Inhalt -->

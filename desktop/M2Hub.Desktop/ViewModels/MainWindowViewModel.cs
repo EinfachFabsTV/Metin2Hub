@@ -41,10 +41,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
         GuildCalc = new GuildCalcViewModel();
+        Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
             store, dialogs, _updates, RefreshActiveNow, ReloadPages,
             info => dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart)));
 
+        ShowStartCommand = new RelayCommand(_ => Show("start"));
         ShowAccountsCommand = new RelayCommand(_ => Show("accounts"));
         ShowEventsCommand = new RelayCommand(_ => Show("events"));
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
@@ -59,6 +61,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Accounts.RelabelAfterLanguageChange();
             GuildCalc.RelabelAfterLanguageChange();
+            Dashboard.Reload();
             Events.Reload();
             Itemshop.Reload();
         };
@@ -81,6 +84,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
     public GuildCalcViewModel GuildCalc { get; }
+
+    /// Die Startseite. Sie haelt keine eigenen Daten, sondern zeigt die der
+    /// anderen Bereiche in Abschnitten.
+    public DashboardViewModel Dashboard { get; }
     public SettingsViewModel Settings { get; }
 
     public object? CurrentPage { get => _currentPage; private set => Set(ref _currentPage, value); }
@@ -91,6 +98,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             if (!Set(ref _currentKey, value)) return;
+            Raise(nameof(IsStart));
             Raise(nameof(IsAccounts));
             Raise(nameof(IsEvents));
             Raise(nameof(IsItemshop));
@@ -99,6 +107,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool IsStart => _currentKey == "start";
     public bool IsAccounts => _currentKey == "accounts";
     public bool IsEvents => _currentKey == "events";
     public bool IsItemshop => _currentKey == "itemshop";
@@ -124,6 +133,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string? RefreshError => _store.Cache.LastError;
     public bool HasRefreshError => !string.IsNullOrWhiteSpace(_store.Cache.LastError);
 
+    public RelayCommand ShowStartCommand { get; }
     public RelayCommand ShowCalcCommand { get; }
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
@@ -145,8 +155,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts.EnsureLoaded();
         Events.Reload();
         Itemshop.Reload();
+        Dashboard.Reload();
         RefreshActiveNow();
-        Show("events");
+
+        // Beim Start die Startseite, es sei denn, die Einstellungen nennen
+        // einen anderen Bereich - wer die Uebersicht nicht will, landet weiter
+        // direkt bei den Accounts.
+        Show(_store.Settings.StartPage);
 
         _timer.Start();
         await RefreshAsync(manual: false);
@@ -177,9 +192,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         Events.Reload();
         Itemshop.Reload();
+        Dashboard.Reload();
         // Welche Server es gibt, steht erst nach dem Abruf fest - Einstellungen
         // und Accounts bauen ihre Listen daraus auf.
         Settings.RefreshServers();
+        Settings.RefreshSections();
         Accounts.RefreshServers();
         RefreshActiveNow();
         Raise(nameof(LastRefreshLabel));
@@ -198,7 +215,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["accounts", "events", "itemshop", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "events", "itemshop", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -214,6 +231,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CurrentKey = key;
         CurrentPage = key switch
         {
+            "start" => Dashboard,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
             "calc" => GuildCalc,
@@ -221,6 +239,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             _ => Events,
         };
         if (key == "accounts") Accounts.EnsureLoaded();
+        if (key == "start") { Accounts.EnsureLoaded(); Dashboard.Reload(); }
     }
 
     /// Globale Events und Happy Hours, die gerade laufen. Beides steht in der

@@ -1,0 +1,226 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <!-- Kopf mit dem Umschalter: Uebersicht oder Arbeitsflaeche -->
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Spacing="2">
+          <TextBlock Classes="h1" Text="{loc:T nav.start}" />
+          <TextBlock Classes="muted" Text="{loc:T start.subtitle}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                    VerticalAlignment="Center">
+          <Button Classes="chip" Classes.active="{Binding IsOverview}"
+                  Content="{loc:T start.mode.overview}" Command="{Binding OverviewCommand}"
+                  ToolTip.Tip="{loc:T start.mode.overview.tip}" />
+          <Button Classes="chip" Classes.active="{Binding IsWork}"
+                  Content="{loc:T start.mode.work}" Command="{Binding WorkCommand}"
+                  ToolTip.Tip="{loc:T start.mode.work.tip}" />
+        </StackPanel>
+      </Grid>
+
+      <!-- Nichts gewaehlt oder zu allem nichts da -->
+      <Border Classes="panel" Padding="18" IsVisible="{Binding Empty}">
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T start.empty}" />
+      </Border>
+
+      <!-- ===== Kennzahlen ===== -->
+      <UniformGrid Rows="1" IsVisible="{Binding ShowStats}">
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T accounts.stats.medals}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalMedals}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T accounts.stats.average}" />
+            <TextBlock Classes="statvalue" Text="{Binding AverageMedals}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T nav.accounts}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalAccounts}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T accounts.stats.chars}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalCharacters}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T accounts.stats.coins}" />
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <Panel Width="17" Height="17" VerticalAlignment="Center">
+                <Ellipse Fill="#B45309" />
+                <Ellipse Margin="1.5" Fill="#F59E0B" />
+                <Ellipse Margin="5" Fill="#FBBF24" />
+              </Panel>
+              <TextBlock Classes="statvalue" Text="{Binding TotalDragonCoins}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T accounts.stats.bio}" />
+            <TextBlock Classes="statvalue" Text="{Binding BioProgress}" />
+          </StackPanel>
+        </Border>
+      </UniformGrid>
+
+      <!-- ===== Jetzt aktiv ===== -->
+      <Border Classes="card" Padding="14" IsVisible="{Binding ShowActive}">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="h2" Text="{loc:T start.section.active}" />
+          <ItemsControl ItemsSource="{Binding ActiveNow}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:ActiveBadgeViewModel">
+                <Button Classes="live" Classes.happy="{Binding IsHappyHour}"
+                        Command="{Binding OpenCommand}" Margin="0,2,6,2">
+                  <StackPanel Orientation="Horizontal" Spacing="7">
+                    <Image Source="{Binding Icon}" Width="16" Height="16"
+                           IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
+                    <Ellipse Classes="dot" Classes.happy="{Binding IsHappyHour}"
+                             Width="7" Height="7" VerticalAlignment="Center"
+                             IsVisible="{Binding !HasIcon}" />
+                    <TextBlock Text="{Binding Title}" FontSize="12" MaxWidth="340"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Remaining}" FontSize="11" Opacity="0.7"
+                               TextWrapping="NoWrap" IsVisible="{Binding HasRemaining}"
+                               VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+
+        <!-- ===== Heute im Kalender ===== -->
+        <Border Grid.Column="0" Classes="card" Padding="14" VerticalAlignment="Top"
+                IsVisible="{Binding ShowCalendar}">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T start.section.calendar}" />
+              <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                      Command="{Binding GoCommand}" CommandParameter="events" />
+            </Grid>
+            <TextBlock Classes="muted" FontSize="11" Text="{Binding CalendarServer}" />
+            <StackPanel Orientation="Horizontal" Spacing="9">
+              <Image Source="{Binding CalendarIcon}" Width="28" Height="28"
+                     IsVisible="{Binding HasCalendarIcon}" VerticalAlignment="Center" />
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding CalendarNow}"
+                           TextWrapping="Wrap" />
+                <TextBlock Classes="muted" FontSize="11" Text="{Binding CalendarLine}" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Itemshop ===== -->
+        <Border Grid.Column="1" Classes="card" Padding="14" VerticalAlignment="Top"
+                IsVisible="{Binding ShowItemshop}">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T start.section.itemshop}" />
+              <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                      Command="{Binding GoCommand}" CommandParameter="itemshop" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Ending}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:EndingItemViewModel">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,5">
+                    <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Title}"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Margin="8,0,0,0"
+                               Text="{Binding Ends}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- ===== Medaillen eintragen (Arbeitsflaeche) ===== -->
+      <Border Classes="card" Padding="14" IsVisible="{Binding ShowMedals}">
+        <StackPanel Spacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T start.section.medals}" />
+            <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                    Command="{Binding GoCommand}" CommandParameter="accounts" />
+          </Grid>
+          <TextBlock Classes="muted" FontSize="11" Text="{loc:T start.medals.hint}"
+                     TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding Donors}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:CharacterItemViewModel">
+                <Grid ColumnDefinitions="*,Auto,70" ColumnSpacing="8" Margin="0,0,0,5">
+                  <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center"
+                             Text="{Binding Display}" Foreground="{Binding NameBrush}"
+                             TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                  <ItemsControl Grid.Column="1" ItemsSource="{Binding Presets}"
+                                VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="3" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:MedalPresetViewModel">
+                        <Button Classes="chip" Content="{Binding Label}" Command="{Binding ApplyCommand}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Grid.Column="2" FontSize="12" HorizontalAlignment="Right"
+                             VerticalAlignment="Center" Text="{Binding Medals}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- ===== Bio offen (Arbeitsflaeche) ===== -->
+      <Border Classes="card" Padding="14" IsVisible="{Binding ShowBio}">
+        <StackPanel Spacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T start.section.bio}" />
+            <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                    Command="{Binding GoCommand}" CommandParameter="accounts" />
+          </Grid>
+          <ItemsControl ItemsSource="{Binding BioOpen}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:AccountItemViewModel">
+                <Border Classes="badge" Margin="0,0,6,6">
+                  <TextBlock FontSize="11" Text="{Binding Name}" />
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
