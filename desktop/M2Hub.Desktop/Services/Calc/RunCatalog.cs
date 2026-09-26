@@ -33,12 +33,9 @@ public static class RunCatalog
         public string ChestName => Chest ?? Loot[0];
     }
 
-    /// Vorgabe fuer den Preis je Truhe, in Won. Die Rechnung dahinter:
-    /// 100.000.000 Yang sind 1 Won (so rechnet auch FormatYang).
+    /// Vorgabe fuer den Preis je Truhe, **in kk**. Gerechnet wird ueberall in
+    /// kk, angezeigt ab 100 kk in w - siehe `Money.FormatYang`.
     public const int DefaultChestPrice = 40;
-
-    /// Ein Won in Yang - steht als Fussnote unter der Statistik.
-    public const long YangPerWon = 100_000_000;
 
     public static readonly Run[] Runs =
     [

@@ -204,7 +204,7 @@ public sealed class RunsViewModel : ViewModelBase
         }
     }
 
-    /// Preis je Truhe in Won. Steht je Lauf und laesst sich hier aendern -
+    /// Preis je Truhe **in kk**. Steht je Lauf und laesst sich hier aendern -
     /// was die Truhe wert ist, weiss nur der Nutzer.
     public int ChestPrice
     {
@@ -221,10 +221,11 @@ public sealed class RunsViewModel : ViewModelBase
         }
     }
 
-    /// Truhen mal Preis, in Won.
-    public string Income => (InScope().Sum(e => e.Chests) * (long)ChestPrice).ToString("N0") + " " + Loc.T("runs.won");
+    /// Truhen mal Preis. Gerechnet in kk, geschrieben ab 100 kk in w - die
+    /// Umrechnung macht `Money.FormatYang` fuer die ganze App.
+    public string Income => Money.FormatYang(InScope().Sum(e => e.Chests) * (double)ChestPrice);
 
-    public string PriceNote => Loc.T("runs.priceNote", RunCatalog.YangPerWon.ToString("N0"));
+    public string PriceNote => Loc.T("runs.priceNote", Money.KkPerW);
 
     /// Die Beute des Zeitraums, aufgeschluesselt.
     public ObservableCollection<LootSumViewModel> LootSums { get; } = new();
