@@ -1,139 +1,148 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:views="using:M2Hub.Desktop.Views"
              xmlns:loc="using:M2Hub.Desktop.Services"
              x:Class="M2Hub.Desktop.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
 
   <ScrollViewer>
-    <StackPanel Margin="18" Spacing="14" MaxWidth="760" HorizontalAlignment="Left">
+    <StackPanel Margin="18" Spacing="14" MaxWidth="1180" HorizontalAlignment="Left">
 
       <StackPanel Spacing="2">
         <TextBlock Classes="h1" Text="{loc:T nav.settings}" />
         <TextBlock Classes="muted" Text="{loc:T settings.subtitle}" />
       </StackPanel>
 
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.language}" />
-          <TextBlock Classes="muted" Text="{loc:T settings.language.hint}" TextWrapping="Wrap" />
-          <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding Language}"
-                    MinWidth="320" HorizontalAlignment="Left">
-            <ComboBox.ItemTemplate>
-              <DataTemplate DataType="vm:LanguageOption">
-                <TextBlock Text="{Binding Label}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
+      <!-- Zwei Stapel nebeneinander, solange das Fenster breit genug ist,
+           darunter untereinander. Vorher stand alles in einer Spalte: viel
+           Scrollen, waehrend rechts die halbe Seite leer blieb. -->
+      <UniformGrid Columns="{Binding $parent[ScrollViewer].Bounds.Width,
+                             Converter={x:Static views:SettingsColumns.Instance}}">
+
+        <StackPanel Spacing="14" Margin="0,0,7,0" VerticalAlignment="Top">
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.language}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.language.hint}" TextWrapping="Wrap" />
+              <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding Language}"
+                        MinWidth="320" HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:LanguageOption">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.start}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.start.hint}" TextWrapping="Wrap" />
+              <TextBlock Classes="muted" FontSize="11" Text="{Binding EditingMode}" />
+
+              <ItemsControl ItemsSource="{Binding Sections}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:DashboardSectionRow">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5" Margin="0,0,0,5">
+                      <CheckBox Grid.Column="0" IsChecked="{Binding Visible}" Content="{Binding Label}" />
+                      <Button Grid.Column="1" Content="↑" ToolTip.Tip="{loc:T settings.start.up}"
+                              Command="{Binding $parent[UserControl].DataContext.MoveSectionCommand}"
+                              CommandParameter="{Binding}" />
+                      <Button Grid.Column="2" Content="↓" ToolTip.Tip="{loc:T settings.start.down}"
+                              Command="{Binding $parent[UserControl].DataContext.MoveSectionDownCommand}"
+                              CommandParameter="{Binding}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <StackPanel Spacing="6">
+                <TextBlock Classes="muted" Text="{loc:T settings.start.open}" />
+                <ComboBox ItemsSource="{Binding StartPages}" SelectedItem="{Binding StartPage}"
+                          HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="vm:StartPageOption">
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.team}" />
+              <CheckBox Content="{loc:T settings.team.only}" IsChecked="{Binding TeamPostsOnly}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.team.hint}" TextWrapping="Wrap" />
+              <TextBox Text="{Binding TeamNames}" Watermark="{loc:T settings.team.names}"
+                       IsEnabled="{Binding TeamPostsOnly}" />
+            </StackPanel>
+          </Border>
         </StackPanel>
-      </Border>
 
-      <!-- Sichtbare Server -->
-      <Border Classes="card" IsVisible="{Binding HasServers}">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.servers}" />
-          <TextBlock Classes="muted" Text="{loc:T settings.servers.hint}" />
-          <ItemsControl ItemsSource="{Binding Servers}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:ServerVisibility">
-                <CheckBox Content="{Binding Label}" IsChecked="{Binding Visible, Mode=TwoWay}" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+        <StackPanel Spacing="14" Margin="7,0,0,0" VerticalAlignment="Top">
+          <Border Classes="card" IsVisible="{Binding HasServers}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.servers}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.servers.hint}" />
+              <ItemsControl ItemsSource="{Binding Servers}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:ServerVisibility">
+                    <CheckBox Content="{Binding Label}" IsChecked="{Binding Visible, Mode=TwoWay}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.header}" />
+              <TextBlock Classes="muted"
+                         Text="{loc:T settings.header.hint}" />
+              <ComboBox ItemsSource="{Binding HeaderServers}" SelectedItem="{Binding HeaderServer}"
+                        MinWidth="320" HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:HeaderServerOption">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.update}" />
+              <TextBlock Classes="muted" Text="{Binding Version}" />
+              <CheckBox Content="{loc:T settings.update.check}"
+                        IsChecked="{Binding CheckUpdates}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.update.hint}" TextWrapping="Wrap" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{loc:T settings.update.now}" Command="{Binding CheckNowCommand}"
+                        IsEnabled="{Binding NotBusy}" />
+                <Button Content="{loc:T settings.update.page}" Command="{Binding OpenReleasesCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.data}" />
+              <TextBlock Classes="muted" Text="{Binding DataFolder}" TextWrapping="Wrap" />
+              <TextBlock Classes="muted"
+                         Text="{loc:T settings.data.hint}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{loc:T settings.data.open}" Command="{Binding OpenFolderCommand}" />
+                <Button Classes="danger" Content="{loc:T settings.data.clear}" Command="{Binding ClearCacheCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
         </StackPanel>
-      </Border>
-
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.header}" />
-          <TextBlock Classes="muted"
-                     Text="{loc:T settings.header.hint}" />
-          <ComboBox ItemsSource="{Binding HeaderServers}" SelectedItem="{Binding HeaderServer}"
-                    MinWidth="320" HorizontalAlignment="Left">
-            <ComboBox.ItemTemplate>
-              <DataTemplate DataType="vm:HeaderServerOption">
-                <TextBlock Text="{Binding Label}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-        </StackPanel>
-      </Border>
-
-      <!-- Welche Abschnitte die Startseite zeigt, in welcher Reihenfolge -->
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.start}" />
-          <TextBlock Classes="muted" Text="{loc:T settings.start.hint}" TextWrapping="Wrap" />
-          <TextBlock Classes="muted" FontSize="11" Text="{Binding EditingMode}" />
-
-          <ItemsControl ItemsSource="{Binding Sections}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:DashboardSectionRow">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5" Margin="0,0,0,5">
-                  <CheckBox Grid.Column="0" IsChecked="{Binding Visible}" Content="{Binding Label}" />
-                  <Button Grid.Column="1" Content="↑" ToolTip.Tip="{loc:T settings.start.up}"
-                          Command="{Binding $parent[UserControl].DataContext.MoveSectionCommand}"
-                          CommandParameter="{Binding}" />
-                  <Button Grid.Column="2" Content="↓" ToolTip.Tip="{loc:T settings.start.down}"
-                          Command="{Binding $parent[UserControl].DataContext.MoveSectionDownCommand}"
-                          CommandParameter="{Binding}" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-
-          <StackPanel Spacing="6">
-            <TextBlock Classes="muted" Text="{loc:T settings.start.open}" />
-            <ComboBox ItemsSource="{Binding StartPages}" SelectedItem="{Binding StartPage}"
-                      HorizontalAlignment="Stretch">
-              <ComboBox.ItemTemplate>
-                <DataTemplate DataType="vm:StartPageOption">
-                  <TextBlock Text="{Binding Label}" />
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-          </StackPanel>
-        </StackPanel>
-      </Border>
-
-      <!-- Im Itemshop-Board stehen gelegentlich Beitraege von Spielern -->
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.team}" />
-          <CheckBox Content="{loc:T settings.team.only}" IsChecked="{Binding TeamPostsOnly}" />
-          <TextBlock Classes="muted" Text="{loc:T settings.team.hint}" TextWrapping="Wrap" />
-          <TextBox Text="{Binding TeamNames}" Watermark="{loc:T settings.team.names}"
-                   IsEnabled="{Binding TeamPostsOnly}" />
-        </StackPanel>
-      </Border>
-
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.update}" />
-          <TextBlock Classes="muted" Text="{Binding Version}" />
-          <CheckBox Content="{loc:T settings.update.check}"
-                    IsChecked="{Binding CheckUpdates}" />
-          <TextBlock Classes="muted" Text="{loc:T settings.update.hint}" TextWrapping="Wrap" />
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="{loc:T settings.update.now}" Command="{Binding CheckNowCommand}"
-                    IsEnabled="{Binding NotBusy}" />
-            <Button Content="{loc:T settings.update.page}" Command="{Binding OpenReleasesCommand}" />
-          </StackPanel>
-        </StackPanel>
-      </Border>
-
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T settings.data}" />
-          <TextBlock Classes="muted" Text="{Binding DataFolder}" TextWrapping="Wrap" />
-          <TextBlock Classes="muted"
-                     Text="{loc:T settings.data.hint}" />
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="{loc:T settings.data.open}" Command="{Binding OpenFolderCommand}" />
-            <Button Classes="danger" Content="{loc:T settings.data.clear}" Command="{Binding ClearCacheCommand}" />
-          </StackPanel>
-        </StackPanel>
-      </Border>
+      </UniformGrid>
 
       <TextBlock Classes="success" Text="{Binding Status}" IsVisible="{Binding HasStatus}" />
     </StackPanel>
