@@ -112,6 +112,11 @@ public sealed class RunsViewModel : ViewModelBase
     public string AddLabel => Loc.T(EntersChests ? "runs.add" : "runs.finish");
     public string AddHint => Loc.T(EntersChests ? "runs.chests" : "runs.finishHint");
 
+    /// Das Bild der Truhe neben dem Eingabefeld - sonst steht dort als
+    /// einzige Zeile ohne Bild, was gezaehlt wird.
+    public Avalonia.Media.Imaging.Bitmap? ChestIcon => EventIcons.Find(Current.ChestName);
+    public bool HasChestIcon => EntersChests && ChestIcon is not null;
+
     /// Die Beutearten des Laufs, je mit ihrem Zaehler.
     public ObservableCollection<LootRowViewModel> Loot { get; } = new();
 
@@ -361,6 +366,8 @@ public sealed class RunsViewModel : ViewModelBase
         Raise(nameof(EntersChests));
         Raise(nameof(AddLabel));
         Raise(nameof(AddHint));
+        Raise(nameof(ChestIcon));
+        Raise(nameof(HasChestIcon));
         Raise(nameof(ChestPrice));
         Raise(nameof(Cooldown));
         Raise(nameof(HasEntries));

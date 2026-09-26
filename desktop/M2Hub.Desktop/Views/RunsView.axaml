@@ -103,13 +103,17 @@
                          VerticalAlignment="Center" Text="{Binding DayLabel}" />
             </Grid>
 
-            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-              <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+              <!-- Die Truhe des Laufs; bei Jotun wird nichts eingetippt, dort
+                   bleibt sie weg. -->
+              <Image Grid.Column="0" Source="{Binding ChestIcon}" Width="20" Height="20"
+                     IsVisible="{Binding HasChestIcon}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center"
                          Text="{Binding AddHint}" TextWrapping="Wrap" />
-              <NumericUpDown Grid.Column="1" Width="90" Value="{Binding Chests}"
+              <NumericUpDown Grid.Column="2" Width="90" Value="{Binding Chests}"
                              Minimum="0" Maximum="9999" ShowButtonSpinner="False"
                              IsVisible="{Binding EntersChests}" />
-              <Button Grid.Column="2" Classes="primary" Content="{Binding AddLabel}"
+              <Button Grid.Column="3" Classes="primary" Content="{Binding AddLabel}"
                       Command="{Binding AddCommand}" />
             </Grid>
 

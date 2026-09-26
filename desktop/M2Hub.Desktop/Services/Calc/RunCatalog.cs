@@ -24,7 +24,14 @@ public static class RunCatalog
         int CooldownMinutes,
         bool EntersChests,
         string[] Loot,
-        int? MaxPerDay = null);
+        int? MaxPerDay = null,
+        string? Chest = null)
+    {
+        /// Die Truhe, die der Lauf abwirft - sie steht neben dem Eingabefeld.
+        /// Meist ist das die Beute selbst; bei der Hydra nicht, dort faellt
+        /// eine Truhe, in der die aufgezaehlten Dinge stecken.
+        public string ChestName => Chest ?? Loot[0];
+    }
 
     /// Vorgabe fuer den Preis je Truhe, in Won. Die Rechnung dahinter:
     /// 100.000.000 Yang sind 1 Won (so rechnet auch FormatYang).
@@ -39,7 +46,8 @@ public static class RunCatalog
             "Hydra-Truhe",
             20, true,
             ["Gegenstand verzaubern B", "Gegenstand verstärken", "Purpur Ebenholzkasten",
-             "Blauer Ebenholzkasten", "Grüner Ebenholzkasten"]),
+             "Blauer Ebenholzkasten", "Grüner Ebenholzkasten"],
+            Chest: "Hydra-Truhe"),
 
         new("razador", "Razador",
             "8–10 Truhen des Razador pro Run",
