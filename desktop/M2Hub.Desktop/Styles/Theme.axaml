@@ -356,4 +356,51 @@
     <Setter Property="Background" Value="#333B82F6" />
   </Style>
 
+  <!-- Tageswaehler (Run Tracker). Eigene Knoepfe statt des Fluent-Kalenders,
+       damit die Farben aus dieser Datei kommen. -->
+  <Style Selector="Button.day">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Width" Value="30" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{StaticResource MainBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.day:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SubtleBrush}" />
+  </Style>
+
+  <!-- Tage aus dem Nachbarmonat: waehlbar, aber zurueckgenommen. -->
+  <Style Selector="Button.day.outside">
+    <Setter Property="Foreground" Value="#556B7280" />
+  </Style>
+
+  <Style Selector="Button.day.today">
+    <Setter Property="BorderBrush" Value="#553B82F6" />
+  </Style>
+
+  <Style Selector="Button.day.selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+  </Style>
+
+  <Style Selector="Button.day.selected">
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- Kopfzeile des Waehlers: Wochentage und die beiden Pfeile. -->
+  <Style Selector="TextBlock.dayhead">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Margin" Value="0,0,0,2" />
+  </Style>
+
 </Styles>

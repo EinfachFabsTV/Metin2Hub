@@ -111,6 +111,21 @@ public static partial class EventIcons
             ["Süper Taş", "Superstone"]),
         new("Teleportationsring", "Teleportationsring.png", ["Telering", "Teleportring"],
             ["Teleportation Ring", "Işınlanma Yüzüğü"]),              // TR uebersetzt
+
+        // Die Beute des Run Trackers. Diese Namen stehen nicht im
+        // Eventkalender, sondern in RunCatalog - sie werden nie aus dem Forum
+        // gelesen, deshalb bleibt die fremdsprachige Spalte hier leer. Wer sie
+        // fuellt, holt die Namen aus dem jeweiligen Forum, nicht aus einer
+        // Uebersetzung.
+        new("Blauer Ebenholzkasten", "Blauer_Ebenholzkasten.png", []),
+        new("Grüner Ebenholzkasten", "Gruener_Ebenholzkasten.png", []),
+        new("Hydra-Truhe", "Hydras_Truhe.png", ["Hydras Truhe", "Truhe der Hydra"]),
+        new("Schlangenschatz", "Schlangenschatz.png", []),
+        new("Truhe des Bagjanamu", "Truhe_des_Bagjanamu.png", ["Bagjanamu-Truhe"]),
+        new("Truhe des Beran-Setaou", "Truhe_des_Beran_Setaou.png", ["Beran-Setaou-Truhe"]),
+        new("Truhe des Jotun Thrym", "Truhe_des_Jotun_Thrym.png", ["Jotun-Thrym-Truhe"]),
+        new("Truhe des Nemere", "Truhe_des_Nemere.png", ["Nemere-Truhe"]),
+        new("Truhe des Razador", "Truhe_des_Razador.png", ["Razador-Truhe"]),
     ];
 
     /// Name und Alias jeweils in Vergleichsform, mit Verweis auf den Eintrag.

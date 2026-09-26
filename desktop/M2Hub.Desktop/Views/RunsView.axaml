@@ -41,7 +41,53 @@
         <!-- ===== Tag ===== -->
         <Border Grid.Column="0" Classes="card" Padding="12" VerticalAlignment="Top">
           <StackPanel Spacing="8">
-            <Calendar SelectedDate="{Binding Day}" DisplayDate="{Binding Day}" />
+            <!-- Eigener Tageswaehler: der Fluent-Kalender brachte sein
+                 eigenes Aussehen mit und stand neben den Karten fremd da. -->
+            <StackPanel Spacing="6" DataContext="{Binding Picker}" Width="224">
+
+              <!-- Monat -->
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Button Grid.Column="0" Classes="chip" Content="‹"
+                        Width="26" HorizontalContentAlignment="Center"
+                        Command="{Binding PrevCommand}" />
+                <TextBlock Grid.Column="1" Text="{Binding MonthLabel}"
+                           FontSize="13" FontWeight="Bold"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Classes="chip" Content="›"
+                        Width="26" HorizontalContentAlignment="Center"
+                        Command="{Binding NextCommand}" />
+              </Grid>
+
+              <!-- Wochentage -->
+              <ItemsControl ItemsSource="{Binding Heads}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Classes="dayhead" Text="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <!-- Tage: immer sechs Wochen, damit die Karte nicht springt -->
+              <ItemsControl ItemsSource="{Binding Cells}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><UniformGrid Columns="7" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:DayCellViewModel">
+                    <Button Classes="day"
+                            Classes.outside="{Binding !InMonth}"
+                            Classes.today="{Binding IsToday}"
+                            Classes.selected="{Binding IsSelected}"
+                            Content="{Binding Text}"
+                            Command="{Binding $parent[ItemsControl].DataContext.PickCommand}"
+                            CommandParameter="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
             <Button Classes="chip" HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     Content="{loc:T runs.today}" Command="{Binding TodayCommand}" />

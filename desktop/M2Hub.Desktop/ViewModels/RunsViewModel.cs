@@ -49,6 +49,10 @@ public sealed class RunsViewModel : ViewModelBase
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => Tick();
 
+        Picker = new DayPickerViewModel(_day, d => Day = d);
+        // Monatsname und Wochentage stehen in der eingestellten Sprache.
+        Loc.I.PropertyChanged += (_, _) => Picker.Refresh();
+
         Reload();
     }
 
@@ -85,10 +89,15 @@ public sealed class RunsViewModel : ViewModelBase
         set
         {
             if (!Set(ref _day, value.Date)) return;
+            Picker.Select(_day);
             Raise(nameof(DayLabel));
             RaiseStats();
         }
     }
+
+    /// Das Raster der Tage - eigener Waehler statt des Fluent-Kalenders,
+    /// damit die Karte aussieht wie die uebrigen.
+    public DayPickerViewModel Picker { get; }
 
     public string DayLabel => _day.ToString("dd.MM.yyyy");
     public RelayCommand TodayCommand { get; }
