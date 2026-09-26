@@ -59,6 +59,17 @@
         </StackPanel>
       </Border>
 
+      <!-- Im Itemshop-Board stehen gelegentlich Beitraege von Spielern -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T settings.team}" />
+          <CheckBox Content="{loc:T settings.team.only}" IsChecked="{Binding TeamPostsOnly}" />
+          <TextBlock Classes="muted" Text="{loc:T settings.team.hint}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding TeamNames}" Watermark="{loc:T settings.team.names}"
+                   IsEnabled="{Binding TeamPostsOnly}" />
+        </StackPanel>
+      </Border>
+
       <Border Classes="card">
         <StackPanel Spacing="10">
           <TextBlock Classes="h2" Text="{loc:T settings.update}" />

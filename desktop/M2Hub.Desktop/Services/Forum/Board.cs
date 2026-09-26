@@ -9,7 +9,8 @@ public static partial class Board
 {
     public sealed record BoardThread(string ThreadId, string Url, string Title);
 
-    public sealed record ParsedPost(string Title, string? ImageUrl, string BodyText, DateTime? PostedAt);
+    public sealed record ParsedPost(
+        string Title, string? ImageUrl, string BodyText, DateTime? PostedAt, string? Author);
 
     public sealed record Period(DateTime? StartsAt, DateTime? EndsAt, bool AllDay);
 
@@ -70,6 +71,14 @@ public static partial class Board
     [GeneratedRegex(@"<time\b[^>]*datetime=""([^""]+)""", RegexOptions.IgnoreCase)]
     private static partial Regex PostTime();
 
+    // Verfasser des Beitrags. Die Forensoftware schreibt ihn als Verweis auf
+    // das Benutzerprofil; beide Schreibweisen kommen vor, je nach Vorlage.
+    [GeneratedRegex(@"<a\b[^>]*href=""[^""]*\?user/\d+-[^""]*""[^>]*class=""[^""]*\busername\b[^""]*""[^>]*>([\s\S]*?)</a>", RegexOptions.IgnoreCase)]
+    private static partial Regex AuthorLink();
+
+    [GeneratedRegex(@"<a\b[^>]*class=""[^""]*\busername\b[^""]*""[^>]*href=""[^""]*\?user/\d+-[^""]*""[^>]*>([\s\S]*?)</a>", RegexOptions.IgnoreCase)]
+    private static partial Regex AuthorLinkAlt();
+
     [GeneratedRegex(@"^https?://", RegexOptions.IgnoreCase)]
     private static partial Regex HttpUrl();
 
@@ -123,7 +132,24 @@ public static partial class Board
                 System.Globalization.DateTimeStyles.AssumeUniversal, out var parsed))
             postedAt = parsed;
 
-        return new ParsedPost(title, imageUrl, CleanText(Html.HtmlToText(bodyHtml)), postedAt);
+        return new ParsedPost(
+            title, imageUrl, CleanText(Html.HtmlToText(bodyHtml)), postedAt, ParseAuthor(html ?? ""));
+    }
+
+    /// Verfasser des ersten Beitrags, oder null, wenn er sich nicht ablesen
+    /// laesst. Genommen wird der erste Treffer - der Beitrag oben auf der
+    /// Seite ist der, um den es geht.
+    private static string? ParseAuthor(string html)
+    {
+        foreach (var rx in new[] { AuthorLink(), AuthorLinkAlt() })
+        {
+            var m = rx.Match(html);
+            if (!m.Success) continue;
+
+            var name = Html.HtmlToText(m.Groups[1].Value).Trim();
+            if (name.Length > 0) return name;
+        }
+        return null;
     }
 
     [GeneratedRegex(@"^\s*Inhaltsverzeichnis\s*\[\s*Verbergen\s*\]\s*", RegexOptions.IgnoreCase)]

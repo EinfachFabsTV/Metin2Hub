@@ -249,6 +249,7 @@ public sealed class ForumService
             StartsAt = period.StartsAt,
             EndsAt = period.EndsAt,
             PostedAt = post.PostedAt,
+            Author = post.Author,
             FetchedAt = DateTime.UtcNow,
         });
     }
@@ -270,6 +271,7 @@ public sealed class ForumService
             StartsAt = period.StartsAt,
             EndsAt = period.EndsAt,
             PostedAt = post.PostedAt,
+            Author = post.Author,
             FetchedAt = DateTime.UtcNow,
         });
     }

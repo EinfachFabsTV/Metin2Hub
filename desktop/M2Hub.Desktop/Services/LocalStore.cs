@@ -6,11 +6,12 @@ namespace M2Hub.Desktop.Services;
 /// Alles liegt lokal im Nutzerprofil - die App hat keinen Server und kein Konto.
 ///
 ///   accounts.json  Accounts, Charaktere, Gilden, Schnellwahl
-///   cache.json     Events und Itemshop, hoechstens sieben Tage alt
+///   cache.json     Events und Itemshop - abgelaufene hoechstens sieben Tage
 ///   images/        heruntergeladene Ankuendigungsbilder
 public sealed class LocalStore
 {
-    /// Aufbewahrung der geladenen Forum-Daten.
+    /// Aufbewahrung abgelaufener Forum-Daten. Was noch laeuft oder erst
+    /// ansteht, bleibt unabhaengig davon stehen.
     public static readonly TimeSpan CacheLifetime = TimeSpan.FromDays(7);
 
     private static readonly JsonSerializerOptions Json = new()
@@ -107,17 +108,44 @@ public sealed class LocalStore
         Write(CachePath, Cache);
     }
 
-    /// Alles aelter als sieben Tage fliegt raus - so war es abgesprochen.
+    /// Abgelaufenes aelter als sieben Tage fliegt raus.
+    ///
+    /// Frueher zaehlte allein das Abrufdatum. Ein Thread wird aber nur einmal
+    /// geladen - danach bleibt sein Abrufdatum stehen, waehrend das Event
+    /// weiterlaeuft. Ein Event ueber vier Wochen verschwand so nach sieben
+    /// Tagen aus der Liste, obwohl es gerade lief.
+    ///
+    /// Deshalb entscheidet jetzt der Zeitraum: was laeuft oder erst ansteht,
+    /// bleibt. Erst wenn es vorbei ist, zaehlt das Alter. Eintraege ohne
+    /// Zeitraum - Ankuendigungen ohne Datum - werden wie bisher nach sieben
+    /// Tagen verworfen, weil sich ihr Ende sonst nie feststellen laesst.
     public void Prune()
     {
-        var limit = DateTime.UtcNow - CacheLifetime;
-        Cache.GlobalEvents.RemoveAll(e => e.FetchedAt is { } f && f.ToUniversalTime() < limit);
-        Cache.Itemshop.RemoveAll(e => e.FetchedAt is { } f && f.ToUniversalTime() < limit);
+        var now = DateTime.UtcNow;
+        var limit = now - CacheLifetime;
+
+        Cache.GlobalEvents.RemoveAll(e => Outdated(e.StartsAt, e.EndsAt, e.FetchedAt, now, limit));
+        Cache.Itemshop.RemoveAll(e => Outdated(e.StartsAt, e.EndsAt, e.FetchedAt, now, limit));
+
         if (Cache.CalendarFetchedAt is { } c && c.ToUniversalTime() < limit)
         {
             Cache.Servers.Clear();
             Cache.CalendarFetchedAt = null;
         }
+    }
+
+    /// Laeuft noch oder steht an: bleibt. Sonst raus, sobald der Abruf sieben
+    /// Tage her ist.
+    private static bool Outdated(
+        DateTime? startsAt, DateTime? endsAt, DateTime? fetchedAt, DateTime now, DateTime limit)
+    {
+        if (endsAt is { } end && end.ToUniversalTime() >= now) return false;
+
+        // Ohne Ende, aber mit Beginn in der Zukunft: angekuendigt, noch nicht
+        // gelaufen - das gehoert erst recht nicht weggeworfen.
+        if (endsAt is null && startsAt is { } start && start.ToUniversalTime() >= now) return false;
+
+        return fetchedAt is { } f && f.ToUniversalTime() < limit;
     }
 }
 
@@ -200,6 +228,15 @@ public sealed class SettingsData
     /// Beitraege im Event-Board ohne erkannten Zeitraum mitzeigen.
     /// Standardmaessig aus - meist sind es gar keine Events.
     public bool ShowUndatedEvents { get; set; }
+
+    /// Im Itemshop nur die Beitraege des Teams zeigen. Im Board stehen
+    /// gelegentlich Beitraege von Spielern; die sind keine Aktionen.
+    public bool TeamPostsOnly { get; set; } = true;
+
+    /// Namen der Team-Accounts, wie sie im Forum unter dem Beitrag stehen.
+    /// Leer heisst: nicht filtern - lieber alles zeigen als das Falsche
+    /// verschlucken. Ergaenzen laesst sich die Liste in den Einstellungen.
+    public List<string> TeamNames { get; set; } = new();
 
     /// Version, auf die schon hingewiesen wurde - damit derselbe Hinweis nicht
     /// bei jedem Start erneut kommt.

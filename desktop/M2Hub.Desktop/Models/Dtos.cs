@@ -148,6 +148,11 @@ public sealed class GlobalEventDto
     public DateTime? StartsAt { get; set; }
     public DateTime? EndsAt { get; set; }
     public DateTime? PostedAt { get; set; }
+
+    /// Verfasser des Beitrags, sofern ablesbar. Aeltere cache.json kennen das
+    /// Feld nicht - dort bleibt es leer.
+    public string? Author { get; set; }
+
     public DateTime? FetchedAt { get; set; }
 }
 
@@ -164,6 +169,10 @@ public sealed class ItemshopEventDto
     public DateTime? StartsAt { get; set; }
     public DateTime? EndsAt { get; set; }
     public DateTime? PostedAt { get; set; }
+
+    /// Verfasser des Beitrags, sofern ablesbar.
+    public string? Author { get; set; }
+
     public DateTime? FetchedAt { get; set; }
 }
 

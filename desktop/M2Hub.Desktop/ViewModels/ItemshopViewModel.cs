@@ -28,6 +28,8 @@ public sealed class ItemshopItemViewModel : ViewModelBase
         // "neu" richtet sich nach dem Zeitpunkt der ersten Entdeckung.
         IsNew = dto.FetchedAt is { } f && (DateTime.UtcNow - f.ToUniversalTime()).TotalDays <= 3;
 
+        Author = dto.Author ?? "";
+
         Kind = Services.Forum.Board.KindLabels.TryGetValue(dto.Kind, out var label) ? label : "Aktion";
 
         State = Running ? Loc.T("events.running")
@@ -44,6 +46,13 @@ public sealed class ItemshopItemViewModel : ViewModelBase
     public string? ImageUrl { get; }
     public string Range { get; }
     public string Kind { get; }
+
+    /// Verfasser, so wie er im Forum unter dem Beitrag steht. Steht auf der
+    /// Karte, damit erkennbar bleibt, woher eine Ankuendigung kommt.
+    public string Author { get; }
+    public bool HasAuthor => Author.Length > 0;
+    public string AuthorLabel => HasAuthor ? Loc.T("itemshop.author", Author) : "";
+
     public string State { get; }
     public bool Running { get; }
     public bool Upcoming { get; }
@@ -146,9 +155,29 @@ public sealed class ItemshopViewModel : ViewModelBase
                 // mitzeigen, solange ueberhaupt etwas eingeblendet ist.
                 : ShowRunning || ShowUpcoming;
             if (!stateOk) continue;
+            if (!FromTeam(item)) continue;
             if (term.Length > 0 && !item.Title.Contains(term, cmp) && !item.Text.Contains(term, cmp)) continue;
             Items.Add(item);
         }
         Raise(nameof(Empty));
+    }
+
+    /// Im Itemshop-Board stehen gelegentlich Beitraege von Spielern - die sind
+    /// keine Aktionen.
+    ///
+    /// Gefiltert wird nur, wenn beides vorliegt: die Einstellung ist gesetzt
+    /// und es sind Team-Namen hinterlegt. Ein Beitrag ohne erkennbaren
+    /// Verfasser bleibt stehen. Lieber einer zu viel als eine Ankuendigung,
+    /// die niemand mehr zu sehen bekommt - eine geaenderte Forenvorlage darf
+    /// die Seite nicht leeren.
+    private bool FromTeam(ItemshopItemViewModel item)
+    {
+        if (!_store.Settings.TeamPostsOnly) return true;
+
+        var team = _store.Settings.TeamNames;
+        if (team.Count == 0) return true;
+        if (!item.HasAuthor) return true;
+
+        return team.Any(n => string.Equals(n.Trim(), item.Author, StringComparison.CurrentCultureIgnoreCase));
     }
 }

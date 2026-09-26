@@ -54,6 +54,10 @@
 
                   <TextBlock Classes="muted" Text="{Binding Range}" />
                   <TextBlock Classes="muted" Text="{Binding State}" />
+                  <!-- Woher die Ankuendigung kommt - im Board stehen auch
+                       Beitraege von Spielern. -->
+                  <TextBlock Classes="muted" FontSize="11" IsVisible="{Binding HasAuthor}"
+                             Text="{Binding AuthorLabel}" />
 
                   <TextBlock Text="{Binding Text}" IsVisible="{Binding HasText}" MaxLines="6"
                              TextTrimming="CharacterEllipsis" />

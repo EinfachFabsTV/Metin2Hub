@@ -52,6 +52,8 @@ public sealed class SettingsViewModel : ViewModelBase
     private LanguageOption _language;
     private HeaderServerOption _headerServer;
     private bool _checkUpdates;
+    private bool _teamPostsOnly;
+    private string _teamNames;
     private string? _status;
     private bool _busy;
 
@@ -71,6 +73,8 @@ public sealed class SettingsViewModel : ViewModelBase
         _showUpdate = showUpdate;
 
         _checkUpdates = store.Settings.CheckUpdates;
+        _teamPostsOnly = store.Settings.TeamPostsOnly;
+        _teamNames = string.Join(", ", store.Settings.TeamNames);
         _language = LanguageOptions.FirstOrDefault(o => o.Code == store.Settings.Language)
                     ?? LanguageOptions[0];
         HeaderServers = BuildHeaderServers(store);
@@ -207,6 +211,38 @@ public sealed class SettingsViewModel : ViewModelBase
             if (!Set(ref _checkUpdates, value)) return;
             _store.Settings.CheckUpdates = value;
             _store.SaveSettings();
+        }
+    }
+
+    /// Im Itemshop stehen gelegentlich Beitraege von Spielern. Gefiltert wird
+    /// ueber die Namen der Team-Accounts; solange keine hinterlegt sind,
+    /// bleibt alles sichtbar.
+    public bool TeamPostsOnly
+    {
+        get => _teamPostsOnly;
+        set
+        {
+            if (!Set(ref _teamPostsOnly, value)) return;
+            _store.Settings.TeamPostsOnly = value;
+            _store.SaveSettings();
+            _cacheCleared();
+        }
+    }
+
+    /// Die Namen als eine Zeile, durch Komma getrennt - fuer eine Handvoll
+    /// Eintraege braucht es keine Liste mit Knoepfen.
+    public string TeamNames
+    {
+        get => _teamNames;
+        set
+        {
+            if (!Set(ref _teamNames, value)) return;
+            _store.Settings.TeamNames = value
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+            _store.SaveSettings();
+            _cacheCleared();
         }
     }
 
