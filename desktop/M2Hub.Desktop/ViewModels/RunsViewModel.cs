@@ -42,6 +42,7 @@ public sealed class RunsViewModel : ViewModelBase
         TodayCommand = new RelayCommand(_ => Day = DateTime.Today);
         DeleteCommand = new AsyncRelayCommand(p => DeleteAsync(p as RunEntryViewModel));
         ClearCommand = new AsyncRelayCommand(_ => ClearAsync());
+        QuickCommand = new RelayCommand(p => { if (p is QuickChest q) Chests = q.Value; });
         StartTimerCommand = new RelayCommand(_ => StartTimer());
         StopTimerCommand = new RelayCommand(_ => StopTimer());
 
@@ -106,7 +107,22 @@ public sealed class RunsViewModel : ViewModelBase
 
     /// Erhaltene Truhen. Bei Jotun gibt es das Feld nicht - dort zaehlt die
     /// Beute darunter.
-    public int Chests { get => _chests; set => Set(ref _chests, Math.Max(0, value)); }
+    public int Chests
+    {
+        get => _chests;
+        set
+        {
+            if (!Set(ref _chests, Math.Max(0, value))) return;
+            foreach (var q in Quick) q.IsActive = q.Value == _chests;
+        }
+    }
+
+    /// Schnellwahl unter dem Feld: 0 bis zur groessten Zahl des Laufs. Bei der
+    /// Hydra sind es hoechstens fuenf Truhen, das trifft man mit einem Klick;
+    /// wo acht bis zehn oder vierundsechzig fallen, gibt es keine.
+    public ObservableCollection<QuickChest> Quick { get; } = new();
+    public bool HasQuick => EntersChests && Quick.Count > 0;
+    public RelayCommand QuickCommand { get; }
 
     public bool EntersChests => Current.EntersChests;
     public string AddLabel => Loc.T(EntersChests ? "runs.add" : "runs.finish");
@@ -360,8 +376,13 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var e in Mine().OrderByDescending(e => e.Day).ThenByDescending(e => e.AddedAt))
             Entries.Add(new RunEntryViewModel(e));
 
+        // Schnellwahl des Laufs
+        Quick.Clear();
+        foreach (var value in Current.Quick) Quick.Add(new QuickChest(value) { IsActive = value == _chests });
+
         ResetTimer();
 
+        Raise(nameof(HasQuick));
         Raise(nameof(Subtitle));
         Raise(nameof(RunName));
         Raise(nameof(EntersChests));
@@ -411,6 +432,17 @@ public sealed class RunsViewModel : ViewModelBase
 
 /// Ein Knopf in einer Auswahlreihe: Lauf oder Zeitraum. Traegt neben der
 /// Beschriftung, ob er gerade gewaehlt ist - daran haengt die Hervorhebung.
+/// Ein Knopf der Schnellwahl: eine feste Truhenzahl.
+public sealed class QuickChest(int value) : ViewModelBase
+{
+    private bool _isActive;
+
+    public int Value { get; } = value;
+    public string Label { get; } = value.ToString();
+
+    public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
+}
+
 public sealed class RunChip(string key, string label) : ViewModelBase
 {
     private bool _isActive;

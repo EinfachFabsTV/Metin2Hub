@@ -25,12 +25,21 @@ public static class RunCatalog
         bool EntersChests,
         string[] Loot,
         int? MaxPerDay = null,
-        string? Chest = null)
+        string? Chest = null,
+        int? QuickChests = null)
     {
         /// Die Truhe, die der Lauf abwirft - sie steht neben dem Eingabefeld.
         /// Meist ist das die Beute selbst; bei der Hydra nicht, dort faellt
         /// eine Truhe, in der die aufgezaehlten Dinge stecken.
         public string ChestName => Chest ?? Loot[0];
+
+        /// Groesste Zahl der Schnellwahl unter dem Eingabefeld, oder null.
+        /// Nur dort gesetzt, wo ein Lauf wenige Truhen abwirft und man sie
+        /// mit einem Klick trifft - bei acht bis zehn oder gar vierundsechzig
+        /// waere eine Knopfreihe laenger als das Tippen.
+        public int[] Quick => QuickChests is { } max
+            ? Enumerable.Range(0, max + 1).ToArray()
+            : [];
     }
 
     /// Vorgabe fuer den Preis je Truhe, **in kk**. Gerechnet wird ueberall in
@@ -44,7 +53,8 @@ public static class RunCatalog
             20, true,
             ["Gegenstand verzaubern B", "Gegenstand verstärken", "Purpur Ebenholzkasten",
              "Blauer Ebenholzkasten", "Grüner Ebenholzkasten"],
-            Chest: "Hydra-Truhe"),
+            Chest: "Hydra-Truhe",
+            QuickChests: 5),
 
         new("razador", "Razador",
             "8–10 Truhen des Razador pro Run",
