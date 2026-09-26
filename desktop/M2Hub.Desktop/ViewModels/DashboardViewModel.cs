@@ -89,12 +89,13 @@ public sealed class DashboardViewModel : ViewModelBase
     public bool ShowActive => Shows(DashboardSections.Active) && ActiveNow.Count > 0;
     public bool ShowCalendar => Shows(DashboardSections.Calendar) && HasCalendar;
     public bool ShowItemshop => Shows(DashboardSections.Itemshop) && Ending.Count > 0;
+    public bool ShowRuns => Shows(DashboardSections.Runs) && RunsToday.Count > 0;
     public bool ShowMedals => Shows(DashboardSections.Medals) && Donors.Count > 0;
     public bool ShowBio => Shows(DashboardSections.Bio) && BioOpen.Count > 0;
 
     /// Ist nichts gewaehlt oder liegt zu allem nichts vor, sagt die Seite das -
     /// statt leer dazustehen.
-    public bool Empty => !ShowStats && !ShowActive && !ShowCalendar
+    public bool Empty => !ShowStats && !ShowActive && !ShowCalendar && !ShowRuns
                          && !ShowItemshop && !ShowMedals && !ShowBio;
 
     /* ---------- Kennzahlen ---------- */
@@ -123,6 +124,14 @@ public sealed class DashboardViewModel : ViewModelBase
 
     public ObservableCollection<EndingItemViewModel> Ending { get; } = new();
 
+    /* ---------- Runs ---------- */
+
+    /// Was heute gelaufen ist, je Lauf - dieselbe Zaehlung wie im Run Tracker,
+    /// nur zusammengefasst.
+    public ObservableCollection<RunTodayViewModel> RunsToday { get; } = new();
+
+    public string RunsTodayTotal { get; private set; } = "";
+
     /* ---------- Arbeitsflaeche ---------- */
 
     /// Die Spenden-Chars mit ihrer Schnellwahl - auf sie wird taeglich
@@ -136,6 +145,7 @@ public sealed class DashboardViewModel : ViewModelBase
 
     public void Reload()
     {
+        BuildRuns();
         BuildCalendar();
         BuildEnding();
         BuildWork();
@@ -147,6 +157,7 @@ public sealed class DashboardViewModel : ViewModelBase
         Raise(nameof(TotalDragonCoins));
         Raise(nameof(BioProgress));
 
+        Raise(nameof(RunsTodayTotal));
         Raise(nameof(CalendarServer));
         Raise(nameof(CalendarNow));
         Raise(nameof(CalendarLine));
@@ -163,10 +174,31 @@ public sealed class DashboardViewModel : ViewModelBase
         Raise(nameof(ShowStats));
         Raise(nameof(ShowActive));
         Raise(nameof(ShowCalendar));
+        Raise(nameof(ShowRuns));
         Raise(nameof(ShowItemshop));
         Raise(nameof(ShowMedals));
         Raise(nameof(ShowBio));
         Raise(nameof(Empty));
+    }
+
+    /// Die heutigen Laeufe, je Lauf eine Zeile.
+    private void BuildRuns()
+    {
+        RunsToday.Clear();
+
+        var today = DateTime.Today.ToString("yyyy-MM-dd");
+        var mine = _store.Runs.Entries.Where(e => e.Day == today).ToList();
+
+        foreach (var run in Services.Calc.RunCatalog.Runs)
+        {
+            var count = mine.Count(e => e.Run == run.Key);
+            if (count == 0) continue;
+
+            var chests = mine.Where(e => e.Run == run.Key).Sum(e => e.Chests);
+            RunsToday.Add(new RunTodayViewModel(run.Name, count, chests));
+        }
+
+        RunsTodayTotal = Loc.T("start.runs.total", mine.Count, mine.Sum(e => e.Chests));
     }
 
     /// Der Server aus den Einstellungen; ist keiner gewaehlt, der erste, der
@@ -225,6 +257,14 @@ public sealed class DashboardViewModel : ViewModelBase
             if (!account.BioDone) BioOpen.Add(account);
         }
     }
+}
+
+/// Eine Zeile im Abschnitt „Runs heute": Lauf, Anzahl und Truhen.
+public sealed class RunTodayViewModel(string name, int runs, int chests)
+{
+    public string Name { get; } = name;
+    public string Runs { get; } = Loc.T("start.runs.count", runs);
+    public string Chests { get; } = Loc.T("runs.entry.chests", chests);
 }
 
 /// Eine Zeile im Abschnitt „Itemshop": was es ist und wann es endet.

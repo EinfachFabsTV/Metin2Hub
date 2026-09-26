@@ -12,6 +12,7 @@ public static class DashboardSections
     public const string Active = "active";
     public const string Calendar = "calendar";
     public const string Itemshop = "itemshop";
+    public const string Runs = "runs";
     public const string Medals = "medals";
     public const string Bio = "bio";
 
@@ -22,13 +23,13 @@ public static class DashboardSections
     /// Alle Abschnitte in ihrer natuerlichen Reihenfolge - danach richtet sich
     /// die Liste in den Einstellungen.
     public static readonly string[] All =
-        [Stats, Active, Calendar, Itemshop, Medals, Bio];
+        [Stats, Active, Runs, Calendar, Itemshop, Medals, Bio];
 
     /// „Uebersicht" fasst nur zusammen, „Arbeitsflaeche" nimmt die Abschnitte
     /// dazu, in die man etwas eintraegt.
     public static string[] Default(string mode) => mode == Work
-        ? [Medals, Bio, Stats, Active, Calendar, Itemshop]
-        : [Stats, Active, Calendar, Itemshop];
+        ? [Medals, Bio, Runs, Stats, Active, Calendar, Itemshop]
+        : [Stats, Active, Runs, Calendar, Itemshop];
 
     /// Abschnitte, in denen etwas eingetragen wird. In der Uebersicht sind sie
     /// nicht voreingestellt, abwaehlbar bleiben sie ueberall.

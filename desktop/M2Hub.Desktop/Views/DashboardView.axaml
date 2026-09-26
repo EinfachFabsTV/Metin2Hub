@@ -110,6 +110,29 @@
         </StackPanel>
       </Border>
 
+      <!-- ===== Runs heute ===== -->
+      <Border Classes="card" Padding="14" IsVisible="{Binding ShowRuns}">
+        <StackPanel Spacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T start.section.runs}" />
+            <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                    Command="{Binding GoCommand}" CommandParameter="runs" />
+          </Grid>
+          <TextBlock Classes="muted" FontSize="11" Text="{Binding RunsTodayTotal}" />
+          <ItemsControl ItemsSource="{Binding RunsToday}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:RunTodayViewModel">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,5">
+                  <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Name}" />
+                  <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Text="{Binding Runs}" />
+                  <TextBlock Grid.Column="2" FontSize="12" FontWeight="Bold" Text="{Binding Chests}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
 
         <!-- ===== Heute im Kalender ===== -->

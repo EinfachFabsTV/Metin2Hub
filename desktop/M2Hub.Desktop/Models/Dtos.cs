@@ -176,3 +176,44 @@ public sealed class ItemshopEventDto
     public DateTime? FetchedAt { get; set; }
 }
 
+
+/* ---------- Run Tracker ---------- */
+
+/// Ein eingetragener Lauf. Die Beute steht als Name → Anzahl; so bleibt die
+/// Datei lesbar, auch wenn der Katalog spaeter eine Beuteart mehr kennt.
+public sealed class RunEntryDto
+{
+    public int Id { get; set; }
+
+    /// Schluessel des Laufs (RunCatalog.Run.Key).
+    public string Run { get; set; } = "";
+
+    /// Tag, an dem der Lauf zaehlt - als YYYY-MM-DD. Ein Datum ohne Uhrzeit,
+    /// weil die Statistik nach Tagen und Monaten rechnet.
+    public string Day { get; set; } = "";
+
+    /// Erhaltene Truhen. Bei Laeufen ohne eigenes Feld die Summe der Beute.
+    public int Chests { get; set; }
+
+    public Dictionary<string, int> Loot { get; set; } = new();
+
+    /// Wann der Eintrag gemacht wurde - fuer die Reihenfolge in der Liste.
+    public DateTime AddedAt { get; set; }
+}
+
+/// Alles, was der Run Tracker speichert. Liegt als runs.json im Profil,
+/// getrennt von accounts.json - es sind andere Daten mit anderer Lebensdauer.
+public sealed class RunsData
+{
+    public List<RunEntryDto> Entries { get; set; } = new();
+
+    /// Preis je Truhe in Won, je Lauf. Fehlt einer, gilt die Vorgabe.
+    public Dictionary<string, int> ChestPrice { get; set; } = new();
+
+    /// Abweichende Abklingzeit in Minuten, je Lauf.
+    public Dictionary<string, int> Cooldown { get; set; } = new();
+
+    public int NextId { get; set; } = 1;
+
+    public int TakeId() => NextId++;
+}

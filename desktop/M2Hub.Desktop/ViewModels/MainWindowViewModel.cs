@@ -41,6 +41,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
         GuildCalc = new GuildCalcViewModel();
+        RunTracker = new RunsViewModel(store, dialogs);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
             store, dialogs, _updates, RefreshActiveNow, ReloadPages,
@@ -51,6 +52,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowEventsCommand = new RelayCommand(_ => Show("events"));
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
+        ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
         OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
@@ -61,6 +63,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Accounts.RelabelAfterLanguageChange();
             GuildCalc.RelabelAfterLanguageChange();
+            RunTracker.RelabelAfterLanguageChange();
             Dashboard.Reload();
             Events.Reload();
             Itemshop.Reload();
@@ -85,6 +88,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
     public GuildCalcViewModel GuildCalc { get; }
 
+    /// Run Tracker: eingetragene Laeufe, rein lokal.
+    public RunsViewModel RunTracker { get; }
+
     /// Die Startseite. Sie haelt keine eigenen Daten, sondern zeigt die der
     /// anderen Bereiche in Abschnitten.
     public DashboardViewModel Dashboard { get; }
@@ -102,6 +108,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsAccounts));
             Raise(nameof(IsEvents));
             Raise(nameof(IsItemshop));
+            Raise(nameof(IsRuns));
             Raise(nameof(IsCalc));
             Raise(nameof(IsSettings));
         }
@@ -111,6 +118,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsAccounts => _currentKey == "accounts";
     public bool IsEvents => _currentKey == "events";
     public bool IsItemshop => _currentKey == "itemshop";
+    public bool IsRuns => _currentKey == "runs";
     public bool IsCalc => _currentKey == "calc";
     public bool IsSettings => _currentKey == "settings";
 
@@ -134,6 +142,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasRefreshError => !string.IsNullOrWhiteSpace(_store.Cache.LastError);
 
     public RelayCommand ShowStartCommand { get; }
+    public RelayCommand ShowRunsCommand { get; }
     public RelayCommand ShowCalcCommand { get; }
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
@@ -197,6 +206,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         // und Accounts bauen ihre Listen daraus auf.
         Settings.RefreshServers();
         Settings.RefreshSections();
+        RunTracker.Reload();
         Accounts.RefreshServers();
         RefreshActiveNow();
         Raise(nameof(LastRefreshLabel));
@@ -215,7 +225,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["start", "accounts", "events", "itemshop", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "runs", "events", "itemshop", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -232,6 +242,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CurrentPage = key switch
         {
             "start" => Dashboard,
+            "runs" => RunTracker,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
             "calc" => GuildCalc,

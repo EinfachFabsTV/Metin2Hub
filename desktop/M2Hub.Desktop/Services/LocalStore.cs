@@ -6,6 +6,7 @@ namespace M2Hub.Desktop.Services;
 /// Alles liegt lokal im Nutzerprofil - die App hat keinen Server und kein Konto.
 ///
 ///   accounts.json  Accounts, Charaktere, Gilden, Schnellwahl
+///   runs.json      eingetragene Laeufe des Run Trackers
 ///   cache.json     Events und Itemshop - abgelaufene hoechstens sieben Tage
 ///   images/        heruntergeladene Ankuendigungsbilder
 public sealed class LocalStore
@@ -27,6 +28,7 @@ public sealed class LocalStore
             "M2Hub");
 
     private static string AccountsPath => Path.Combine(Directory, "accounts.json");
+    private static string RunsPath => Path.Combine(Directory, "runs.json");
     private static string CachePath => Path.Combine(Directory, "cache.json");
     private static string SettingsPath => Path.Combine(Directory, "settings.json");
 
@@ -34,12 +36,14 @@ public sealed class LocalStore
 
     public AccountsData Accounts { get; private set; } = new();
     public CacheData Cache { get; private set; } = new();
+    public RunsData Runs { get; private set; } = new();
     public SettingsData Settings { get; private set; } = new();
 
     public LocalStore()
     {
         Accounts = Read<AccountsData>(AccountsPath) ?? Seed();
         Cache = Read<CacheData>(CachePath) ?? new CacheData();
+        Runs = Read<RunsData>(RunsPath) ?? new RunsData();
         Settings = Read<SettingsData>(SettingsPath) ?? new SettingsData();
         Prune();
     }
@@ -94,6 +98,8 @@ public sealed class LocalStore
     public void SaveAccounts() => Write(AccountsPath, Accounts);
 
     public void SaveSettings() => Write(SettingsPath, Settings);
+
+    public void SaveRuns() => Write(RunsPath, Runs);
 
     /// Verwirft den Forum-Stand; der naechste Abruf holt alles neu.
     public void ClearCache()

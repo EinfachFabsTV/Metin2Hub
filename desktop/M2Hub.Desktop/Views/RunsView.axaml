@@ -1,0 +1,244 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.RunsView"
+             x:DataType="vm:RunsViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <!-- Kopf: Laufauswahl und die Zeile darunter -->
+      <StackPanel Spacing="8">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="h1" Text="{loc:T nav.runs}" />
+          <TextBlock Classes="muted" Text="{loc:T runs.subtitle}" />
+        </StackPanel>
+
+        <ItemsControl ItemsSource="{Binding Runs}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:RunChip">
+              <Button Classes="chip" Classes.active="{Binding IsActive}"
+                      Margin="0,0,6,6" Content="{Binding Label}"
+                      Command="{Binding $parent[UserControl].DataContext.ChooseRunCommand}"
+                      CommandParameter="{Binding}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Orientation="Horizontal" Spacing="7">
+          <TextBlock FontWeight="Bold" FontSize="12" Text="{Binding RunName}" />
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding Subtitle}" TextWrapping="Wrap" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Tag · Eintrag · Statistik -->
+      <Grid ColumnDefinitions="Auto,*,1.05*" ColumnSpacing="14">
+
+        <!-- ===== Tag ===== -->
+        <Border Grid.Column="0" Classes="card" Padding="12" VerticalAlignment="Top">
+          <StackPanel Spacing="8">
+            <Calendar SelectedDate="{Binding Day}" DisplayDate="{Binding Day}" />
+            <Button Classes="chip" HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Content="{loc:T runs.today}" Command="{Binding TodayCommand}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Eintrag ===== -->
+        <Border Grid.Column="1" Classes="card" Padding="14" VerticalAlignment="Top">
+          <StackPanel Spacing="10">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T runs.entry}" />
+              <TextBlock Grid.Column="1" Classes="muted" FontSize="11"
+                         VerticalAlignment="Center" Text="{Binding DayLabel}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+              <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                         Text="{Binding AddHint}" TextWrapping="Wrap" />
+              <NumericUpDown Grid.Column="1" Width="90" Value="{Binding Chests}"
+                             Minimum="0" Maximum="9999" ShowButtonSpinner="False"
+                             IsVisible="{Binding EntersChests}" />
+              <Button Grid.Column="2" Classes="primary" Content="{Binding AddLabel}"
+                      Command="{Binding AddCommand}" />
+            </Grid>
+
+            <!-- Beute: je Art ein Zaehler -->
+            <ItemsControl ItemsSource="{Binding Loot}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:LootRowViewModel">
+                  <Border Classes="panel" Padding="9,6" Margin="0,0,0,6">
+                    <Grid ColumnDefinitions="Auto,*,Auto,44,Auto" ColumnSpacing="7">
+                      <Image Grid.Column="0" Source="{Binding Icon}" Width="20" Height="20"
+                             IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center"
+                                 Text="{Binding Name}" TextWrapping="NoWrap"
+                                 TextTrimming="CharacterEllipsis" />
+                      <Button Grid.Column="2" Classes="icon" Content="−"
+                              Command="{Binding LessCommand}" />
+                      <TextBlock Grid.Column="3" FontSize="12" HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" Text="{Binding Count}" />
+                      <Button Grid.Column="4" Classes="icon" Content="+"
+                              Command="{Binding MoreCommand}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Statistik ===== -->
+        <Border Grid.Column="2" Classes="card" Padding="14" VerticalAlignment="Top">
+          <StackPanel Spacing="10">
+            <ItemsControl ItemsSource="{Binding Scopes}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:RunChip">
+                  <Button Classes="chip" Classes.active="{Binding IsActive}"
+                          Margin="0,0,5,5" Content="{Binding Label}"
+                          Command="{Binding $parent[UserControl].DataContext.ChooseScopeCommand}"
+                          CommandParameter="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Classes="h2" Text="{Binding ScopeLabel}" />
+
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto"
+                  RowSpacing="7">
+              <TextBlock Grid.Row="0" Grid.Column="0" Classes="muted" Text="{loc:T runs.stat.runs}" />
+              <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" Text="{Binding RunCount}" />
+
+              <TextBlock Grid.Row="1" Grid.Column="0" Classes="muted" Text="{loc:T runs.stat.chests}" />
+              <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" Text="{Binding ChestCount}" />
+
+              <TextBlock Grid.Row="2" Grid.Column="0" Classes="muted" Text="{loc:T runs.stat.average}" />
+              <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding ChestAverage}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                         Text="{loc:T runs.price}" />
+              <NumericUpDown Grid.Column="1" Width="90" Value="{Binding ChestPrice}"
+                             Minimum="0" Maximum="99999" ShowButtonSpinner="False" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T runs.income}" />
+              <TextBlock Grid.Column="1" FontWeight="Bold"
+                         Foreground="{StaticResource SuccessBrush}" Text="{Binding Income}" />
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding LootSums}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:LootSumViewModel">
+                  <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="7" Margin="0,0,0,4">
+                    <Image Grid.Column="0" Source="{Binding Icon}" Width="17" Height="17"
+                           IsVisible="{Binding HasIcon}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center"
+                               Text="{Binding Name}" TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" FontSize="12" FontWeight="Bold"
+                               VerticalAlignment="Center" Text="{Binding Count}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Classes="muted" FontSize="10.5" TextWrapping="Wrap"
+                       Text="{Binding PriceNote}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- Insgesamt und Abklingzeit -->
+      <UniformGrid Rows="1">
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T runs.total.runs}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalRuns}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T runs.total.chests}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalChests}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat" Margin="0,0,10,0">
+          <StackPanel>
+            <TextBlock Classes="muted" Text="{loc:T runs.total.average}" />
+            <TextBlock Classes="statvalue" Text="{Binding TotalAverage}" />
+            <TextBlock Classes="muted" FontSize="10.5" Text="{loc:T runs.total.perRun}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card stat">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="muted" Text="{loc:T runs.timer}" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="statvalue" Text="{Binding TimerLabel}" />
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"
+                          VerticalAlignment="Center">
+                <Button Classes="primary" Content="{loc:T runs.timer.start}"
+                        Command="{Binding StartTimerCommand}" IsVisible="{Binding TimerIdle}" />
+                <Button Content="{loc:T runs.timer.stop}"
+                        Command="{Binding StopTimerCommand}" IsVisible="{Binding TimerRunning}" />
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+              <TextBlock Grid.Column="0" Classes="muted" FontSize="10.5"
+                         VerticalAlignment="Center" Text="{loc:T runs.cooldown}" />
+              <NumericUpDown Grid.Column="1" Width="76" Value="{Binding Cooldown}"
+                             Minimum="0" Maximum="1440" ShowButtonSpinner="False" />
+            </Grid>
+          </StackPanel>
+        </Border>
+      </UniformGrid>
+
+      <!-- Eingetragene Laeufe -->
+      <Border Classes="card" Padding="14">
+        <StackPanel Spacing="9">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Classes="h2" Text="{loc:T runs.entries}" />
+            <Button Grid.Column="1" Classes="danger" Content="{loc:T runs.clear}"
+                    Command="{Binding ClearCommand}" IsVisible="{Binding HasEntries}" />
+          </Grid>
+
+          <TextBlock Classes="muted" Text="{loc:T runs.entries.none}"
+                     IsVisible="{Binding !HasEntries}" />
+
+          <ItemsControl ItemsSource="{Binding Entries}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:RunEntryViewModel">
+                <Border Classes="panel" Padding="10,7" Margin="0,0,0,6">
+                  <Grid ColumnDefinitions="90,Auto,*,Auto" ColumnSpacing="9">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center"
+                               Text="{Binding DayLabel}" />
+                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
+                               VerticalAlignment="Center" Text="{Binding ChestLabel}" />
+                    <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
+                               VerticalAlignment="Center" Text="{Binding LootLabel}"
+                               IsVisible="{Binding HasLoot}" TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="3" Classes="icon danger" Content="✕"
+                            ToolTip.Tip="{loc:T runs.delete}"
+                            Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
+                            CommandParameter="{Binding}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

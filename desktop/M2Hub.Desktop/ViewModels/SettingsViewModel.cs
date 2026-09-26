@@ -287,6 +287,7 @@ public sealed class SettingsViewModel : ViewModelBase
     [
         new("start", Loc.T("nav.start")),
         new("accounts", Loc.T("nav.accounts")),
+        new("runs", Loc.T("nav.runs")),
         new("events", Loc.T("nav.events")),
         new("itemshop", Loc.T("nav.itemshop")),
         new("calc", Loc.T("nav.calc")),
