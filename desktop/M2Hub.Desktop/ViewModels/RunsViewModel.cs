@@ -17,6 +17,8 @@ public sealed class RunsViewModel : ViewModelBase
     private readonly LocalStore _store;
     private readonly IDialogService _dialogs;
     private readonly DispatcherTimer _timer;
+    private readonly DispatcherTimer _midnight;
+    private DateTime _today = DateTime.Today;
 
     private RunChip _run;
     private DateTime _day = DateTime.Today;
@@ -49,6 +51,13 @@ public sealed class RunsViewModel : ViewModelBase
         // Der Wecker laeuft nur, solange eine Abklingzeit laeuft.
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => Tick();
+
+        // Um Mitternacht faengt der naechste Tag an. Stand der Waehler auf
+        // dem alten heute, geht er mit - sonst traegt man nach Mitternacht
+        // weiter auf gestern ein und die Kacheln zaehlen den Vortag mit.
+        _midnight = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _midnight.Tick += (_, _) => CheckDay();
+        _midnight.Start();
 
         Picker = new DayPickerViewModel(_day, d => Day = d);
         // Monatsname und Wochentage stehen in der eingestellten Sprache.
@@ -163,7 +172,6 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var row in Loot) row.Count = 0;
 
         Reload();
-        StartTimer();
     }
 
     /* ---------- Statistik ---------- */
@@ -246,20 +254,38 @@ public sealed class RunsViewModel : ViewModelBase
     /// Die Beute des Zeitraums, aufgeschluesselt.
     public ObservableCollection<LootSumViewModel> LootSums { get; } = new();
 
-    /* ---------- Insgesamt ---------- */
+    /* ---------- Der Tag ---------- */
 
     private IEnumerable<RunEntryDto> Mine() => _store.Runs.Entries.Where(e => e.Run == _run.Key);
 
-    public string TotalRuns => Mine().Count().ToString("N0");
-    public string TotalChests => Mine().Sum(e => e.Chests).ToString("N0");
+    /// Die Eintraege des gewaehlten Tages. Die Kacheln zaehlten frueher alles
+    /// zusammen, was je eingetragen wurde - am naechsten Abend stand dort
+    /// immer noch die Summe des Vortages. Was ueber laengere Zeit
+    /// zusammenkommt, steht in der Statistik daneben (Monat, komplett).
+    private IEnumerable<RunEntryDto> OfDay() =>
+        Mine().Where(e => e.Day == _day.ToString("yyyy-MM-dd"));
+
+    public string TotalRuns => OfDay().Count().ToString("N0");
+    public string TotalChests => OfDay().Sum(e => e.Chests).ToString("N0");
 
     public string TotalAverage
     {
         get
         {
-            var list = Mine().ToList();
+            var list = OfDay().ToList();
             return list.Count == 0 ? "0,00" : ((double)list.Sum(e => e.Chests) / list.Count).ToString("N2");
         }
+    }
+
+    /// Prueft, ob seit dem letzten Blick ein neuer Tag begonnen hat.
+    private void CheckDay()
+    {
+        var today = DateTime.Today;
+        if (today == _today) return;
+
+        var followed = _day == _today;
+        _today = today;
+        if (followed) Day = today;
     }
 
     /* ---------- Abklingzeit ---------- */
