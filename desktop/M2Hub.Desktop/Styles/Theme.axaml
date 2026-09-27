@@ -381,6 +381,16 @@
     <Setter Property="Foreground" Value="#556B7280" />
   </Style>
 
+  <!-- Tag mit Eintraegen: gruen, damit man die Luecken sieht. -->
+  <Style Selector="Button.day.marked">
+    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.day.marked /template/ ContentPresenter">
+    <Setter Property="Background" Value="#1F10B981" />
+  </Style>
+
   <Style Selector="Button.day.today">
     <Setter Property="BorderBrush" Value="#553B82F6" />
   </Style>

@@ -402,6 +402,9 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var e in Mine().OrderByDescending(e => e.Day).ThenByDescending(e => e.AddedAt))
             Entries.Add(new RunEntryViewModel(e));
 
+        // Welche Tage im Raster gruen stehen - die des gewaehlten Laufs.
+        Picker.Mark(Mine().Select(e => e.Day));
+
         // Schnellwahl des Laufs
         Quick.Clear();
         foreach (var value in Current.Quick) Quick.Add(new QuickChest(value) { IsActive = value == _chests });

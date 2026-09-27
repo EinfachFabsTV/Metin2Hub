@@ -18,6 +18,7 @@ public sealed class DayPickerViewModel : ViewModelBase
     private const int Weeks = 6;
 
     private readonly Action<DateTime> _picked;
+    private readonly HashSet<string> _marked = [];
     private DateTime _selected;
     private DateTime _month;
 
@@ -61,6 +62,16 @@ public sealed class DayPickerViewModel : ViewModelBase
     /// Nach einem Sprachwechsel: Monatsname und Wochentage neu schreiben.
     public void Refresh() => Build();
 
+    /// Die Tage, an denen etwas eingetragen ist (jeweils yyyy-MM-dd). Sie
+    /// stehen gruen im Raster - so sieht man auf einen Blick, wo noch eine
+    /// Luecke ist, ohne jeden Tag anzuklicken.
+    public void Mark(IEnumerable<string> days)
+    {
+        _marked.Clear();
+        foreach (var day in days) _marked.Add(day);
+        Build();
+    }
+
     private void Shift(int months)
     {
         _month = _month.AddMonths(months);
@@ -95,7 +106,8 @@ public sealed class DayPickerViewModel : ViewModelBase
                 date.Day.ToString(CultureInfo.InvariantCulture),
                 date.Month == _month.Month,
                 date == _selected,
-                date == today));
+                date == today,
+                _marked.Contains(date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))));
         }
 
         Raise(nameof(MonthLabel));
@@ -115,7 +127,7 @@ public sealed class DayPickerViewModel : ViewModelBase
 
 /// Ein Tag im Raster. Rein lesend - angeklickt wird ueber das PickCommand.
 public sealed class DayCellViewModel(
-    DateTime date, string text, bool inMonth, bool isSelected, bool isToday)
+    DateTime date, string text, bool inMonth, bool isSelected, bool isToday, bool hasEntries)
 {
     public DateTime Date { get; } = date;
     public string Text { get; } = text;
@@ -125,4 +137,7 @@ public sealed class DayCellViewModel(
     public bool InMonth { get; } = inMonth;
     public bool IsSelected { get; } = isSelected;
     public bool IsToday { get; } = isToday;
+
+    /// An diesem Tag ist fuer den gewaehlten Lauf etwas eingetragen.
+    public bool HasEntries { get; } = hasEntries;
 }

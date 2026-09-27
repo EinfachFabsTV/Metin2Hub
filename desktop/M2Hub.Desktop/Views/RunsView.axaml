@@ -79,6 +79,7 @@
                   <DataTemplate DataType="vm:DayCellViewModel">
                     <Button Classes="day"
                             Classes.outside="{Binding !InMonth}"
+                            Classes.marked="{Binding HasEntries}"
                             Classes.today="{Binding IsToday}"
                             Classes.selected="{Binding IsSelected}"
                             Content="{Binding Text}"
