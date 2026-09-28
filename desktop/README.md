@@ -5,8 +5,14 @@ Die Oberfläche ist [Avalonia](https://avaloniaui.net/) (C# / .NET 9), gezeichne
 wird direkt über Skia. Es gibt kein HTML, kein Electron, kein Chromium und
 keinen System-WebView.
 
-Umfang: **Accounts**, **Events** (global und serverspezifisch) und
-**Itemshop**. Keine Rechner, kein Admin-Bereich.
+Umfang: **Start** (eine Übersicht aus selbst gewählten Abschnitten),
+**Accounts**, **Runs** (der Run Tracker), **Events** (global und
+serverspezifisch), **Itemshop** und **Rechner** (bisher der Gilden-Rechner).
+Die Bereiche stehen in einer Seitenleiste links.
+
+Die Oberfläche gibt es auf **Deutsch, Englisch, Türkisch und Italienisch**;
+geladen wird trotzdem immer aus dem deutschen Forum, übersetzt wird erst beim
+Anzeigen.
 
 Die App ist **eigenständig**: kein Server, kein Konto, keine Anmeldung, keine
 Registrierung. Alles liegt lokal im Nutzerprofil.
@@ -16,12 +22,16 @@ Registrierung. Alles liegt lokal im Nutzerprofil.
 | Bereich | Quelle | Ablage |
 |---|---|---|
 | Accounts, Charaktere, Gilden, Schnellwahl | nur lokal, von Hand gepflegt | `accounts.json` |
+| Eingetragene Läufe (Run Tracker) | nur lokal, eigene Messungen | `runs.json` |
 | Events (global) | Forum-Board 1167 „News - Events“ | `cache.json` |
 | Eventkalender je Server | Forum-Thread 90381 „Eventkalender“ | `cache.json` |
 | Itemshop | Forum-Board 303 „News - Itemshop“ | `cache.json` |
 
-Geladene Forum-Daten werden **sieben Tage** aufbewahrt und danach beim nächsten
-Start verworfen. Solange etwas im Speicher liegt, funktioniert die App auch
+Von den geladenen Forum-Daten bleibt stehen, **was läuft oder erst ansteht** –
+erst abgelaufene Einträge werden nach sieben Tagen verworfen. Das Abrufdatum
+allein taugt nicht als Maß: ein Thread wird nur einmal geladen, das Event läuft
+weiter. `runs.json` wird nie verworfen; es sind eigene Messungen, keine
+abgerufenen Daten. Solange etwas im Speicher liegt, funktioniert die App auch
 ohne Netz.
 
 ### Wann geladen wird
@@ -100,6 +110,21 @@ Zweispaltig statt der langen Liste aufklappbarer Karten:
 
 Löschvorgänge fragen immer nach.
 
+## Run Tracker
+
+Je Lauf ein Reiter (Hydra, Razador, Nemere, Jotun, Beran, Schlangenrun),
+darunter der Tageswähler, die Eintragsmaske und die Statistik in drei
+Zeiträumen. Tage mit Einträgen stehen grün im Raster, die Liste darunter ist
+nach Tagen gebündelt und folgt dem gewählten Zeitraum.
+
+**Abklingzeit und Preis je Truhe sind Vorgaben, keine festen Wahrheiten** – sie
+stammen aus der Vorlage (m2tracker.de) und lassen sich je Lauf ändern. Der
+Preis steht in **kk**; der Ertrag wird ab 100 kk in **w** geschrieben
+(`Services/Calc/Money.cs`). Die Abklingzeit läuft erst auf Knopfdruck.
+
+Export und Import gibt es bewusst nicht: `runs.json` ist selbst die Sicherung,
+und der Ordner steht in den Einstellungen.
+
 ## Herunterladen
 
 Fertig gebaut, ohne selbst etwas zu installieren:
@@ -122,10 +147,9 @@ signiert ist – „Weitere Informationen“ → „Trotzdem ausführen“.
 
 ## Bauen
 
-> Hinweis: In der Umgebung, in der dieser Code entstanden ist, war kein
-> .NET-SDK verfügbar (der Download ist dort netzseitig gesperrt). Der erste
-> `dotnet build` auf deinem Rechner ist also der erste überhaupt – kleinere
-> Anpassungen (Paketversionen, einzelne Bindings) können dabei anfallen.
+> Hinweis: In der Umgebung, in der dieser Code entsteht, ist kein .NET-SDK
+> verfügbar (der Download ist dort netzseitig gesperrt). Übersetzt wird deshalb
+> im Actions-Lauf – jede veröffentlichte Fassung ist dort gebaut worden.
 
 Voraussetzung ist das **.NET 9 SDK** (https://dotnet.microsoft.com/download).
 
@@ -152,21 +176,25 @@ Das Ergebnis liegt unter
 
 ```
 accounts.json   Accounts, Charaktere, Gilden, Schnellwahl
-cache.json      Events, Eventkalender, Itemshop (max. 7 Tage)
+runs.json       eingetragene Läufe des Run Trackers
+cache.json      Events, Eventkalender, Itemshop (Abgelaufenes nach 7 Tagen)
 images/         heruntergeladene Ankündigungsbilder
 ```
 
-Zum Zurücksetzen genügt es, den Ordner zu löschen. `accounts.json` ist die
-Datei, die man sichern sollte – alles andere lädt sich neu.
+Zum Zurücksetzen genügt es, den Ordner zu löschen. `accounts.json` und
+`runs.json` sind die Dateien, die man sichern sollte – alles andere lädt sich
+neu.
 
 ## Aufbau
 
 ```
 Services/       LocalStore (Ablage), ForumService (Abruf + Drosselung), ImageCache
 Services/Forum/ Portierte Parser: Html, EventCalendar, Board
-Models/      Datenmodell der App
-ViewModels/  Zustand und Logik je Bereich (INotifyPropertyChanged, ohne Framework-Zusatz)
-Views/       XAML-Oberflächen, ein UserControl je Bereich
+Services/Calc/  GuildCalc, RunCatalog, Money – reine Funktionen, ohne Framework
+Services/I18n/  Loc (Oberflächentexte), Glossary (Forum-Wörter → Anzeigesprache)
+Models/         Datenmodell der App
+ViewModels/     Zustand und Logik je Bereich (INotifyPropertyChanged, ohne Framework-Zusatz)
+Views/          XAML-Oberflächen, ein UserControl je Bereich
 Styles/         Theme.axaml – die Tokens aus Veraltet/app/assets/css/main.css
 ```
 
@@ -177,3 +205,10 @@ Regel für `main.css` in der alten Web-Version.
 Das Programmsymbol entsteht aus `fav.png` im Projektstamm und liegt als
 `Assets/m2hub.ico` (Fenster, Taskleiste, Exe) und `Assets/m2hub.png`
 (Kopfzeile) bei.
+
+## Fensteraufnahme
+
+`Program.cs` setzt unter Windows `Win32CompositionMode.RedirectionSurface`.
+Ohne das zeichnet Avalonia über die WinUI-Komposition, das Fenster hat keine
+Weiterleitungsfläche, und **OBS erkennt es nicht als Fensteraufnahme**.
+Durchscheinende Fenster, die dadurch wegfallen, nutzt die App nicht.
