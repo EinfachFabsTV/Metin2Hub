@@ -180,6 +180,23 @@
 
             <TextBlock Classes="h2" Text="{Binding ScopeLabel}" />
 
+            <!-- Welcher Monat. Steht nur bei der Monatsstatistik da; getippt
+                 wird gesucht, weil der Vorrat ueber Jahre waechst. -->
+            <AutoCompleteBox IsVisible="{Binding IsMonthScope}"
+                             ItemsSource="{Binding Months}"
+                             SelectedItem="{Binding Month, Mode=TwoWay}"
+                             ValueMemberBinding="{Binding Label}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             Watermark="{loc:T runs.month.pick}"
+                             HorizontalAlignment="Stretch">
+              <AutoCompleteBox.ItemTemplate>
+                <DataTemplate DataType="vm:MonthOption">
+                  <TextBlock Text="{Binding Label}" />
+                </DataTemplate>
+              </AutoCompleteBox.ItemTemplate>
+            </AutoCompleteBox>
+
             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto"
                   RowSpacing="7">
               <TextBlock Grid.Row="0" Grid.Column="0" Classes="muted" Text="{loc:T runs.stat.runs}" />

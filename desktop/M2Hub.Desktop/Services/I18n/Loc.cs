@@ -148,6 +148,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["runs.today"] = ["Heute", "Today", "Bugün", "Oggi"],
         ["runs.scope.day"] = ["Tagesstatistik", "Day", "Günlük", "Giorno"],
         ["runs.scope.month"] = ["Monatsstatistik", "Month", "Aylık", "Mese"],
+        ["runs.month.pick"] = ["Monat wählen", "Choose month", "Ay seç", "Scegli il mese"],
         ["runs.scope.all"] = ["Statistik komplett", "All time", "Tümü", "Totale"],
         ["runs.stat.runs"] = ["Runs", "Runs", "Koşular", "Run"],
         ["runs.stat.chests"] = ["Truhen", "Chests", "Sandıklar", "Forzieri"],

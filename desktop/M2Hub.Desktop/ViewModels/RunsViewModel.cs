@@ -24,6 +24,7 @@ public sealed class RunsViewModel : ViewModelBase
     private DateTime _day = DateTime.Today;
     private int _chests;
     private string _scope = "day";
+    private string _month = DateTime.Today.ToString("yyyy-MM");
     private TimeSpan _left;
     private bool _running;
 
@@ -61,7 +62,11 @@ public sealed class RunsViewModel : ViewModelBase
 
         Picker = new DayPickerViewModel(_day, d => Day = d);
         // Monatsname und Wochentage stehen in der eingestellten Sprache.
-        Loc.I.PropertyChanged += (_, _) => Picker.Refresh();
+        Loc.I.PropertyChanged += (_, _) =>
+        {
+            Picker.Refresh();
+            BuildMonths();
+        };
 
         Reload();
     }
@@ -186,7 +191,14 @@ public sealed class RunsViewModel : ViewModelBase
         {
             if (value is null || !Set(ref _scope, value.Key)) return;
             foreach (var o in Scopes) o.IsActive = o.Key == _scope;
+
+            // Beim Umschalten auf den Monat den des gewaehlten Tages zeigen -
+            // das ist der Monat, den man gerade vor sich hat.
+            if (_scope == "month") _month = _day.ToString("yyyy-MM");
+
             Raise(nameof(Scope));
+            Raise(nameof(IsMonthScope));
+            Raise(nameof(Month));
             RaiseStats();
         }
     }
@@ -194,6 +206,48 @@ public sealed class RunsViewModel : ViewModelBase
     public RelayCommand ChooseScopeCommand { get; }
 
     public string ScopeLabel => Scope.Label;
+
+    /* ---------- Monatsauswahl ---------- */
+
+    /// Die Monate, aus denen gewaehlt werden kann: der laufende und jeder, in
+    /// dem fuer diesen Lauf etwas steht, neueste zuerst.
+    ///
+    /// Frueher zeigte die Monatsstatistik immer den Monat des gewaehlten
+    /// Tages. Weil `runs.json` nie verworfen wird, waechst der Vorrat aber
+    /// ueber Jahre - ohne Auswahl kaeme man nur ueber den Kalender an einen
+    /// aelteren Monat.
+    public ObservableCollection<MonthOption> Months { get; } = new();
+
+    public MonthOption? Month
+    {
+        get => Months.FirstOrDefault(m => m.Key == _month) ?? Months.FirstOrDefault();
+        set
+        {
+            // Die Auswahl mit Suche liefert beim Tippen zwischendurch null.
+            if (value is null || !Set(ref _month, value.Key)) return;
+            Raise(nameof(Month));
+            RaiseStats();
+        }
+    }
+
+    /// Nur bei der Monatsstatistik steht die Auswahl da.
+    public bool IsMonthScope => _scope == "month";
+
+    private void BuildMonths()
+    {
+        var keys = Mine()
+            .Select(e => e.Day.Length >= 7 ? e.Day[..7] : null)
+            .Where(k => k is not null)
+            .Append(DateTime.Today.ToString("yyyy-MM"))
+            .Append(_month)
+            .Distinct()
+            .OrderByDescending(k => k, StringComparer.Ordinal)
+            .ToList();
+
+        Months.Clear();
+        foreach (var key in keys) Months.Add(new MonthOption(key!));
+        Raise(nameof(Month));
+    }
 
     private void BuildScopes()
     {
@@ -211,7 +265,7 @@ public sealed class RunsViewModel : ViewModelBase
         return _scope switch
         {
             "day" => mine.Where(e => e.Day == _day.ToString("yyyy-MM-dd")),
-            "month" => mine.Where(e => e.Day.StartsWith(_day.ToString("yyyy-MM"), StringComparison.Ordinal)),
+            "month" => mine.Where(e => e.Day.StartsWith(_month, StringComparison.Ordinal)),
             _ => mine,
         };
     }
@@ -402,6 +456,9 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var e in Mine().OrderByDescending(e => e.Day).ThenByDescending(e => e.AddedAt))
             Entries.Add(new RunEntryViewModel(e));
 
+        // Die Monate, aus denen gewaehlt werden kann - je gewaehltem Lauf.
+        BuildMonths();
+
         // Welche Tage im Raster gruen stehen - die des gewaehlten Laufs.
         Picker.Mark(Mine().Select(e => e.Day));
 
@@ -461,6 +518,31 @@ public sealed class RunsViewModel : ViewModelBase
 
 /// Ein Knopf in einer Auswahlreihe: Lauf oder Zeitraum. Traegt neben der
 /// Beschriftung, ob er gerade gewaehlt ist - daran haengt die Hervorhebung.
+/// Ein Monat in der Auswahl. Der Schluessel ist sprachneutral (yyyy-MM), die
+/// Beschriftung folgt der eingestellten Sprache.
+public sealed class MonthOption(string key)
+{
+    public string Key { get; } = key;
+
+    public string Label { get; } = DateTime.TryParseExact(
+        key, "yyyy-MM", System.Globalization.CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.None, out var date)
+            ? date.ToString("MMMM yyyy", Culture())
+            : key;
+
+    /// Wie beim Tageswaehler: die Sprache der Oberflaeche, nicht die von
+    /// Windows.
+    private static System.Globalization.CultureInfo Culture()
+    {
+        try { return System.Globalization.CultureInfo.GetCultureInfo(Services.Loc.I.Language); }
+        catch (System.Globalization.CultureNotFoundException)
+        { return System.Globalization.CultureInfo.CurrentCulture; }
+    }
+
+    /// Die Auswahl mit Suche vergleicht ueber den Text.
+    public override string ToString() => Label;
+}
+
 /// Ein Knopf der Schnellwahl: eine feste Truhenzahl.
 public sealed class QuickChest(int value) : ViewModelBase
 {
