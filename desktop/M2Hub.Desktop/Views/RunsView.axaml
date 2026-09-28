@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:views="using:M2Hub.Desktop.Views"
              xmlns:loc="using:M2Hub.Desktop.Services"
              x:Class="M2Hub.Desktop.Views.RunsView"
              x:DataType="vm:RunsViewModel">
@@ -302,30 +303,40 @@
           <TextBlock Classes="muted" Text="{loc:T runs.entries.none}"
                      IsVisible="{Binding !HasEntries}" />
 
+          <!-- Je Tag eine Kachel. Die Fensterbreite bestimmt die Spaltenzahl,
+               die Kacheln teilen die Breite unter sich auf. Aufgeklappt wird
+               je Kachel, nie von selbst. -->
           <ItemsControl ItemsSource="{Binding Days}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="{Binding $parent[ItemsControl].Bounds.Width,
+                                       Converter={x:Static views:DayTileColumns.Instance}}" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="vm:RunDayViewModel">
-                <Border Classes="panel" Padding="0" Margin="0,0,0,6">
+                <Border Classes="panel" Padding="0" Margin="0,0,8,8" VerticalAlignment="Top">
                   <StackPanel>
 
-                    <!-- Der Tag: eine Zeile mit der Summe, zum Aufklappen -->
+                    <!-- Kopf der Kachel: Tag, Summe, Zeichen zum Aufklappen -->
                     <Button Classes="dayrow" Command="{Binding ToggleCommand}">
-                      <Grid ColumnDefinitions="Auto,90,*,Auto" ColumnSpacing="9">
-                        <TextBlock Grid.Column="0" FontSize="11" Classes="muted"
+                      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" FontSize="13" FontWeight="SemiBold"
+                                   Text="{Binding DayLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" FontSize="11" Classes="muted"
                                    VerticalAlignment="Center" Text="{Binding Chevron}" />
-                        <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Text="{Binding DayLabel}" />
-                        <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
-                                   VerticalAlignment="Center" Text="{Binding Summary}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Classes="muted" FontSize="11" Margin="0,2,0,0"
+                                   Text="{Binding Summary}" />
                       </Grid>
                     </Button>
 
                     <!-- Die einzelnen Laeufe des Tages -->
                     <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding IsOpen}"
-                                  Margin="26,0,8,8">
+                                  Margin="10,0,8,8">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:RunEntryViewModel">
-                          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9" Margin="0,3,0,0">
+                          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="7" Margin="0,3,0,0">
                             <TextBlock Grid.Column="0" FontSize="12" FontWeight="Bold"
                                        VerticalAlignment="Center" Text="{Binding ChestLabel}" />
                             <TextBlock Grid.Column="1" Classes="muted" FontSize="11"

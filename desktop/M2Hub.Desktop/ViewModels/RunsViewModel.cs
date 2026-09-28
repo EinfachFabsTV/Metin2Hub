@@ -514,16 +514,14 @@ public sealed class RunsViewModel : ViewModelBase
             .OrderByDescending(g => g.Key, StringComparer.Ordinal)
             .ToList();
 
-        for (var i = 0; i < groups.Count; i++)
+        foreach (var group in groups)
         {
-            var day = new RunDayViewModel(groups[i].Key, groups[i].OrderByDescending(e => e.AddedAt))
+            // Zugeklappt, bis jemand sie aufklappt. Von selbst aufzugehen
+            // hiesse, dass die Kachel beim Eintragen jedes Mal aufspringt.
+            Days.Add(new RunDayViewModel(group.Key, group.OrderByDescending(e => e.AddedAt))
             {
-                // Der neueste Tag steht offen da - sonst zeigt die Karte nach
-                // dem Eintragen nur Summen, und man sieht nicht, was man
-                // gerade eingetragen hat.
-                IsOpen = open.Count == 0 ? i == 0 : open.Contains(groups[i].Key),
-            };
-            Days.Add(day);
+                IsOpen = open.Contains(group.Key),
+            });
         }
 
         Raise(nameof(HasEntries));
