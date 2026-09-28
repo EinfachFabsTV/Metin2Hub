@@ -356,6 +356,21 @@
     <Setter Property="Background" Value="#333B82F6" />
   </Style>
 
+  <!-- Zeile eines Tages in der Eintragsliste: sieht aus wie Text, ist aber
+       der Knopf zum Auf- und Zuklappen. -->
+  <Style Selector="Button.dayrow">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="Button.dayrow:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SubtleBrush}" />
+  </Style>
+
   <!-- Tageswaehler (Run Tracker). Eigene Knoepfe statt des Fluent-Kalenders,
        damit die Farben aus dieser Datei kommen. -->
   <Style Selector="Button.day">

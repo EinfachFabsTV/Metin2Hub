@@ -182,12 +182,16 @@
 
             <!-- Welcher Monat. Steht nur bei der Monatsstatistik da; getippt
                  wird gesucht, weil der Vorrat ueber Jahre waechst. -->
-            <AutoCompleteBox IsVisible="{Binding IsMonthScope}"
+            <AutoCompleteBox Name="MonthPick"
+                             IsVisible="{Binding IsMonthScope}"
                              ItemsSource="{Binding Months}"
                              SelectedItem="{Binding Month, Mode=TwoWay}"
                              ValueMemberBinding="{Binding Label}"
                              FilterMode="Contains"
                              MinimumPrefixLength="0"
+                             IsTextCompletionEnabled="False"
+                             GotFocus="MonthPickOpen"
+                             LostFocus="MonthPickClose"
                              Watermark="{loc:T runs.month.pick}"
                              HorizontalAlignment="Stretch">
               <AutoCompleteBox.ItemTemplate>
@@ -300,24 +304,45 @@
           <TextBlock Classes="muted" Text="{loc:T runs.entries.none}"
                      IsVisible="{Binding !HasEntries}" />
 
-          <ItemsControl ItemsSource="{Binding Entries}">
+          <ItemsControl ItemsSource="{Binding Days}">
             <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:RunEntryViewModel">
-                <Border Classes="panel" Padding="10,7" Margin="0,0,0,6">
-                  <Grid ColumnDefinitions="90,Auto,*,Auto" ColumnSpacing="9">
-                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center"
-                               Text="{Binding DayLabel}" />
-                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
-                               VerticalAlignment="Center" Text="{Binding ChestLabel}" />
-                    <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
-                               VerticalAlignment="Center" Text="{Binding LootLabel}"
-                               IsVisible="{Binding HasLoot}" TextWrapping="NoWrap"
-                               TextTrimming="CharacterEllipsis" />
-                    <Button Grid.Column="3" Classes="icon danger" Content="✕"
-                            ToolTip.Tip="{loc:T runs.delete}"
-                            Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
-                            CommandParameter="{Binding}" />
-                  </Grid>
+              <DataTemplate DataType="vm:RunDayViewModel">
+                <Border Classes="panel" Padding="0" Margin="0,0,0,6">
+                  <StackPanel>
+
+                    <!-- Der Tag: eine Zeile mit der Summe, zum Aufklappen -->
+                    <Button Classes="dayrow" Command="{Binding ToggleCommand}">
+                      <Grid ColumnDefinitions="Auto,90,*,Auto" ColumnSpacing="9">
+                        <TextBlock Grid.Column="0" FontSize="11" Classes="muted"
+                                   VerticalAlignment="Center" Text="{Binding Chevron}" />
+                        <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Text="{Binding DayLabel}" />
+                        <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
+                                   VerticalAlignment="Center" Text="{Binding Summary}" />
+                      </Grid>
+                    </Button>
+
+                    <!-- Die einzelnen Laeufe des Tages -->
+                    <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding IsOpen}"
+                                  Margin="26,0,8,8">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:RunEntryViewModel">
+                          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9" Margin="0,3,0,0">
+                            <TextBlock Grid.Column="0" FontSize="12" FontWeight="Bold"
+                                       VerticalAlignment="Center" Text="{Binding ChestLabel}" />
+                            <TextBlock Grid.Column="1" Classes="muted" FontSize="11"
+                                       VerticalAlignment="Center" Text="{Binding LootLabel}"
+                                       IsVisible="{Binding HasLoot}" TextWrapping="NoWrap"
+                                       TextTrimming="CharacterEllipsis" />
+                            <Button Grid.Column="2" Classes="icon danger" Content="✕"
+                                    ToolTip.Tip="{loc:T runs.delete}"
+                                    Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
+                                    CommandParameter="{Binding}" />
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

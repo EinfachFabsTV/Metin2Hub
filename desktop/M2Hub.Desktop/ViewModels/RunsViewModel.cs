@@ -405,9 +405,10 @@ public sealed class RunsViewModel : ViewModelBase
 
     /* ---------- Eintraege ---------- */
 
-    public ObservableCollection<RunEntryViewModel> Entries { get; } = new();
+    /// Die Eintraege, nach Tagen gebuendelt.
+    public ObservableCollection<RunDayViewModel> Days { get; } = new();
 
-    public bool HasEntries => Entries.Count > 0;
+    public bool HasEntries => Days.Count > 0;
 
     public AsyncRelayCommand DeleteCommand { get; }
     public AsyncRelayCommand ClearCommand { get; }
@@ -451,10 +452,7 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var name in Current.Loot)
             Loot.Add(new LootRowViewModel(name, keep.TryGetValue(name, out var c) ? c : 0));
 
-        // Eintraege, neueste oben
-        Entries.Clear();
-        foreach (var e in Mine().OrderByDescending(e => e.Day).ThenByDescending(e => e.AddedAt))
-            Entries.Add(new RunEntryViewModel(e));
+        BuildDays();
 
         // Die Monate, aus denen gewaehlt werden kann - je gewaehltem Lauf.
         BuildMonths();
@@ -482,8 +480,43 @@ public sealed class RunsViewModel : ViewModelBase
         RaiseStats();
     }
 
+    /// Die Liste der Tage. Sie folgt dem gewaehlten Zeitraum - bei
+        /// „Tagesstatistik" steht nur der eine Tag da, bei „komplett" alles.
+    /// Die Liste der Tage. Sie folgt dem gewaehlten Zeitraum - bei
+    /// „Tagesstatistik" steht nur der eine Tag da, bei „komplett" alles.
+    ///
+    /// Eine Zeile je Lauf wurde nach wenigen Wochen unlesbar; jetzt steht je
+    /// Tag eine Zeile mit der Summe, die sich aufklappen laesst.
+    private void BuildDays()
+    {
+        // Aufgeklappte Tage bleiben aufgeklappt.
+        var open = Days.Where(d => d.IsOpen).Select(d => d.Key).ToHashSet();
+
+        Days.Clear();
+        var groups = InScope()
+            .GroupBy(e => e.Day)
+            .OrderByDescending(g => g.Key, StringComparer.Ordinal)
+            .ToList();
+
+        for (var i = 0; i < groups.Count; i++)
+        {
+            var day = new RunDayViewModel(groups[i].Key, groups[i].OrderByDescending(e => e.AddedAt))
+            {
+                // Der neueste Tag steht offen da - sonst zeigt die Karte nach
+                // dem Eintragen nur Summen, und man sieht nicht, was man
+                // gerade eingetragen hat.
+                IsOpen = open.Count == 0 ? i == 0 : open.Contains(groups[i].Key),
+            };
+            Days.Add(day);
+        }
+
+        Raise(nameof(HasEntries));
+    }
+
     private void RaiseStats()
     {
+        BuildDays();
+
         LootSums.Clear();
         var sums = new Dictionary<string, int>();
         foreach (var e in InScope())
@@ -605,6 +638,40 @@ public sealed class LootSumViewModel
 }
 
 /// Ein eingetragener Lauf in der Liste unten.
+/// Ein Tag in der Liste: die Summe in der Zeile, die einzelnen Laeufe
+/// darunter, sobald man ihn aufklappt.
+public sealed class RunDayViewModel : ViewModelBase
+{
+    private bool _isOpen;
+
+    public RunDayViewModel(string key, IEnumerable<RunEntryDto> entries)
+    {
+        Key = key;
+        DayLabel = DateTime.TryParse(key, out var day) ? day.ToString("dd.MM.yyyy") : key;
+
+        foreach (var e in entries) Entries.Add(new RunEntryViewModel(e));
+
+        Summary = Loc.T("runs.day.summary", Entries.Count, Entries.Sum(e => e.Chests));
+        ToggleCommand = new RelayCommand(_ => IsOpen = !IsOpen);
+    }
+
+    public string Key { get; }
+    public string DayLabel { get; }
+    public string Summary { get; }
+    public ObservableCollection<RunEntryViewModel> Entries { get; } = new();
+
+    public bool IsOpen
+    {
+        get => _isOpen;
+        set { if (Set(ref _isOpen, value)) Raise(nameof(Chevron)); }
+    }
+
+    /// Das Zeichen am Zeilenende sagt, ob der Tag offen steht.
+    public string Chevron => _isOpen ? "▾" : "▸";
+
+    public RelayCommand ToggleCommand { get; }
+}
+
 public sealed class RunEntryViewModel
 {
     public RunEntryViewModel(RunEntryDto dto)

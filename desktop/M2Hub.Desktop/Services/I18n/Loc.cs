@@ -168,6 +168,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["runs.cooldown.hours"] = ["{0} Stunden Cooldown", "{0} hours cooldown", "{0} saat bekleme", "{0} ore di recupero"],
         ["runs.maxPerDay"] = ["maximal {0} Runs/Tag", "at most {0} runs/day", "günde en fazla {0} koşu", "al massimo {0} run/giorno"],
         ["runs.entries"] = ["Einträge", "Entries", "Kayıtlar", "Voci"],
+        ["runs.day.summary"] = ["{0} Runs · {1} Truhen", "{0} runs · {1} chests", "{0} koşu · {1} sandık", "{0} run · {1} forzieri"],
         ["runs.entries.none"] = ["Noch keine Runs eingetragen.", "No runs recorded yet.", "Henüz koşu kaydedilmedi.", "Nessun run registrato finora."],
         ["runs.entry.chests"] = ["{0} Truhen", "{0} chests", "{0} sandık", "{0} forzieri"],
         ["runs.delete"] = ["Eintrag löschen", "Delete entry", "Kaydı sil", "Elimina voce"],
