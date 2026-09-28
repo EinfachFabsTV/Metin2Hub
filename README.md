@@ -19,8 +19,9 @@
 
 M2Hub ist ein Programm für den eigenen Rechner. Es sammelt, was man sonst über
 Forenreiter, Notizzettel und Excel-Tabellen verteilt: welche Events gerade
-laufen, was im Itemshop ansteht, und wie es um die eigenen Accounts und
-Charaktere steht.
+laufen, was im Itemshop ansteht, wie es um die eigenen Accounts und Charaktere
+steht, was die Läufe des Abends eingebracht haben – und was eine Gildenstufe
+kostet.
 
 ## Was M2Hub kann
 
@@ -67,7 +68,45 @@ was zuletzt war.
 
 </td>
 </tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🐉 &nbsp;Runs
+
+Der **Run Tracker**: Hydra, Razador, Nemere, Jotun, Beran und Schlangenrun, je
+mit ihrer Beute.
+
+Truhen eintragen, und die App rechnet **Tag, Monat und Gesamtzeit** aus – samt
+Ertrag in Won. Tage, an denen schon etwas steht, sind im Kalender **grün**.
+
+Dazu eine **Abklingzeit** je Lauf, die auf Knopfdruck mitläuft.
+
+</td>
+<td width="33%" valign="top">
+
+### 🧮 &nbsp;Rechner
+
+Der **Gilden-Rechner**: wie viele Spenden von Stufe zu Stufe fehlen, wie lange
+das dauert und was es kostet.
+
+Kleine, mittlere und hohe Spende lassen sich einzeln zu- und abschalten.
+
+</td>
+<td width="33%" valign="top">
+
+### 🏠 &nbsp;Start
+
+Eine **Übersicht aus Abschnitten, die du selbst wählst**: was gerade läuft, die
+Runs des Tages, der Kalender, offene Bios, fällige Medaillen.
+
+Zwei Anordnungen – **Übersicht** zum Nachsehen, **Arbeitsfläche** zum
+Eintragen – zwischen denen ein Schalter wechselt.
+
+</td>
+</tr>
 </table>
+
+Die Oberfläche gibt es auf **Deutsch, Englisch, Türkisch und Italienisch**.
 
 ## Erste Schritte
 
@@ -143,19 +182,21 @@ Server.** Es gibt keine Stelle, an die Daten fließen könnten.
 |  | |
 |:--:|---|
 | 🚫 | **Kein Konto, keine Anmeldung, kein Passwort.** Es gibt nichts anzulegen und nichts zu verlieren. |
-| 💾 | **Accounts, Charaktere und Medaillen liegen ausschließlich bei dir**, in einer Datei in deinem Windows-Benutzerordner. Sie werden nirgendwohin übertragen – auch nicht zu uns. |
+| 💾 | **Accounts, Charaktere, Medaillen und die eingetragenen Läufe liegen ausschließlich bei dir**, in Dateien in deinem Windows-Benutzerordner. Sie werden nirgendwohin übertragen – auch nicht zu uns. |
 | 👁️ | **Keine Sammlung von Nutzungsdaten**, keine Werbung, keine Zählpixel. |
 | 🔑 | **Nach Zugangsdaten wird nie gefragt.** M2Hub braucht dein Spiel-Passwort nicht und würde es nicht speichern. Sollte dich jemals ein Programm danach fragen, das sich als M2Hub ausgibt, ist es nicht M2Hub. |
 
 Ins Netz greift das Programm nur an einer Stelle: Es liest den öffentlichen
 Eventkalender und die Ankündigungen im offiziellen Metin2-Forum – dieselben
 Seiten, die man auch im Browser aufrufen würde. Diese Angaben werden auf dem
-eigenen Rechner zwischengespeichert und nach sieben Tagen verworfen. Dabei
-werden keinerlei persönliche Daten übermittelt.
+eigenen Rechner zwischengespeichert; was läuft oder erst ansteht, bleibt stehen,
+Abgelaufenes wird nach sieben Tagen verworfen. Dabei werden keinerlei
+persönliche Daten übermittelt.
 
 Wer seine Einträge sichern oder auf einen anderen Rechner mitnehmen möchte,
-kopiert die Datei `accounts.json` – zu finden über **Einstellungen → Ordner
-öffnen**.
+kopiert die Dateien `accounts.json` und `runs.json` – zu finden über
+**Einstellungen → Ordner öffnen**. Die eingetragenen Läufe werden nie
+verworfen; es sind eigene Messungen, keine abgerufenen Daten.
 
 ## Aktualisierungen
 
