@@ -180,26 +180,24 @@
 
             <TextBlock Classes="h2" Text="{Binding ScopeLabel}" />
 
-            <!-- Welcher Monat. Steht nur bei der Monatsstatistik da; getippt
-                 wird gesucht, weil der Vorrat ueber Jahre waechst. -->
-            <AutoCompleteBox Name="MonthPick"
-                             IsVisible="{Binding IsMonthScope}"
-                             ItemsSource="{Binding Months}"
-                             SelectedItem="{Binding Month, Mode=TwoWay}"
-                             ValueMemberBinding="{Binding Label}"
-                             FilterMode="Contains"
-                             MinimumPrefixLength="0"
-                             IsTextCompletionEnabled="False"
-                             GotFocus="MonthPickOpen"
-                             LostFocus="MonthPickClose"
-                             Watermark="{loc:T runs.month.pick}"
-                             HorizontalAlignment="Stretch">
-              <AutoCompleteBox.ItemTemplate>
-                <DataTemplate DataType="vm:MonthOption">
-                  <TextBlock Text="{Binding Label}" />
-                </DataTemplate>
-              </AutoCompleteBox.ItemTemplate>
-            </AutoCompleteBox>
+            <!-- Welcher Monat. Steht nur bei der Monatsstatistik da. Das
+                 Suchfeld filtert die Liste; gewaehlt wird darunter. Ein
+                 AutoCompleteBox stand hier vorher und tat sich schwer damit,
+                 Liste und Auswahl auseinanderzuhalten. -->
+            <StackPanel Spacing="6" IsVisible="{Binding IsMonthScope}">
+              <TextBox Text="{Binding MonthFilter, Mode=TwoWay}"
+                       Watermark="{loc:T runs.month.search}" />
+              <ComboBox ItemsSource="{Binding Months}"
+                        SelectedItem="{Binding Month, Mode=TwoWay}"
+                        PlaceholderText="{loc:T runs.month.pick}"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate DataType="vm:MonthOption">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
 
             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto"
                   RowSpacing="7">

@@ -25,6 +25,7 @@ public sealed class RunsViewModel : ViewModelBase
     private int _chests;
     private string _scope = "day";
     private string _month = DateTime.Today.ToString("yyyy-MM");
+    private string _monthFilter = "";
     private TimeSpan _left;
     private bool _running;
 
@@ -230,22 +231,37 @@ public sealed class RunsViewModel : ViewModelBase
         }
     }
 
+    private bool Matches(MonthOption month) =>
+        _monthFilter.Length == 0
+        || month.Label.Contains(_monthFilter, StringComparison.CurrentCultureIgnoreCase)
+        || month.Key.Contains(_monthFilter, StringComparison.Ordinal);
+
     /// Nur bei der Monatsstatistik steht die Auswahl da.
     public bool IsMonthScope => _scope == "month";
 
+    /// Das Suchwort ueber der Liste. Getippt wird gefiltert; der gewaehlte
+    /// Monat bleibt immer darin, sonst faende die Auswahl ihn nicht wieder.
+    public string MonthFilter
+    {
+        get => _monthFilter;
+        set { if (Set(ref _monthFilter, value ?? "")) BuildMonths(); }
+    }
+
     private void BuildMonths()
     {
-        var keys = Mine()
+        var months = Mine()
             .Select(e => e.Day.Length >= 7 ? e.Day[..7] : null)
             .Where(k => k is not null)
             .Append(DateTime.Today.ToString("yyyy-MM"))
             .Append(_month)
             .Distinct()
             .OrderByDescending(k => k, StringComparer.Ordinal)
+            .Select(k => new MonthOption(k!))
+            .Where(m => m.Key == _month || Matches(m))
             .ToList();
 
         Months.Clear();
-        foreach (var key in keys) Months.Add(new MonthOption(key!));
+        foreach (var month in months) Months.Add(month);
         Raise(nameof(Month));
     }
 
