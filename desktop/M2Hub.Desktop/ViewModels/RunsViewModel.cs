@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Avalonia.Threading;
 using M2Hub.Desktop.Models;
 using M2Hub.Desktop.Services;
@@ -314,16 +315,16 @@ public sealed class RunsViewModel : ViewModelBase
     /// zuletzt gesetzte des Laufs. Beim Aendern bekommen die Eintraege dieses
     /// Tages den neuen Preis - eine Korrektur gilt fuer den ganzen Tag - und
     /// er wird zur Vorgabe fuer die naechsten.
-    public int ChestPrice
+    public decimal ChestPrice
     {
         get
         {
-            var day = OfDay().FirstOrDefault(e => e.Price > 0);
+            var day = OfDay().FirstOrDefault(e => e.Price > 0m);
             return day?.Price ?? RunPrice;
         }
         set
         {
-            var price = Math.Max(0, value);
+            var price = Math.Max(0m, value);
             if (ChestPrice == price) return;
 
             _store.Runs.ChestPrice[_run.Key] = price;
@@ -331,7 +332,30 @@ public sealed class RunsViewModel : ViewModelBase
 
             _store.SaveRuns();
             Raise(nameof(ChestPrice));
+            Raise(nameof(ChestPriceText));
             RaiseStats();
+        }
+    }
+
+    /// Der Preis als Text, weil er krumm sein darf: „56,25" so gut wie
+    /// „56.25". Im Spiel steht der Punkt auf der Tastatur naeher, im deutschen
+    /// Zahlbild trennt das Komma - beides soll gehen, also wird der Punkt vor
+    /// dem Lesen zum Komma gemacht und fest gegen die invariante Kultur
+    /// gelesen.
+    ///
+    /// Unlesbares bleibt stehen, statt still auf 0 zu springen: wer mitten im
+    /// Tippen „56," stehen hat, soll nicht bei jedem Zeichen einen neuen Wert
+    /// gespeichert bekommen.
+    public string ChestPriceText
+    {
+        get => ChestPrice.ToString("0.##", CultureInfo.CurrentCulture);
+        set
+        {
+            var text = (value ?? "").Trim().Replace(',', '.');
+            if (decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var price))
+                ChestPrice = price;
+
+            Raise(nameof(ChestPriceText));
         }
     }
 
@@ -351,20 +375,20 @@ public sealed class RunsViewModel : ViewModelBase
             var chests = InScope().Sum(e => e.Chests);
             if (chests == 0) return "—";
 
-            var total = InScope().Sum(e => (double)e.Chests * (e.Price > 0 ? e.Price : RunPrice));
-            return Money.FormatYang(total / chests);
+            var total = InScope().Sum(e => e.Chests * (e.Price > 0m ? e.Price : RunPrice));
+            return Money.FormatYang((double)(total / chests));
         }
     }
 
     /// Der zuletzt gesetzte Preis des Laufs - Vorgabe fuer Tage ohne eigenen.
-    private int RunPrice =>
+    private decimal RunPrice =>
         _store.Runs.ChestPrice.TryGetValue(_run.Key, out var p) ? p : RunCatalog.DefaultChestPrice;
 
     /// Truhen mal Preis - je Eintrag mit dem Preis seines Tages. Gerechnet in
     /// kk, geschrieben ab 100 kk in w; die Umrechnung macht
     /// `Money.FormatYang` fuer die ganze App.
     public string Income =>
-        Money.FormatYang(InScope().Sum(e => (double)e.Chests * (e.Price > 0 ? e.Price : RunPrice)));
+        Money.FormatYang((double)InScope().Sum(e => e.Chests * (e.Price > 0m ? e.Price : RunPrice)));
 
     public string PriceNote => Loc.T("runs.priceNote", Money.KkPerW);
 
@@ -538,6 +562,7 @@ public sealed class RunsViewModel : ViewModelBase
         Raise(nameof(ChestIcon));
         Raise(nameof(HasChestIcon));
         Raise(nameof(ChestPrice));
+        Raise(nameof(ChestPriceText));
         Raise(nameof(Cooldown));
         Raise(nameof(HasEntries));
         RaiseStats();
@@ -589,6 +614,7 @@ public sealed class RunsViewModel : ViewModelBase
             if (!Current.Loot.Contains(name)) LootSums.Add(new LootSumViewModel(name, count));
 
         Raise(nameof(ChestPrice));
+        Raise(nameof(ChestPriceText));
         Raise(nameof(IsDayScope));
         Raise(nameof(AveragePrice));
         Raise(nameof(RunCount));

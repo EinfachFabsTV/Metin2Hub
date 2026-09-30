@@ -201,7 +201,7 @@ public sealed class RunEntryDto
     ///
     /// 0 heisst „nicht vermerkt": Eintraege aus Fassungen vor 1.41.0 kennen
     /// das Feld nicht, fuer sie gilt der hinterlegte Preis des Laufs.
-    public int Price { get; set; }
+    public decimal Price { get; set; }
 
     public Dictionary<string, int> Loot { get; set; } = new();
 
@@ -216,7 +216,7 @@ public sealed class RunsData
     public List<RunEntryDto> Entries { get; set; } = new();
 
     /// Preis je Truhe in Won, je Lauf. Fehlt einer, gilt die Vorgabe.
-    public Dictionary<string, int> ChestPrice { get; set; } = new();
+    public Dictionary<string, decimal> ChestPrice { get; set; } = new();
 
     /// Abweichende Abklingzeit in Minuten, je Lauf.
     public Dictionary<string, int> Cooldown { get; set; } = new();

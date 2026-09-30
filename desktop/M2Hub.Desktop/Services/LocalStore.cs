@@ -60,9 +60,9 @@ public sealed class LocalStore
     private void StampRunPrices()
     {
         var changed = false;
-        foreach (var entry in Runs.Entries.Where(e => e.Price <= 0))
+        foreach (var entry in Runs.Entries.Where(e => e.Price <= 0m))
         {
-            entry.Price = Runs.ChestPrice.TryGetValue(entry.Run, out var price) && price > 0
+            entry.Price = Runs.ChestPrice.TryGetValue(entry.Run, out var price) && price > 0m
                 ? price
                 : Calc.RunCatalog.DefaultChestPrice;
             changed = true;

@@ -218,8 +218,10 @@
                   IsVisible="{Binding IsDayScope}">
               <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                          Text="{loc:T runs.price}" />
-              <NumericUpDown Grid.Column="1" Width="90" Value="{Binding ChestPrice}"
-                             Minimum="0" Maximum="99999" ShowButtonSpinner="False" />
+              <!-- Textfeld statt Zahlenfeld: der Preis darf krumm sein, und
+                   „56.25" soll so gut gehen wie „56,25". -->
+              <TextBox Grid.Column="1" Width="90"
+                       Text="{Binding ChestPriceText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
             </Grid>
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"

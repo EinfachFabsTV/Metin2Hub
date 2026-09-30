@@ -44,7 +44,7 @@ public static class RunCatalog
 
     /// Vorgabe fuer den Preis je Truhe, **in kk**. Gerechnet wird ueberall in
     /// kk, angezeigt ab 100 kk in w - siehe `Money.FormatYang`.
-    public const int DefaultChestPrice = 40;
+    public const decimal DefaultChestPrice = 40m;
 
     public static readonly Run[] Runs =
     [
