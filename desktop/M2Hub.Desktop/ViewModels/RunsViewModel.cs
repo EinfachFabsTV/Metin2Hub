@@ -161,7 +161,11 @@ public sealed class RunsViewModel : ViewModelBase
 
         // Ohne eigenes Truhenfeld ergibt die Beute die Truhenzahl.
         var chests = EntersChests ? _chests : loot.Values.Sum();
-        if (chests == 0 && loot.Count == 0) return;
+
+        // Ein Lauf ohne Truhen ist auch ein Lauf: er kostet dieselbe Zeit und
+        // gehoert in die Zahl der Runs, sonst schoent der Durchschnitt. Frueher
+        // wurde er stillschweigend verworfen - man druckte auf „Eintragen" und
+        // nichts geschah.
 
         _store.Runs.Entries.Add(new RunEntryDto
         {
