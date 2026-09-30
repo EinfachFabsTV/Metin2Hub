@@ -114,7 +114,8 @@
                          Text="{Binding AddHint}" TextWrapping="Wrap" />
               <NumericUpDown Grid.Column="2" Width="90" Value="{Binding Chests}"
                              Minimum="0" Maximum="9999" ShowButtonSpinner="False"
-                             IsVisible="{Binding EntersChests}" />
+                             IsVisible="{Binding EntersChests}"
+                             KeyDown="ChestsKeyDown" />
               <Button Grid.Column="3" Classes="primary" Content="{Binding AddLabel}"
                       Command="{Binding AddCommand}" />
             </Grid>
@@ -221,7 +222,8 @@
               <!-- Textfeld statt Zahlenfeld: der Preis darf krumm sein, und
                    „56.25" soll so gut gehen wie „56,25". -->
               <TextBox Grid.Column="1" Width="90"
-                       Text="{Binding ChestPriceText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                       Text="{Binding ChestPriceText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                       KeyDown="PriceKeyDown" />
             </Grid>
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
