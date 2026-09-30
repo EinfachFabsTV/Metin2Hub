@@ -212,11 +212,22 @@
               <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding ChestAverage}" />
             </Grid>
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <!-- Am Tag wird der Preis eingetippt; ueber Monat und Gesamtzeit
+                 steht der Durchschnitt, der sich aus den Tagen ergibt. -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                  IsVisible="{Binding IsDayScope}">
               <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                          Text="{loc:T runs.price}" />
               <NumericUpDown Grid.Column="1" Width="90" Value="{Binding ChestPrice}"
                              Minimum="0" Maximum="99999" ShowButtonSpinner="False" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                  IsVisible="{Binding !IsDayScope}">
+              <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                         Text="{loc:T runs.price.average}" TextWrapping="Wrap" />
+              <TextBlock Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center"
+                         Text="{Binding AveragePrice}" />
             </Grid>
 
             <Grid ColumnDefinitions="*,Auto">

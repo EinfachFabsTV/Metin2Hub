@@ -155,6 +155,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["runs.stat.chests"] = ["Truhen", "Chests", "Sandıklar", "Forzieri"],
         ["runs.stat.average"] = ["Truhen Ø", "Chests avg.", "Sandık ort.", "Forzieri medi"],
         ["runs.price"] = ["Preis pro Truhe am Tag (kk)", "Price per chest that day (kk)", "O günkü sandık fiyatı (kk)", "Prezzo per forziere del giorno (kk)"],
+        ["runs.price.average"] = ["Durchschnittspreis pro Truhe", "Average price per chest", "Sandık başına ortalama fiyat", "Prezzo medio per forziere"],
         ["runs.income"] = ["Ertrag", "Income", "Gelir", "Guadagno"],
         ["runs.priceNote"] = ["Rechnung: Truhen × Preis in kk, je Tag mit dem Preis dieses Tages. {0} kk sind 1 w.", "Calculation: chests × price in kk, each day with that day\u2019s price. {0} kk make 1 w.", "Hesap: sandık × kk cinsinden fiyat, her gün kendi fiyatıyla. {0} kk 1 w eder.", "Calcolo: forzieri × prezzo in kk, ogni giorno con il prezzo di quel giorno. {0} kk fanno 1 w."],
         ["runs.total.runs"] = ["Runs am Tag", "Runs today", "Günlük koşu", "Run del giorno"],

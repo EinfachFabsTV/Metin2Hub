@@ -331,6 +331,27 @@ public sealed class RunsViewModel : ViewModelBase
         }
     }
 
+    /// Nur am Tag laesst sich der Preis eintippen. Ueber Monat und Gesamtzeit
+    /// steht stattdessen der Durchschnitt: dort sind mehrere Tage mit
+    /// verschiedenen Preisen zusammengezaehlt, ein einzelner Wert waere
+    /// geraten.
+    public bool IsDayScope => _scope == "day";
+
+    /// Was eine Truhe im Zeitraum im Mittel eingebracht hat - nach Truhen
+    /// gewichtet, nicht nach Tagen: ein Tag mit sechzig Truhen zaehlt mehr als
+    /// einer mit sechs. Ergibt sich aus den Tagen und ist nicht zu aendern.
+    public string AveragePrice
+    {
+        get
+        {
+            var chests = InScope().Sum(e => e.Chests);
+            if (chests == 0) return "—";
+
+            var total = InScope().Sum(e => (double)e.Chests * (e.Price > 0 ? e.Price : RunPrice));
+            return Money.FormatYang(total / chests);
+        }
+    }
+
     /// Der zuletzt gesetzte Preis des Laufs - Vorgabe fuer Tage ohne eigenen.
     private int RunPrice =>
         _store.Runs.ChestPrice.TryGetValue(_run.Key, out var p) ? p : RunCatalog.DefaultChestPrice;
@@ -564,6 +585,8 @@ public sealed class RunsViewModel : ViewModelBase
             if (!Current.Loot.Contains(name)) LootSums.Add(new LootSumViewModel(name, count));
 
         Raise(nameof(ChestPrice));
+        Raise(nameof(IsDayScope));
+        Raise(nameof(AveragePrice));
         Raise(nameof(RunCount));
         Raise(nameof(ChestCount));
         Raise(nameof(ChestAverage));
