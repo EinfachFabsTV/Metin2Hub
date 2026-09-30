@@ -169,6 +169,7 @@ public sealed class RunsViewModel : ViewModelBase
             Run = _run.Key,
             Day = _day.ToString("yyyy-MM-dd"),
             Chests = chests,
+            Price = ChestPrice,
             Loot = loot,
             AddedAt = DateTime.Now,
         });
@@ -298,26 +299,47 @@ public sealed class RunsViewModel : ViewModelBase
         }
     }
 
-    /// Preis je Truhe **in kk**. Steht je Lauf und laesst sich hier aendern -
-    /// was die Truhe wert ist, weiss nur der Nutzer.
+    /// Preis je Truhe **in kk**, fuer den gewaehlten Tag.
+    ///
+    /// Was eine Truhe einbringt, schwankt. Deshalb merkt sich jeder Eintrag
+    /// den Preis, der an seinem Tag galt (`RunEntryDto.Price`); die
+    /// Monatssumme rechnet jeden Tag mit seinem eigenen. Frueher galt ein
+    /// Preis je Lauf - aenderte man ihn, stimmte rueckwirkend kein Monat mehr.
+    ///
+    /// Gelesen wird der Preis des gewaehlten Tages, und wo keiner steht, der
+    /// zuletzt gesetzte des Laufs. Beim Aendern bekommen die Eintraege dieses
+    /// Tages den neuen Preis - eine Korrektur gilt fuer den ganzen Tag - und
+    /// er wird zur Vorgabe fuer die naechsten.
     public int ChestPrice
     {
-        get => _store.Runs.ChestPrice.TryGetValue(_run.Key, out var p) ? p : RunCatalog.DefaultChestPrice;
+        get
+        {
+            var day = OfDay().FirstOrDefault(e => e.Price > 0);
+            return day?.Price ?? RunPrice;
+        }
         set
         {
             var price = Math.Max(0, value);
             if (ChestPrice == price) return;
 
             _store.Runs.ChestPrice[_run.Key] = price;
+            foreach (var entry in OfDay()) entry.Price = price;
+
             _store.SaveRuns();
             Raise(nameof(ChestPrice));
-            Raise(nameof(Income));
+            RaiseStats();
         }
     }
 
-    /// Truhen mal Preis. Gerechnet in kk, geschrieben ab 100 kk in w - die
-    /// Umrechnung macht `Money.FormatYang` fuer die ganze App.
-    public string Income => Money.FormatYang(InScope().Sum(e => e.Chests) * (double)ChestPrice);
+    /// Der zuletzt gesetzte Preis des Laufs - Vorgabe fuer Tage ohne eigenen.
+    private int RunPrice =>
+        _store.Runs.ChestPrice.TryGetValue(_run.Key, out var p) ? p : RunCatalog.DefaultChestPrice;
+
+    /// Truhen mal Preis - je Eintrag mit dem Preis seines Tages. Gerechnet in
+    /// kk, geschrieben ab 100 kk in w; die Umrechnung macht
+    /// `Money.FormatYang` fuer die ganze App.
+    public string Income =>
+        Money.FormatYang(InScope().Sum(e => (double)e.Chests * (e.Price > 0 ? e.Price : RunPrice)));
 
     public string PriceNote => Loc.T("runs.priceNote", Money.KkPerW);
 
@@ -497,8 +519,6 @@ public sealed class RunsViewModel : ViewModelBase
     }
 
     /// Die Liste der Tage. Sie folgt dem gewaehlten Zeitraum - bei
-        /// „Tagesstatistik" steht nur der eine Tag da, bei „komplett" alles.
-    /// Die Liste der Tage. Sie folgt dem gewaehlten Zeitraum - bei
     /// „Tagesstatistik" steht nur der eine Tag da, bei „komplett" alles.
     ///
     /// Eine Zeile je Lauf wurde nach wenigen Wochen unlesbar; jetzt steht je
@@ -543,6 +563,7 @@ public sealed class RunsViewModel : ViewModelBase
         foreach (var (name, count) in sums)
             if (!Current.Loot.Contains(name)) LootSums.Add(new LootSumViewModel(name, count));
 
+        Raise(nameof(ChestPrice));
         Raise(nameof(RunCount));
         Raise(nameof(ChestCount));
         Raise(nameof(ChestAverage));

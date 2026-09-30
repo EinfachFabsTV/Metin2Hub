@@ -195,6 +195,14 @@ public sealed class RunEntryDto
     /// Erhaltene Truhen. Bei Laeufen ohne eigenes Feld die Summe der Beute.
     public int Chests { get; set; }
 
+    /// Preis je Truhe **in kk**, wie er an diesem Tag galt. Der Preis
+    /// schwankt; rechnete der Monat mit dem heutigen, waere die Summe falsch,
+    /// sobald er sich einmal geaendert hat.
+    ///
+    /// 0 heisst „nicht vermerkt": Eintraege aus Fassungen vor 1.41.0 kennen
+    /// das Feld nicht, fuer sie gilt der hinterlegte Preis des Laufs.
+    public int Price { get; set; }
+
     public Dictionary<string, int> Loot { get; set; } = new();
 
     /// Wann der Eintrag gemacht wurde - fuer die Reihenfolge in der Liste.
