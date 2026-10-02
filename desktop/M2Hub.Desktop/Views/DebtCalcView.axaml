@@ -48,20 +48,43 @@
             </ItemsControl>
           </StackPanel>
 
+          <!-- Woher die Truhen je Lauf kommen -->
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.chests}" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Button Classes="chip" Classes.active="{Binding UseStatsChests}"
+                      Content="{loc:T calc.debt.chests.stats}"
+                      Command="{Binding UseStatsChestsCommand}" />
+              <Button Classes="chip" Classes.active="{Binding UseManualChests}"
+                      Content="{loc:T calc.debt.chests.manual}"
+                      Command="{Binding UseManualChestsCommand}" />
+            </StackPanel>
+
+            <TextBox Text="{Binding ManualChestsText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                     IsVisible="{Binding UseManualChests}" />
+
+            <!-- Ohne Eintraege gibt es keinen Erfahrungswert - dann hilft nur
+                 die Zahl von Hand. -->
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                       IsVisible="{Binding NeedsManualChests}"
+                       Text="{Binding NoEntriesHint}" />
+          </StackPanel>
+
           <!-- Woher der Preis kommt -->
           <StackPanel Spacing="6">
             <TextBlock Classes="muted" Text="{loc:T calc.debt.price}" />
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <Button Classes="chip" Classes.active="{Binding UseRange}"
+              <Button Classes="chip" Classes.active="{Binding UsePriceRange}"
                       Content="{loc:T calc.debt.price.range}"
                       Command="{Binding UseRangeCommand}" />
-              <Button Classes="chip" Classes.active="{Binding UseAverage}"
+              <Button Classes="chip" Classes.active="{Binding UseAveragePrice}"
                       Content="{loc:T calc.debt.price.average}"
+                      IsEnabled="{Binding CanUseAveragePrice}"
                       Command="{Binding UseAverageCommand}" />
             </StackPanel>
 
             <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="7"
-                  IsVisible="{Binding UseRange}">
+                  IsVisible="{Binding UsePriceRange}">
               <TextBox Grid.Column="0"
                        Text="{Binding PriceLowText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
               <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="–" />
@@ -69,7 +92,7 @@
                        Text="{Binding PriceHighText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
             </Grid>
 
-            <Border Classes="statrow" IsVisible="{Binding UseAverage}">
+            <Border Classes="statrow" IsVisible="{Binding UseAveragePrice}">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Grid.Column="0" Classes="muted"
                            Text="{loc:T calc.debt.price.fromStats}" TextWrapping="Wrap" />
@@ -90,13 +113,18 @@
 
           <TextBlock Classes="h2" Text="{loc:T calc.debt.result}" />
 
-          <!-- Ohne eigene Laeufe fehlt die Grundlage - dann sagt die Karte
-               das, statt eine Zahl zu erfinden. -->
-          <TextBlock Classes="muted" TextWrapping="Wrap"
-                     IsVisible="{Binding !HasEntries}"
-                     Text="{Binding NoEntriesHint}" />
+          <!-- Fortschritt: was von der Schuld schon abbezahlt ist -->
+          <StackPanel Spacing="4">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.debt.progress}" />
+              <TextBlock Grid.Column="1" FontWeight="Bold"
+                         Foreground="{StaticResource SuccessBrush}"
+                         Text="{Binding ProgressLabel}" />
+            </Grid>
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" Height="8" />
+          </StackPanel>
 
-          <StackPanel Spacing="10" IsVisible="{Binding HasEntries}">
+          <StackPanel Spacing="10">
 
             <StackPanel Spacing="2">
               <TextBlock Classes="muted" Text="{loc:T calc.debt.runsNeeded}" />

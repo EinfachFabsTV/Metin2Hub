@@ -284,4 +284,35 @@ public sealed class SettingsData
     /// Version, auf die schon hingewiesen wurde - damit derselbe Hinweis nicht
     /// bei jedem Start erneut kommt.
     public string? SkippedVersion { get; set; }
+
+    /// Stand des Schulden-Rechners. Er gehoert in die Einstellungen und nicht
+    /// zu den Laeufen: es ist **eine** Schuld, kein Wert je Lauf.
+    public DebtData Debt { get; set; } = new();
+}
+
+/// Was der Schulden-Rechner behaelt.
+///
+/// **Eine Schuld fuer alles**: Schuld und Abbezahltes gelten unabhaengig vom
+/// Lauf. Der Laufwechsel aendert nur die Schaetzung - „wie viele Hydra-Runs"
+/// statt „wie viele Razador-Runs" -, nicht den Fortschritt.
+public sealed class DebtData
+{
+    /// Schuld und bereits Abbezahltes, in **Won**.
+    public decimal Total { get; set; } = 2000m;
+    public decimal Farmed { get; set; }
+
+    /// Der Lauf, mit dem zuletzt gerechnet wurde.
+    public string Run { get; set; } = "hydra";
+
+    /// Die Preisspanne je Truhe, in kk.
+    public decimal PriceLow { get; set; } = 50m;
+    public decimal PriceHigh { get; set; } = 62m;
+
+    /// Statt der Spanne der Durchschnitt aus der Gesamtstatistik.
+    public bool UseAveragePrice { get; set; }
+
+    /// Truhen je Lauf von Hand statt aus den eigenen Eintraegen - fuer Laeufe,
+    /// zu denen noch nichts eingetragen ist, und fuer eigene Annahmen.
+    public bool UseManualChests { get; set; }
+    public decimal ManualChests { get; set; } = 9m;
 }

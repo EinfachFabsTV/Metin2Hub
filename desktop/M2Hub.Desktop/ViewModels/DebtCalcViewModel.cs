@@ -8,14 +8,17 @@ namespace M2Hub.Desktop.ViewModels;
 
 /// Schulden-Rechner: wie viele Laeufe fehlen noch, bis die Schuld bezahlt ist.
 ///
-/// Schuld und Erfarmtes traegt man **von Hand** ein - was man abbezahlt hat,
-/// weiss nur man selbst, und es kommt nicht nur aus Laeufen. Beides steht in
-/// **Won**, so wie man darueber redet; gerechnet wird in kk (`Money`).
+/// **Eine Schuld fuer alles.** Schuld und Abbezahltes gelten unabhaengig vom
+/// Lauf und stehen in den Einstellungen (`SettingsData.Debt`); der
+/// Laufwechsel aendert nur die Schaetzung, nicht den Fortschritt. Beides
+/// traegt der Nutzer von Hand ein - was abbezahlt ist, weiss nur er, und es
+/// kommt nicht nur aus Laeufen. Angegeben in **Won**, so wie man darueber
+/// redet; gerechnet wird in kk (`Money`).
 ///
-/// Die Truhen je Lauf kommen dagegen aus den eigenen Eintraegen im Run
-/// Tracker - danach ist der Bereich ja da. Beim Preis hat man die Wahl: eine
-/// Spanne von Hand („50 bis 62 kk") oder der Durchschnitt aus der
-/// Gesamtstatistik des Laufs.
+/// Die Truhen je Lauf kommen aus den eigenen Eintraegen im Run Tracker oder,
+/// umschaltbar, von Hand - fuer Laeufe ohne Eintraege und fuer eigene
+/// Annahmen. Dasselbe beim Preis: Spanne oder Durchschnitt aus der
+/// Gesamtstatistik.
 ///
 /// Der Rechenweg liegt in `Services/Calc/DebtCalc`; hier steht nur, was
 /// eingestellt ist und wie es beschriftet wird.
@@ -24,23 +27,28 @@ public sealed class DebtCalcViewModel : ViewModelBase
     private readonly LocalStore _store;
 
     private RunChip _run;
-    private decimal _debt = 2000m;
-    private decimal _farmed;
-    private decimal _priceLow = 50m;
-    private decimal _priceHigh = 62m;
-    private bool _useAverage;
 
     public DebtCalcViewModel(LocalStore store)
     {
         _store = store;
 
         foreach (var run in RunCatalog.Runs) Runs.Add(new RunChip(run.Key, run.Name));
-        _run = Runs[0];
+        _run = Runs.FirstOrDefault(c => c.Key == State.Run) ?? Runs[0];
         _run.IsActive = true;
 
         ChooseRunCommand = new RelayCommand(p => { if (p is RunChip chip) Run = chip; });
-        UseAverageCommand = new RelayCommand(_ => UseAverage = true);
-        UseRangeCommand = new RelayCommand(_ => UseAverage = false);
+        UseAverageCommand = new RelayCommand(_ => UseAveragePrice = true);
+        UseRangeCommand = new RelayCommand(_ => UseAveragePrice = false);
+        UseStatsChestsCommand = new RelayCommand(_ => UseManualChests = false);
+        UseManualChestsCommand = new RelayCommand(_ => UseManualChests = true);
+    }
+
+    private DebtData State => _store.Settings.Debt;
+
+    private void Save()
+    {
+        _store.SaveSettings();
+        RaiseResult();
     }
 
     /* ---------- Auswahl ---------- */
@@ -55,7 +63,8 @@ public sealed class DebtCalcViewModel : ViewModelBase
             if (value is null || !Set(ref _run, value)) return;
 
             foreach (var chip in Runs) chip.IsActive = chip.Key == _run.Key;
-            RaiseResult();
+            State.Run = _run.Key;
+            Save();
         }
     }
 
@@ -68,58 +77,85 @@ public sealed class DebtCalcViewModel : ViewModelBase
     /// Die Schuld in Won - „2000 Won", wie man es sagt.
     public string DebtText
     {
-        get => Text(_debt);
-        set { if (Read(value, out var won)) { _debt = won; RaiseResult(); } Raise(nameof(DebtText)); }
+        get => Text(State.Total);
+        set { if (Read(value, out var won)) { State.Total = won; Save(); } Raise(nameof(DebtText)); }
     }
 
     /// Was davon schon abbezahlt ist, ebenfalls in Won. Von Hand, weil es
     /// nicht nur aus Laeufen kommt.
     public string FarmedText
     {
-        get => Text(_farmed);
-        set { if (Read(value, out var won)) { _farmed = won; RaiseResult(); } Raise(nameof(FarmedText)); }
+        get => Text(State.Farmed);
+        set { if (Read(value, out var won)) { State.Farmed = won; Save(); } Raise(nameof(FarmedText)); }
     }
 
     /// Die Preisspanne je Truhe, in kk. Der Preis schwankt im Laufe des Tages;
     /// eine Spanne trifft es besser als eine Zahl.
     public string PriceLowText
     {
-        get => Text(_priceLow);
-        set { if (Read(value, out var kk)) { _priceLow = kk; RaiseResult(); } Raise(nameof(PriceLowText)); }
+        get => Text(State.PriceLow);
+        set { if (Read(value, out var kk)) { State.PriceLow = kk; Save(); } Raise(nameof(PriceLowText)); }
     }
 
     public string PriceHighText
     {
-        get => Text(_priceHigh);
-        set { if (Read(value, out var kk)) { _priceHigh = kk; RaiseResult(); } Raise(nameof(PriceHighText)); }
+        get => Text(State.PriceHigh);
+        set { if (Read(value, out var kk)) { State.PriceHigh = kk; Save(); } Raise(nameof(PriceHighText)); }
+    }
+
+    /// Truhen je Lauf von Hand - fuer Laeufe ohne Eintraege und fuer eigene
+    /// Annahmen.
+    public string ManualChestsText
+    {
+        get => Text(State.ManualChests);
+        set { if (Read(value, out var n)) { State.ManualChests = n; Save(); } Raise(nameof(ManualChestsText)); }
     }
 
     /// Statt der Spanne der Durchschnitt aus der Gesamtstatistik des Laufs.
-    public bool UseAverage
+    public bool UseAveragePrice
     {
-        get => _useAverage;
+        get => State.UseAveragePrice;
         set
         {
-            if (!Set(ref _useAverage, value)) return;
+            if (State.UseAveragePrice == value) return;
 
-            Raise(nameof(UseRange));
-            RaiseResult();
+            State.UseAveragePrice = value;
+            Raise(nameof(UseAveragePrice));
+            Raise(nameof(UsePriceRange));
+            Save();
         }
     }
 
-    public bool UseRange => !_useAverage;
+    public bool UsePriceRange => !State.UseAveragePrice;
+
+    /// Truhen je Lauf von Hand statt aus den eigenen Eintraegen.
+    public bool UseManualChests
+    {
+        get => State.UseManualChests;
+        set
+        {
+            if (State.UseManualChests == value) return;
+
+            State.UseManualChests = value;
+            Raise(nameof(UseManualChests));
+            Raise(nameof(UseStatsChests));
+            Save();
+        }
+    }
+
+    public bool UseStatsChests => !State.UseManualChests;
 
     public RelayCommand UseAverageCommand { get; }
     public RelayCommand UseRangeCommand { get; }
+    public RelayCommand UseStatsChestsCommand { get; }
+    public RelayCommand UseManualChestsCommand { get; }
 
     /* ---------- Was aus den Eintraegen kommt ---------- */
 
     private IEnumerable<RunEntryDto> Mine() => _store.Runs.Entries.Where(e => e.Run == _run.Key);
 
-    /// Truhen je Lauf, aus allen Eintraegen dieses Laufs. Ohne Eintraege gibt
-    /// es keinen Erfahrungswert - dann sagt die Ansicht das, statt eine Zahl
-    /// zu erfinden.
-    private decimal ChestsPerRun
+    /// Truhen je Lauf aus allen Eintraegen dieses Laufs.
+    private decimal StatsChestsPerRun
     {
         get
         {
@@ -127,6 +163,9 @@ public sealed class DebtCalcViewModel : ViewModelBase
             return list.Count == 0 ? 0m : (decimal)list.Sum(e => e.Chests) / list.Count;
         }
     }
+
+    /// Die Zahl, mit der gerechnet wird: von Hand oder aus den Eintraegen.
+    private decimal ChestsPerRun => State.UseManualChests ? State.ManualChests : StatsChestsPerRun;
 
     /// Der Durchschnittspreis je Truhe ueber alles, nach Truhen gewichtet -
     /// derselbe Wert, den die Gesamtstatistik im Run Tracker zeigt.
@@ -145,19 +184,38 @@ public sealed class DebtCalcViewModel : ViewModelBase
         }
     }
 
+    /// Der Preis, mit dem gerechnet wird. Bei der Spanne die Mitte - fuer die
+    /// Spanne der Laeufe stehen die Enden selbst.
+    private decimal Price => State.UseAveragePrice
+        ? AveragePrice
+        : (State.PriceLow + State.PriceHigh) / 2m;
+
     public bool HasEntries => Mine().Any();
 
-    public string ChestsPerRunLabel => HasEntries
-        ? ChestsPerRun.ToString("0.##", CultureInfo.CurrentCulture)
-        : "—";
+    /// Ohne Eintraege gibt es weder Truhenzahl noch Durchschnittspreis. Dann
+    /// steht ein Hinweis da - und die Zahl von Hand hilft weiter.
+    public bool NeedsManualChests => !HasEntries && !State.UseManualChests;
+
+    /// Der Durchschnittspreis braucht Eintraege; ohne sie ist er leer.
+    public bool CanUseAveragePrice => HasEntries;
+
+    public string ChestsPerRunLabel =>
+        ChestsPerRun <= 0m ? "—" : ChestsPerRun.ToString("0.##", CultureInfo.CurrentCulture);
 
     public string AveragePriceLabel => HasEntries ? Money.FormatYang((double)AveragePrice) : "—";
 
     /* ---------- Ergebnis ---------- */
 
-    private decimal RestKk => DebtCalc.Rest(_debt, _farmed) * Money.KkPerW;
+    private decimal RestKk => DebtCalc.Rest(State.Total, State.Farmed) * Money.KkPerW;
 
     public string RestLabel => Money.FormatYang((double)RestKk);
+
+    /// Wie weit die Schuld abbezahlt ist, in Prozent - fuer den Balken.
+    public double Progress => State.Total <= 0m
+        ? 0
+        : (double)Math.Clamp(State.Farmed / State.Total * 100m, 0m, 100m);
+
+    public string ProgressLabel => Progress.ToString("0.#", CultureInfo.CurrentCulture) + " %";
 
     /// „ungefaehr 540 bis 670 Laeufe" - oder eine Zahl, wenn der Durchschnitt
     /// genommen wird.
@@ -165,16 +223,17 @@ public sealed class DebtCalcViewModel : ViewModelBase
     {
         get
         {
-            if (!HasEntries) return "—";
+            if (ChestsPerRun <= 0m) return "—";
             if (RestKk <= 0m) return Loc.T("calc.debt.done");
 
-            if (_useAverage)
+            if (State.UseAveragePrice)
             {
                 var runs = DebtCalc.Runs(RestKk, DebtCalc.PerRun(ChestsPerRun, AveragePrice));
                 return runs == 0 ? "—" : Loc.T("calc.debt.runs", Number(runs));
             }
 
-            var (min, max) = DebtCalc.RunsBetween(RestKk, ChestsPerRun, _priceLow, _priceHigh);
+            var (min, max) = DebtCalc.RunsBetween(
+                RestKk, ChestsPerRun, State.PriceLow, State.PriceHigh);
             if (min == 0 || max == 0) return "—";
 
             return min == max
@@ -188,10 +247,7 @@ public sealed class DebtCalcViewModel : ViewModelBase
     {
         get
         {
-            if (!HasEntries) return "—";
-
-            var price = _useAverage ? AveragePrice : (_priceLow + _priceHigh) / 2m;
-            var perRun = DebtCalc.PerRun(ChestsPerRun, price);
+            var perRun = DebtCalc.PerRun(ChestsPerRun, Price);
             return perRun <= 0m ? "—" : Money.FormatYang((double)perRun);
         }
     }
@@ -203,9 +259,9 @@ public sealed class DebtCalcViewModel : ViewModelBase
     {
         get
         {
-            if (!HasEntries || RestKk <= 0m) return "—";
+            if (ChestsPerRun <= 0m || RestKk <= 0m) return "—";
 
-            var price = _useAverage ? AveragePrice : Math.Max(_priceLow, _priceHigh);
+            var price = State.UseAveragePrice ? AveragePrice : Math.Max(State.PriceLow, State.PriceHigh);
             var runs = DebtCalc.Runs(RestKk, DebtCalc.PerRun(ChestsPerRun, price));
             if (runs == 0) return "—";
 
@@ -235,9 +291,13 @@ public sealed class DebtCalcViewModel : ViewModelBase
     private void RaiseResult()
     {
         Raise(nameof(HasEntries));
+        Raise(nameof(NeedsManualChests));
+        Raise(nameof(CanUseAveragePrice));
         Raise(nameof(ChestsPerRunLabel));
         Raise(nameof(AveragePriceLabel));
         Raise(nameof(RestLabel));
+        Raise(nameof(Progress));
+        Raise(nameof(ProgressLabel));
         Raise(nameof(RunsLabel));
         Raise(nameof(PerRunLabel));
         Raise(nameof(DurationLabel));
