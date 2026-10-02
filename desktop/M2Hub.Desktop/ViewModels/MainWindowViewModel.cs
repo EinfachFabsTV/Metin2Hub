@@ -40,7 +40,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts = new AccountsViewModel(store, dialogs);
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
-        GuildCalc = new GuildCalcViewModel();
+        Calculators = new CalcHostViewModel(store);
         RunTracker = new RunsViewModel(store, dialogs);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
@@ -62,7 +62,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Loc.I.PropertyChanged += (_, _) =>
         {
             Accounts.RelabelAfterLanguageChange();
-            GuildCalc.RelabelAfterLanguageChange();
+            Calculators.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Dashboard.Reload();
             Events.Reload();
@@ -86,7 +86,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ItemshopViewModel Itemshop { get; }
 
     /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
-    public GuildCalcViewModel GuildCalc { get; }
+    public CalcHostViewModel Calculators { get; }
 
     /// Run Tracker: eingetragene Laeufe, rein lokal.
     public RunsViewModel RunTracker { get; }
@@ -245,11 +245,12 @@ public sealed class MainWindowViewModel : ViewModelBase
             "runs" => RunTracker,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
-            "calc" => GuildCalc,
+            "calc" => Calculators,
             "settings" => Settings,
             _ => Events,
         };
         if (key == "accounts") Accounts.EnsureLoaded();
+        if (key == "calc") Calculators.Reload();
         if (key == "start") { Accounts.EnsureLoaded(); Dashboard.Reload(); }
     }
 

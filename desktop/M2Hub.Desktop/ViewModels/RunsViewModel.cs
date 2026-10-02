@@ -678,9 +678,13 @@ public sealed class QuickChest(int value) : ViewModelBase
 public sealed class RunChip(string key, string label) : ViewModelBase
 {
     private bool _isActive;
+    private string _label = label;
 
     public string Key { get; } = key;
-    public string Label { get; } = label;
+
+    /// Veraenderlich, weil die Rechner-Chips ihre Namen aus `Loc` ziehen und
+    /// ein Sprachwechsel sofort wirken soll.
+    public string Label { get => _label; set => Set(ref _label, value); }
 
     public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
 }

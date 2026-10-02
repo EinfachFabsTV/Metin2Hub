@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             x:Class="M2Hub.Desktop.Views.CalcHostView"
+             x:DataType="vm:CalcHostViewModel">
+
+  <DockPanel>
+    <!-- Welcher Rechner. Oben, damit die Rechner darunter unveraendert
+         bleiben - jeder bringt seine eigene Ueberschrift mit. -->
+    <Border DockPanel.Dock="Top" Padding="18,14,18,0">
+      <ItemsControl ItemsSource="{Binding Calculators}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:RunChip">
+            <Button Classes="chip" Classes.active="{Binding IsActive}"
+                    Margin="0,0,6,0" Content="{Binding Label}"
+                    Command="{Binding $parent[UserControl].DataContext.ChooseCommand}"
+                    CommandParameter="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+
+    <ContentControl Content="{Binding Current}" />
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.DebtCalcView"
+             x:DataType="vm:DebtCalcViewModel">
+
+  <ScrollViewer>
+    <!-- Aufbau wie beim Gilden-Rechner: Eingaben schmal links, Ergebnis
+         breit rechts. -->
+    <Grid Margin="18" ColumnDefinitions="0.8*,1.2*" ColumnSpacing="14">
+
+      <!-- ===== Eingaben ===== -->
+      <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
+        <StackPanel Spacing="16">
+
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h1" Text="{loc:T calc.debt.title}" />
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.subtitle}" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <!-- Schuld und Abbezahltes: beides von Hand, beides in Won -->
+          <StackPanel Spacing="4">
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.debt}" />
+            <TextBox Text="{Binding DebtText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.farmed}" />
+            <TextBox Text="{Binding FarmedText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+
+          <!-- Welcher Lauf -->
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.run}" />
+            <ItemsControl ItemsSource="{Binding Runs}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:RunChip">
+                  <Button Classes="chip" Classes.active="{Binding IsActive}"
+                          Margin="0,0,6,6" Content="{Binding Label}"
+                          Command="{Binding $parent[UserControl].DataContext.ChooseRunCommand}"
+                          CommandParameter="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <!-- Woher der Preis kommt -->
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{loc:T calc.debt.price}" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Button Classes="chip" Classes.active="{Binding UseRange}"
+                      Content="{loc:T calc.debt.price.range}"
+                      Command="{Binding UseRangeCommand}" />
+              <Button Classes="chip" Classes.active="{Binding UseAverage}"
+                      Content="{loc:T calc.debt.price.average}"
+                      Command="{Binding UseAverageCommand}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="7"
+                  IsVisible="{Binding UseRange}">
+              <TextBox Grid.Column="0"
+                       Text="{Binding PriceLowText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+              <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="–" />
+              <TextBox Grid.Column="2"
+                       Text="{Binding PriceHighText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+            </Grid>
+
+            <Border Classes="statrow" IsVisible="{Binding UseAverage}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted"
+                           Text="{loc:T calc.debt.price.fromStats}" TextWrapping="Wrap" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center"
+                           Text="{Binding AveragePriceLabel}" />
+              </Grid>
+            </Border>
+          </StackPanel>
+
+          <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                     Text="{loc:T calc.debt.note}" />
+        </StackPanel>
+      </Border>
+
+      <!-- ===== Ergebnis ===== -->
+      <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top">
+        <StackPanel Spacing="14">
+
+          <TextBlock Classes="h2" Text="{loc:T calc.debt.result}" />
+
+          <!-- Ohne eigene Laeufe fehlt die Grundlage - dann sagt die Karte
+               das, statt eine Zahl zu erfinden. -->
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+                     IsVisible="{Binding !HasEntries}"
+                     Text="{Binding NoEntriesHint}" />
+
+          <StackPanel Spacing="10" IsVisible="{Binding HasEntries}">
+
+            <StackPanel Spacing="2">
+              <TextBlock Classes="muted" Text="{loc:T calc.debt.runsNeeded}" />
+              <TextBlock FontSize="26" FontWeight="Bold"
+                         Foreground="{StaticResource PrimaryBrush}"
+                         Text="{Binding RunsLabel}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.debt.rest}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding RestLabel}" />
+              </Grid>
+            </Border>
+
+            <Border Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.debt.chestsPerRun}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding ChestsPerRunLabel}" />
+              </Grid>
+            </Border>
+
+            <Border Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.debt.perRun}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding PerRunLabel}" />
+              </Grid>
+            </Border>
+
+            <Border Classes="statrow">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.debt.duration}"
+                           TextWrapping="Wrap" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding DurationLabel}" />
+              </Grid>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>
