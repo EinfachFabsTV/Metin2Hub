@@ -17,6 +17,7 @@ public sealed class RunsViewModel : ViewModelBase
 {
     private readonly LocalStore _store;
     private readonly IDialogService _dialogs;
+    private readonly StreamOverlay _stream;
     private readonly DispatcherTimer _timer;
     private readonly DispatcherTimer _midnight;
     private DateTime _today = DateTime.Today;
@@ -30,10 +31,11 @@ public sealed class RunsViewModel : ViewModelBase
     private TimeSpan _left;
     private bool _running;
 
-    public RunsViewModel(LocalStore store, IDialogService dialogs)
+    public RunsViewModel(LocalStore store, IDialogService dialogs, StreamOverlay stream)
     {
         _store = store;
         _dialogs = dialogs;
+        _stream = stream;
 
         foreach (var r in RunCatalog.Runs) Runs.Add(new RunChip(r.Key, r.Name));
         _run = Runs[0];
@@ -566,6 +568,9 @@ public sealed class RunsViewModel : ViewModelBase
         Raise(nameof(Cooldown));
         Raise(nameof(HasEntries));
         RaiseStats();
+
+        // Was im Stream steht, folgt dem, was eingetragen ist.
+        _stream.Write();
     }
 
     /// Die Liste der Tage. Sie folgt dem gewaehlten Zeitraum - bei

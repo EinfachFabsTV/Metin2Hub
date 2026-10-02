@@ -11,10 +11,10 @@ public sealed class CalcHostViewModel : ViewModelBase
 {
     private RunChip _chosen;
 
-    public CalcHostViewModel(LocalStore store)
+    public CalcHostViewModel(LocalStore store, StreamOverlay stream)
     {
         Guild = new GuildCalcViewModel();
-        Debt = new DebtCalcViewModel(store);
+        Debt = new DebtCalcViewModel(store, stream);
 
         Calculators.Add(new RunChip("guild", Loc.T("calc.guild.title")));
         Calculators.Add(new RunChip("debt", Loc.T("calc.debt.title")));

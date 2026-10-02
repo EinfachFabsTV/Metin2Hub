@@ -285,9 +285,28 @@ public sealed class SettingsData
     /// bei jedem Start erneut kommt.
     public string? SkippedVersion { get; set; }
 
+    /// Was in der Stream-Einblendung steht.
+    public StreamData Stream { get; set; } = new();
+
     /// Stand des Schulden-Rechners. Er gehoert in die Einstellungen und nicht
     /// zu den Laeufen: es ist **eine** Schuld, kein Wert je Lauf.
     public DebtData Debt { get; set; } = new();
+}
+
+/// Einstellungen der Stream-Einblendung (`StreamOverlay`).
+public sealed class StreamData
+{
+    /// Aus heisst: es werden keine Dateien geschrieben. Wer nicht streamt,
+    /// soll keine Dateien im Profil liegen haben, die er nie bestellt hat.
+    public bool Enabled { get; set; }
+
+    /// Welcher Zeitraum in Truhen und Runs steht: "today", "session" oder
+    /// "total".
+    public string Scope { get; set; } = "today";
+
+    /// Ab wann „seit Stream-Start" zaehlt. Der Knopf in den Einstellungen
+    /// setzt ihn auf jetzt.
+    public DateTime SessionStart { get; set; } = DateTime.Now;
 }
 
 /// Was der Schulden-Rechner behaelt.

@@ -74,6 +74,7 @@ public sealed class SettingsViewModel : ViewModelBase
     private readonly LocalStore _store;
     private readonly IDialogService _dialogs;
     private readonly UpdateService _updates;
+    private readonly StreamOverlay _stream;
     private readonly Action _headerChanged;
     private readonly Action _cacheCleared;
     private readonly Func<UpdateService.UpdateInfo, Task> _showUpdate;
@@ -94,6 +95,7 @@ public sealed class SettingsViewModel : ViewModelBase
         LocalStore store,
         IDialogService dialogs,
         UpdateService updates,
+        StreamOverlay stream,
         Action headerChanged,
         Action cacheCleared,
         Func<UpdateService.UpdateInfo, Task> showUpdate)
@@ -101,6 +103,7 @@ public sealed class SettingsViewModel : ViewModelBase
         _store = store;
         _dialogs = dialogs;
         _updates = updates;
+        _stream = stream;
         _headerChanged = headerChanged;
         _cacheCleared = cacheCleared;
         _showUpdate = showUpdate;
@@ -121,6 +124,11 @@ public sealed class SettingsViewModel : ViewModelBase
         Servers = BuildServerRows(store);
         _headerServer = HeaderServers.FirstOrDefault(o => o.Key == store.Settings.HeaderServer)
                         ?? HeaderServers[0];
+
+        StreamScopes = BuildStreamScopes();
+        ChooseStreamScopeCommand = new RelayCommand(p => { if (p is RunChip o) StreamScope = o; });
+        ResetStreamStartCommand = new RelayCommand(_ => ResetStreamStart());
+        OpenStreamFolderCommand = new RelayCommand(_ => Platform.OpenFolder(StreamOverlay.FolderPath));
 
         OpenFolderCommand = new RelayCommand(_ => Platform.OpenFolder(LocalStore.Directory));
         OpenReleasesCommand = new RelayCommand(_ => Platform.OpenUrl(UpdateService.ReleasePage));
@@ -398,6 +406,67 @@ public sealed class SettingsViewModel : ViewModelBase
 
     public string? Status { get => _status; private set { if (Set(ref _status, value)) Raise(nameof(HasStatus)); } }
     public bool HasStatus => !string.IsNullOrWhiteSpace(_status);
+
+    /* ---------- Stream-Einblendung ---------- */
+
+    /// Die drei Zeitraeume als Knopfreihe, wie bei den Laeufen.
+    public ObservableCollection<RunChip> StreamScopes { get; }
+
+    public RunChip StreamScope
+    {
+        get => StreamScopes.FirstOrDefault(o => o.Key == _store.Settings.Stream.Scope)
+               ?? StreamScopes[0];
+        set
+        {
+            if (value is null || _store.Settings.Stream.Scope == value.Key) return;
+
+            _store.Settings.Stream.Scope = value.Key;
+            foreach (var o in StreamScopes) o.IsActive = o.Key == value.Key;
+            _store.SaveSettings();
+            _stream.Write();
+            Raise(nameof(StreamScope));
+        }
+    }
+
+    /// Schreibt die App die Dateien? Beim Einschalten stehen sie sofort da -
+    /// sonst richtet man die Quelle in OBS auf eine Datei, die es nicht gibt.
+    public bool StreamEnabled
+    {
+        get => _store.Settings.Stream.Enabled;
+        set
+        {
+            if (_store.Settings.Stream.Enabled == value) return;
+
+            _store.Settings.Stream.Enabled = value;
+            _store.SaveSettings();
+            _stream.Write();
+            Raise(nameof(StreamEnabled));
+        }
+    }
+
+    public RelayCommand ChooseStreamScopeCommand { get; }
+    public RelayCommand ResetStreamStartCommand { get; }
+    public RelayCommand OpenStreamFolderCommand { get; }
+
+    private ObservableCollection<RunChip> BuildStreamScopes()
+    {
+        var list = new ObservableCollection<RunChip>
+        {
+            new(StreamOverlay.Today, Loc.T("stream.scope.today")),
+            new(StreamOverlay.Session, Loc.T("stream.scope.session")),
+            new(StreamOverlay.Total, Loc.T("stream.scope.total")),
+        };
+        foreach (var o in list) o.IsActive = o.Key == _store.Settings.Stream.Scope;
+        return list;
+    }
+
+    private void ResetStreamStart()
+    {
+        _store.Settings.Stream.SessionStart = DateTime.Now;
+        _store.SaveSettings();
+        _stream.Write();
+        Status = Loc.T("settings.stream.resetDone");
+    }
 
     public RelayCommand OpenFolderCommand { get; }
     public RelayCommand OpenReleasesCommand { get; }

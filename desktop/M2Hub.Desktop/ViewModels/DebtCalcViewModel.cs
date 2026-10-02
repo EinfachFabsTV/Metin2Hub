@@ -25,12 +25,14 @@ namespace M2Hub.Desktop.ViewModels;
 public sealed class DebtCalcViewModel : ViewModelBase
 {
     private readonly LocalStore _store;
+    private readonly StreamOverlay _stream;
 
     private RunChip _run;
 
-    public DebtCalcViewModel(LocalStore store)
+    public DebtCalcViewModel(LocalStore store, StreamOverlay stream)
     {
         _store = store;
+        _stream = stream;
 
         foreach (var run in RunCatalog.Runs) Runs.Add(new RunChip(run.Key, run.Name));
         _run = Runs.FirstOrDefault(c => c.Key == State.Run) ?? Runs[0];
@@ -48,6 +50,9 @@ public sealed class DebtCalcViewModel : ViewModelBase
     private void Save()
     {
         _store.SaveSettings();
+
+        // Die Schuld steht auch im Stream.
+        _stream.Write();
         RaiseResult();
     }
 

@@ -40,11 +40,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts = new AccountsViewModel(store, dialogs);
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
-        Calculators = new CalcHostViewModel(store);
-        RunTracker = new RunsViewModel(store, dialogs);
+        Stream = new StreamOverlay(store);
+        Calculators = new CalcHostViewModel(store, Stream);
+        RunTracker = new RunsViewModel(store, dialogs, Stream);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
-            store, dialogs, _updates, RefreshActiveNow, ReloadPages,
+            store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages,
             info => dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart)));
 
         ShowStartCommand = new RelayCommand(_ => Show("start"));
@@ -87,6 +88,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
     public CalcHostViewModel Calculators { get; }
+
+    /// Schreibt die Zahlen fuer OBS - in Dateien, ohne Server.
+    public StreamOverlay Stream { get; }
 
     /// Run Tracker: eingetragene Laeufe, rein lokal.
     public RunsViewModel RunTracker { get; }
