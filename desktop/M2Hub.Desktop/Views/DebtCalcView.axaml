@@ -22,12 +22,14 @@
           <!-- Schuld und Abbezahltes: beides von Hand, beides in Won -->
           <StackPanel Spacing="4">
             <TextBlock Classes="muted" Text="{loc:T calc.debt.debt}" />
-            <TextBox Text="{Binding DebtText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+            <TextBox Text="{Binding DebtText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                     KeyDown="CommitKeyDown" />
           </StackPanel>
 
           <StackPanel Spacing="4">
             <TextBlock Classes="muted" Text="{loc:T calc.debt.farmed}" />
-            <TextBox Text="{Binding FarmedText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+            <TextBox Text="{Binding FarmedText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                     KeyDown="CommitKeyDown" />
           </StackPanel>
 
           <!-- Welcher Lauf -->
@@ -61,7 +63,8 @@
             </StackPanel>
 
             <TextBox Text="{Binding ManualChestsText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                     IsVisible="{Binding UseManualChests}" />
+                     IsVisible="{Binding UseManualChests}"
+                     KeyDown="CommitKeyDown" />
 
             <!-- Ohne Eintraege gibt es keinen Erfahrungswert - dann hilft nur
                  die Zahl von Hand. -->
@@ -86,10 +89,12 @@
             <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="7"
                   IsVisible="{Binding UsePriceRange}">
               <TextBox Grid.Column="0"
-                       Text="{Binding PriceLowText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                       Text="{Binding PriceLowText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                     KeyDown="CommitKeyDown" />
               <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Text="–" />
               <TextBox Grid.Column="2"
-                       Text="{Binding PriceHighText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                       Text="{Binding PriceHighText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                     KeyDown="CommitKeyDown" />
             </Grid>
 
             <Border Classes="statrow" IsVisible="{Binding UseAveragePrice}">

@@ -16,18 +16,26 @@ public partial class RunsView : UserControl
         if (e.Key != Key.Enter || DataContext is not RunsViewModel vm) return;
 
         vm.AddCommand.Execute(null);
-        e.Handled = true;
+        Commit(e);
     }
 
-    /// Enter im Preisfeld uebernimmt den Preis. Die Bindung greift sonst erst
-    /// beim Verlassen des Feldes - wer tippt und Enter drueckt, sieht sonst
-    /// nichts geschehen.
+    /// Enter im Preisfeld uebernimmt den Preis. Die Bindung greift beim
+    /// Verlassen des Feldes - und genau das macht `Commit`.
     private void PriceKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Enter || sender is not TextBox box) return;
-        if (DataContext is not RunsViewModel vm) return;
+        if (e.Key != Key.Enter) return;
 
-        vm.ChestPriceText = box.Text ?? "";
+        Commit(e);
+    }
+
+    /// Nach Enter liegt der Schreibzeiger nicht mehr im Feld.
+    ///
+    /// Sonst steht es weiter offen: wer danach eine Taste trifft - etwa die 7
+    /// fuer den naechsten Lauf - aendert nachtraeglich, was er gerade
+    /// bestaetigt hat. Das Verlassen laesst zugleich die Bindung greifen.
+    private void Commit(KeyEventArgs e)
+    {
+        TopLevel.GetTopLevel(this)?.FocusManager?.ClearFocus();
         e.Handled = true;
     }
 }
