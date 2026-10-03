@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.50.0
+
+**Neu**
+
+- **Deckkraft der Stream-Einblendungen** in den Einstellungen frei einstellbar,
+  von ganz durchsichtig bis ganz deckend. Gilt fuer beide Karten; die Schrift
+  bleibt voll deckend, damit sie vor hellem Spielbild lesbar bleibt.
+
 ## 1.49.1
 
 **Behoben**

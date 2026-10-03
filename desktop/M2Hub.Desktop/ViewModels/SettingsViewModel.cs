@@ -511,6 +511,27 @@ public sealed class SettingsViewModel : ViewModelBase
         Raise(name);
     }
 
+    /// Deckkraft des Kartengrunds, fuer beide Einblendungen. Die Schrift
+    /// bleibt immer voll deckend - sonst waere sie vor hellem Spielbild nicht
+    /// mehr zu lesen.
+    public int StreamOpacity
+    {
+        get => _store.Settings.Stream.Opacity;
+        set
+        {
+            var next = Math.Clamp(value, 0, 100);
+            if (_store.Settings.Stream.Opacity == next) return;
+
+            _store.Settings.Stream.Opacity = next;
+            _store.SaveSettings();
+            _stream.Write();
+            Raise(nameof(StreamOpacity));
+            Raise(nameof(StreamOpacityLabel));
+        }
+    }
+
+    public string StreamOpacityLabel => StreamOpacity + " %";
+
     /// Die Schriftgroesse der Goal-Leiste - drei Stufen, damit man die Karte
     /// nicht in OBS kleinziehen muss.
     public ObservableCollection<RunChip> GoalSizes { get; private set; } = new();

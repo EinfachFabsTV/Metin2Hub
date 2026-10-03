@@ -450,6 +450,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["settings.patchnotes.open"] = ["Änderungen lesen", "Read the changes", "Değişiklikleri oku", "Leggi le modifiche"],
         ["settings.patchnotes"] = ["Was ist neu", "What’s new", "Yenilikler", "Novità"],
         ["settings.patchnotes.all"] = ["Alle Versionen zeigen", "Show all versions", "Tüm sürümleri göster", "Mostra tutte le versioni"],
+        ["settings.stream.opacity"] = ["Deckkraft des Hintergrunds", "Background opacity", "Arka plan opaklığı", "Opacità dello sfondo"],
         ["settings.stream.goal.size"] = ["Schriftgröße der Leiste", "Font size of the bar", "Çubuğun yazı boyutu", "Dimensione del testo nella barra"],
         ["settings.stream.goal.size.s"] = ["Klein", "Small", "Küçük", "Piccolo"],
         ["settings.stream.goal.size.m"] = ["Mittel", "Medium", "Orta", "Medio"],

@@ -175,6 +175,15 @@ public sealed class StreamOverlay(LocalStore store)
     }
 
     /// Drei Stufen, damit man die Karte nicht in OBS kleinziehen muss.
+    /// Die Deckkraft des Kartenhintergrunds, als CSS-Anteil („0.82").
+    /// Der Rand geht mit: ein deutlicher Rahmen um nichts sieht aus wie ein
+    /// Fehler.
+    private double Opacity => Math.Clamp(store.Settings.Stream.Opacity, 0, 100) / 100.0;
+
+    private string Alpha => Opacity.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private string BorderAlpha => (Opacity * 0.1).ToString("0.###", CultureInfo.InvariantCulture);
+
     private static string Size(string? key) => key switch
     {
         "s" => "13",
@@ -230,7 +239,7 @@ public sealed class StreamOverlay(LocalStore store)
     /// Die Karte als HTML. Farben aus `Styles/Theme.axaml` - die eine Quelle
     /// der Wahrheit steht dort, hier stehen dieselben Werte, weil eine
     /// Browser-Quelle kein XAML liest.
-    private static string Page(View view) => $$"""
+    private string Page(View view) => $$"""
         <!doctype html>
         <html lang="de">
         <head>
@@ -247,8 +256,8 @@ public sealed class StreamOverlay(LocalStore store)
           }
           .card {
             display: inline-block;
-            background: rgba(11, 17, 31, .82);
-            border: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(11, 17, 31, {{Alpha}});
+            border: 1px solid rgba(255, 255, 255, {{BorderAlpha}});
             border-radius: 14px;
             padding: 14px 18px;
             min-width: 320px;
@@ -304,7 +313,7 @@ public sealed class StreamOverlay(LocalStore store)
 
     /// Der Rahmen der Goal-Karte: eine flache Leiste, dieselben Farben wie
     /// die erste Karte.
-    private static string Frame(string title, string line, string bar, string size) => $$"""
+    private string Frame(string title, string line, string bar, string size) => $$"""
         <!doctype html>
         <html lang="de">
         <head>
@@ -319,8 +328,8 @@ public sealed class StreamOverlay(LocalStore store)
           }
           .card {
             display: inline-flex; align-items: center; gap: .75em;
-            background: rgba(11, 17, 31, .82);
-            border: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(11, 17, 31, {{Alpha}});
+            border: 1px solid rgba(255, 255, 255, {{BorderAlpha}});
             border-radius: 999px; padding: .5em 1.1em;
             white-space: nowrap;
           }

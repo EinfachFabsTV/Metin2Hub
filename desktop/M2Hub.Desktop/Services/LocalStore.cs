@@ -333,6 +333,12 @@ public sealed class StreamData
     /// Schriftgroesse der Goal-Leiste: "s", "m" oder "l". Lieber hier als in
     /// OBS skalieren - skaliert wird dort auch die Unschaerfe.
     public string GoalSize { get; set; } = "m";
+
+    /// Deckkraft des Kartenhintergrunds in Prozent, fuer beide Einblendungen.
+    /// 0 heisst: nur Schrift und Balken, kein Grund - 100 deckt alles zu.
+    /// Die Schrift bleibt immer voll deckend, sonst waere sie vor hellem
+    /// Spielbild nicht mehr zu lesen.
+    public int Opacity { get; set; } = 82;
 }
 
 /// Was der Schulden-Rechner behaelt.

@@ -152,6 +152,19 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
+                <!-- Wie deckend der Kartengrund ist. Die Schrift bleibt voll
+                     deckend, sonst waere sie vor hellem Bild nicht zu lesen. -->
+                <StackPanel Spacing="4">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="muted"
+                               Text="{loc:T settings.stream.opacity}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold"
+                               Text="{Binding StreamOpacityLabel}" />
+                  </Grid>
+                  <Slider Minimum="0" Maximum="100" TickFrequency="5"
+                          IsSnapToTickEnabled="True" Value="{Binding StreamOpacity}" />
+                </StackPanel>
+
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <Button Content="{loc:T settings.stream.reset}"
                           Command="{Binding ResetStreamStartCommand}" />
