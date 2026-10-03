@@ -75,6 +75,7 @@ public sealed class SettingsViewModel : ViewModelBase
     private readonly IDialogService _dialogs;
     private readonly UpdateService _updates;
     private readonly StreamOverlay _stream;
+    private bool _allPatchnotes;
     private readonly Action _headerChanged;
     private readonly Action _cacheCleared;
     private readonly Func<UpdateService.UpdateInfo, Task> _showUpdate;
@@ -296,6 +297,7 @@ public sealed class SettingsViewModel : ViewModelBase
         new("start", Loc.T("nav.start")),
         new("accounts", Loc.T("nav.accounts")),
         new("runs", Loc.T("nav.runs")),
+        new("goals", Loc.T("nav.goals")),
         new("events", Loc.T("nav.events")),
         new("itemshop", Loc.T("nav.itemshop")),
         new("calc", Loc.T("nav.calc")),
@@ -444,6 +446,62 @@ public sealed class SettingsViewModel : ViewModelBase
         }
     }
 
+    /// Die zweite Einblendung samt ihren Stuecken. Jedes einzeln, weil in
+    /// einem Overlay jede Zeile Platz kostet.
+    public bool GoalOverlayEnabled
+    {
+        get => _store.Settings.Stream.GoalEnabled;
+        set => SetStream(v => _store.Settings.Stream.GoalEnabled = v, value,
+            _store.Settings.Stream.GoalEnabled, nameof(GoalOverlayEnabled));
+    }
+
+    public bool GoalShowProgress
+    {
+        get => _store.Settings.Stream.GoalShowProgress;
+        set => SetStream(v => _store.Settings.Stream.GoalShowProgress = v, value,
+            _store.Settings.Stream.GoalShowProgress, nameof(GoalShowProgress));
+    }
+
+    public bool GoalShowNet
+    {
+        get => _store.Settings.Stream.GoalShowNet;
+        set => SetStream(v => _store.Settings.Stream.GoalShowNet = v, value,
+            _store.Settings.Stream.GoalShowNet, nameof(GoalShowNet));
+    }
+
+    public bool GoalShowRuns
+    {
+        get => _store.Settings.Stream.GoalShowRuns;
+        set => SetStream(v => _store.Settings.Stream.GoalShowRuns = v, value,
+            _store.Settings.Stream.GoalShowRuns, nameof(GoalShowRuns));
+    }
+
+    public bool GoalShowChests
+    {
+        get => _store.Settings.Stream.GoalShowChests;
+        set => SetStream(v => _store.Settings.Stream.GoalShowChests = v, value,
+            _store.Settings.Stream.GoalShowChests, nameof(GoalShowChests));
+    }
+
+    public bool GoalShowActiveRun
+    {
+        get => _store.Settings.Stream.GoalShowActiveRun;
+        set => SetStream(v => _store.Settings.Stream.GoalShowActiveRun = v, value,
+            _store.Settings.Stream.GoalShowActiveRun, nameof(GoalShowActiveRun));
+    }
+
+    /// Setzen, speichern, Dateien neu schreiben - fuer alle Schalter derselbe
+    /// Weg.
+    private void SetStream(Action<bool> set, bool value, bool current, string name)
+    {
+        if (current == value) return;
+
+        set(value);
+        _store.SaveSettings();
+        _stream.Write();
+        Raise(name);
+    }
+
     public RelayCommand ChooseStreamScopeCommand { get; }
     public RelayCommand ResetStreamStartCommand { get; }
     public RelayCommand OpenStreamFolderCommand { get; }
@@ -467,6 +525,29 @@ public sealed class SettingsViewModel : ViewModelBase
         _stream.Write();
         Status = Loc.T("settings.stream.resetDone");
     }
+
+    /* ---------- Patchnotes ---------- */
+
+    /// Was sich in dieser Fassung geaendert hat. Die Liste steht in
+    /// `desktop/CHANGELOG.md` und liegt der App als Datei bei.
+    public string Patchnotes { get; } = Services.Patchnotes.Latest();
+
+    public bool HasPatchnotes => Patchnotes.Length > 0;
+
+    public bool AllPatchnotes
+    {
+        get => _allPatchnotes;
+        set
+        {
+            if (!Set(ref _allPatchnotes, value)) return;
+
+            Raise(nameof(PatchnotesText));
+        }
+    }
+
+    /// Standard ist die neueste Fassung; wer mehr sehen will, klappt alles auf.
+    public string PatchnotesText =>
+        _allPatchnotes ? Services.Patchnotes.Everything() : Patchnotes;
 
     public RelayCommand OpenFolderCommand { get; }
     public RelayCommand OpenReleasesCommand { get; }

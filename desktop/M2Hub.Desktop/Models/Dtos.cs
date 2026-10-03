@@ -225,3 +225,72 @@ public sealed class RunsData
 
     public int TakeId() => NextId++;
 }
+
+/// Ein Ziel: „1500w fuer X". Was die Laeufe seit `StartedAt` einbringen,
+/// zaehlt automatisch; Ausgaben und Zusatzeinnahmen traegt der Nutzer ein.
+public sealed class GoalDto
+{
+    public int Id { get; set; }
+
+    /// Wofuer gespart wird - der Text, der im Stream steht.
+    public string Title { get; set; } = "";
+
+    /// Das Ziel in **Won**, so wie man es sagt.
+    public decimal Target { get; set; }
+
+    /// Ab wann die Laeufe zaehlen. Beim Anlegen „jetzt"; wird das Ziel durch
+    /// ein abgeschlossenes vorheriges aktiv, ist es dessen Abschluss.
+    public DateTime StartedAt { get; set; } = DateTime.Now;
+
+    /// Was vom vorigen Ziel uebrig blieb - nur, wenn der Ueberschuss
+    /// uebertragen werden soll.
+    public decimal CarryIn { get; set; }
+
+    /// Der Lauf, mit dem gerade gearbeitet wird. **Nur Anzeige und
+    /// Schaetzung**: in den Gewinn zaehlen alle Laeufe ab `StartedAt`.
+    public string ActiveRun { get; set; } = "hydra";
+
+    /// Abgeschlossen - dann ist das naechste Ziel an der Reihe.
+    public bool Done { get; set; }
+    public DateTime? DoneAt { get; set; }
+
+    /// Reihenfolge der Warteschlange: das kleinste offene Ziel ist das aktive.
+    public int Sort { get; set; }
+
+    /// Ausgaben und Zusatzeinnahmen, einzeln.
+    public List<GoalBookingDto> Bookings { get; set; } = new();
+}
+
+/// Ein Posten unter einem Ziel. Die Art entscheidet das Vorzeichen:
+/// `income` kommt dazu, alles andere geht ab.
+public sealed class GoalBookingDto
+{
+    public int Id { get; set; }
+
+    /// "push" (Standard: Traenke, Taus, Energiekristall), "extra"
+    /// (Zusatz-Push, etwa Kostueme), "expense" (einmalige Ausgabe) oder
+    /// "income" (Zusatzeinnahme).
+    public string Kind { get; set; } = "push";
+
+    /// Betrag in **Won**, immer positiv - das Vorzeichen steckt in der Art.
+    public decimal Amount { get; set; }
+
+    public string Note { get; set; } = "";
+    public DateTime AddedAt { get; set; } = DateTime.Now;
+}
+
+/// Die Ziele, wie sie in goals.json stehen.
+public sealed class GoalsData
+{
+    public List<GoalDto> Goals { get; set; } = new();
+
+    /// Was beim Erreichen eines Ziels geschieht: "carry" (naechstes wird
+    /// aktiv, der Ueberschuss zaehlt mit), "reset" (naechstes wird aktiv,
+    /// faengt aber bei null an) oder "manual" (es bleibt stehen, bis der
+    /// Nutzer umschaltet).
+    public string OnReached { get; set; } = "carry";
+
+    public int NextId { get; set; } = 1;
+
+    public int TakeId() => NextId++;
+}

@@ -43,6 +43,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Stream = new StreamOverlay(store);
         Calculators = new CalcHostViewModel(store, Stream);
         RunTracker = new RunsViewModel(store, dialogs, Stream);
+        Goals = new GoalsViewModel(store, dialogs, Stream);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
             store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages,
@@ -54,6 +55,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
+        ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
         OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
@@ -64,6 +66,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Accounts.RelabelAfterLanguageChange();
             Calculators.RelabelAfterLanguageChange();
+            Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Dashboard.Reload();
             Events.Reload();
@@ -92,6 +95,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     /// Schreibt die Zahlen fuer OBS - in Dateien, ohne Server.
     public StreamOverlay Stream { get; }
 
+    public GoalsViewModel Goals { get; }
+
     /// Run Tracker: eingetragene Laeufe, rein lokal.
     public RunsViewModel RunTracker { get; }
 
@@ -114,6 +119,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsItemshop));
             Raise(nameof(IsRuns));
             Raise(nameof(IsCalc));
+            Raise(nameof(IsGoals));
             Raise(nameof(IsSettings));
         }
     }
@@ -124,6 +130,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsItemshop => _currentKey == "itemshop";
     public bool IsRuns => _currentKey == "runs";
     public bool IsCalc => _currentKey == "calc";
+    public bool IsGoals => _currentKey == "goals";
     public bool IsSettings => _currentKey == "settings";
 
     public bool Busy { get => _busy; private set { if (Set(ref _busy, value)) Raise(nameof(NotBusy)); } }
@@ -148,6 +155,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand ShowStartCommand { get; }
     public RelayCommand ShowRunsCommand { get; }
     public RelayCommand ShowCalcCommand { get; }
+    public RelayCommand ShowGoalsCommand { get; }
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
     public RelayCommand ShowItemshopCommand { get; }
@@ -229,7 +237,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["start", "accounts", "runs", "events", "itemshop", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -247,6 +255,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             "start" => Dashboard,
             "runs" => RunTracker,
+            "goals" => Goals,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
             "calc" => Calculators,
@@ -255,6 +264,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         };
         if (key == "accounts") Accounts.EnsureLoaded();
         if (key == "calc") Calculators.Reload();
+        if (key == "goals") Goals.Reload();
         if (key == "start") { Accounts.EnsureLoaded(); Dashboard.Reload(); }
     }
 

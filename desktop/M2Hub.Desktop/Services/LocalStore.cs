@@ -7,6 +7,7 @@ namespace M2Hub.Desktop.Services;
 ///
 ///   accounts.json  Accounts, Charaktere, Gilden, Schnellwahl
 ///   runs.json      eingetragene Laeufe des Run Trackers
+///   goals.json     Ziele samt Ausgaben und Zusatzeinnahmen
 ///   cache.json     Events und Itemshop - abgelaufene hoechstens sieben Tage
 ///   images/        heruntergeladene Ankuendigungsbilder
 public sealed class LocalStore
@@ -29,6 +30,7 @@ public sealed class LocalStore
 
     private static string AccountsPath => Path.Combine(Directory, "accounts.json");
     private static string RunsPath => Path.Combine(Directory, "runs.json");
+    private static string GoalsPath => Path.Combine(Directory, "goals.json");
     private static string CachePath => Path.Combine(Directory, "cache.json");
     private static string SettingsPath => Path.Combine(Directory, "settings.json");
 
@@ -37,6 +39,7 @@ public sealed class LocalStore
     public AccountsData Accounts { get; private set; } = new();
     public CacheData Cache { get; private set; } = new();
     public RunsData Runs { get; private set; } = new();
+    public GoalsData Goals { get; private set; } = new();
     public SettingsData Settings { get; private set; } = new();
 
     public LocalStore()
@@ -44,6 +47,7 @@ public sealed class LocalStore
         Accounts = Read<AccountsData>(AccountsPath) ?? Seed();
         Cache = Read<CacheData>(CachePath) ?? new CacheData();
         Runs = Read<RunsData>(RunsPath) ?? new RunsData();
+        Goals = Read<GoalsData>(GoalsPath) ?? new GoalsData();
         Settings = Read<SettingsData>(SettingsPath) ?? new SettingsData();
         Prune();
         StampRunPrices();
@@ -123,6 +127,7 @@ public sealed class LocalStore
     public void SaveSettings() => Write(SettingsPath, Settings);
 
     public void SaveRuns() => Write(RunsPath, Runs);
+    public void SaveGoals() => Write(GoalsPath, Goals);
 
     /// Verwirft den Forum-Stand; der naechste Abruf holt alles neu.
     public void ClearCache()
@@ -307,6 +312,19 @@ public sealed class StreamData
     /// Ab wann „seit Stream-Start" zaehlt. Der Knopf in den Einstellungen
     /// setzt ihn auf jetzt.
     public DateTime SessionStart { get; set; } = DateTime.Now;
+
+    /// Die zweite Einblendung: das aktive Ziel. Eigene Datei, eigene Quelle in
+    /// OBS - wer nur das Ziel zeigen will, blendet die andere Karte aus.
+    public bool GoalEnabled { get; set; }
+
+    /// Was in der Goal-Karte steht. Jedes Stueck einzeln abschaltbar: in einem
+    /// Overlay zaehlt jede Zeile, die man nicht braucht, als Platz, den man
+    /// verliert.
+    public bool GoalShowProgress { get; set; } = true;
+    public bool GoalShowNet { get; set; } = true;
+    public bool GoalShowRuns { get; set; } = true;
+    public bool GoalShowChests { get; set; }
+    public bool GoalShowActiveRun { get; set; } = true;
 }
 
 /// Was der Schulden-Rechner behaelt.

@@ -143,7 +143,36 @@
                   <Button Content="{loc:T settings.stream.open}"
                           Command="{Binding OpenStreamFolderCommand}" />
                 </StackPanel>
+
+                <!-- Die zweite Karte: das aktive Ziel, eigene Datei -->
+                <StackPanel Spacing="6" Margin="0,6,0,0">
+                  <TextBlock Classes="h2" FontSize="14" Text="{loc:T settings.stream.goal}" />
+                  <CheckBox Content="{loc:T settings.stream.goal.hint}"
+                            IsChecked="{Binding GoalOverlayEnabled}" />
+                  <StackPanel Spacing="2" Margin="22,0,0,0" IsEnabled="{Binding GoalOverlayEnabled}">
+                    <CheckBox Content="{loc:T settings.stream.goal.progress}"
+                              IsChecked="{Binding GoalShowProgress}" />
+                    <CheckBox Content="{loc:T settings.stream.goal.net}"
+                              IsChecked="{Binding GoalShowNet}" />
+                    <CheckBox Content="{loc:T settings.stream.goal.runs}"
+                              IsChecked="{Binding GoalShowRuns}" />
+                    <CheckBox Content="{loc:T settings.stream.goal.chests}"
+                              IsChecked="{Binding GoalShowChests}" />
+                    <CheckBox Content="{loc:T settings.stream.goal.activeRun}"
+                              IsChecked="{Binding GoalShowActiveRun}" />
+                  </StackPanel>
+                </StackPanel>
               </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Was sich geaendert hat -->
+          <Border Classes="card" IsVisible="{Binding HasPatchnotes}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.patchnotes}" />
+              <CheckBox Content="{loc:T settings.patchnotes.all}" IsChecked="{Binding AllPatchnotes}" />
+              <SelectableTextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                   Text="{Binding PatchnotesText}" />
             </StackPanel>
           </Border>
 

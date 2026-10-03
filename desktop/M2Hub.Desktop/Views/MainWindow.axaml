@@ -135,6 +135,8 @@
                     Command="{Binding ShowAccountsCommand}" Content="{loc:T nav.accounts}" />
             <Button Classes="side" Classes.active="{Binding IsRuns}"
                     Command="{Binding ShowRunsCommand}" Content="{loc:T nav.runs}" />
+            <Button Classes="side" Classes.active="{Binding IsGoals}"
+                    Command="{Binding ShowGoalsCommand}" Content="{loc:T nav.goals}" />
             <Button Classes="side" Classes.active="{Binding IsEvents}"
                     Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
             <Button Classes="side" Classes.active="{Binding IsItemshop}"

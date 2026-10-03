@@ -1,0 +1,248 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.GoalsView"
+             x:DataType="vm:GoalsViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T goals.title}" />
+        <TextBlock Classes="muted" Text="{loc:T goals.subtitle}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="1.3*,0.9*" ColumnSpacing="14">
+
+        <!-- ===== Das aktive Ziel ===== -->
+        <StackPanel Grid.Column="0" Spacing="14">
+
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="14">
+
+              <TextBlock Classes="muted" Text="{loc:T goals.none}" TextWrapping="Wrap"
+                         IsVisible="{Binding !HasActive}" />
+
+              <StackPanel Spacing="14" IsVisible="{Binding HasActive}">
+
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="h2" Text="{Binding Title}"
+                             TextWrapping="Wrap" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="18"
+                             Foreground="{StaticResource PrimaryBrush}"
+                             VerticalAlignment="Center" Text="{Binding TargetLabel}" />
+                </Grid>
+
+                <StackPanel Spacing="4">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" FontSize="22" FontWeight="Bold"
+                               Foreground="{StaticResource SuccessBrush}"
+                               Text="{Binding NetLabel}" />
+                    <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Bottom"
+                               Text="{Binding ProgressLabel}" />
+                  </Grid>
+                  <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" Height="10" />
+                  <TextBlock Classes="muted" FontSize="12" Text="{Binding RunsLeftLabel}" />
+                </StackPanel>
+
+                <!-- Die Rechnung dahinter -->
+                <StackPanel Spacing="7">
+                  <Border Classes="statrow">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.profit}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding ProfitLabel}" />
+                    </Grid>
+                  </Border>
+                  <Border Classes="statrow" IsVisible="{Binding HasCarry}">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.carry}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding CarryLabel}" />
+                    </Grid>
+                  </Border>
+                  <Border Classes="statrow">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.income}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold"
+                                 Foreground="{StaticResource SuccessBrush}"
+                                 Text="{Binding IncomeLabel}" />
+                    </Grid>
+                  </Border>
+                  <Border Classes="statrow">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.expenses}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold"
+                                 Foreground="{StaticResource AmberBrush}"
+                                 Text="{Binding ExpensesLabel}" />
+                    </Grid>
+                  </Border>
+                  <Border Classes="statrow">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.rest}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding RestLabel}" />
+                    </Grid>
+                  </Border>
+                </StackPanel>
+
+                <!-- Der aktive Lauf: Anzeige und Schaetzung, kein Filter -->
+                <StackPanel Spacing="6">
+                  <TextBlock Classes="muted" Text="{loc:T goals.run}" />
+                  <ItemsControl ItemsSource="{Binding Runs}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:RunChip">
+                        <Button Classes="chip" Classes.active="{Binding IsActive}"
+                                Margin="0,0,6,6" Content="{Binding Label}"
+                                Command="{Binding $parent[UserControl].DataContext.ChooseRunCommand}"
+                                CommandParameter="{Binding}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                             Text="{loc:T goals.run.note}" />
+                </StackPanel>
+
+                <Button Classes="chip" HorizontalAlignment="Left"
+                        Content="{loc:T goals.finish}"
+                        IsEnabled="{Binding CanFinish}"
+                        Command="{Binding FinishCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Ausgaben und Zusatzeinnahmen ===== -->
+          <Border Classes="card" Padding="18" IsVisible="{Binding HasActive}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T goals.booking}" />
+
+              <ItemsControl ItemsSource="{Binding Kinds}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:RunChip">
+                    <Button Classes="chip" Classes.active="{Binding IsActive}"
+                            Margin="0,0,6,6" Content="{Binding Label}"
+                            Command="{Binding $parent[UserControl].DataContext.ChooseKindCommand}"
+                            CommandParameter="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                <TextBox Grid.Column="0" Text="{Binding Amount, Mode=TwoWay}"
+                         Watermark="{loc:T goals.booking.amount}" KeyDown="AddKeyDown" />
+                <TextBox Grid.Column="1" Text="{Binding Note, Mode=TwoWay}"
+                         Watermark="{loc:T goals.booking.note}" KeyDown="AddKeyDown" />
+                <Button Grid.Column="2" Classes="primary" Content="{loc:T goals.booking.add}"
+                        Command="{Binding AddBookingCommand}" />
+              </Grid>
+
+              <TextBlock Classes="muted" Text="{loc:T goals.booking.none}"
+                         IsVisible="{Binding !HasBookings}" />
+
+              <ItemsControl ItemsSource="{Binding Bookings}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:GoalBookingViewModel">
+                    <Border Classes="panel" Padding="10,7" Margin="0,0,0,6">
+                      <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="9">
+                        <TextBlock Grid.Column="0" FontSize="11" Classes="muted"
+                                   VerticalAlignment="Center" Text="{Binding DayLabel}" />
+                        <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
+                                   VerticalAlignment="Center" Text="{Binding AmountLabel}" />
+                        <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                   Text="{Binding KindLabel}" />
+                        <Button Grid.Column="3" Classes="icon danger" Content="✕"
+                                ToolTip.Tip="{loc:T goals.booking.delete}"
+                                Command="{Binding $parent[UserControl].DataContext.DeleteBookingCommand}"
+                                CommandParameter="{Binding}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- ===== Warteschlange ===== -->
+        <StackPanel Grid.Column="1" Spacing="14">
+
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T goals.new}" />
+              <TextBox Text="{Binding NewTitle, Mode=TwoWay}"
+                       Watermark="{loc:T goals.new.title}" KeyDown="AddGoalKeyDown" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox Grid.Column="0" Text="{Binding NewTarget, Mode=TwoWay}"
+                         Watermark="{loc:T goals.new.target}" KeyDown="AddGoalKeyDown" />
+                <Button Grid.Column="1" Classes="primary" Content="{loc:T goals.new.add}"
+                        Command="{Binding AddGoalCommand}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T goals.queue}" />
+
+              <ItemsControl ItemsSource="{Binding Queue}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:GoalRowViewModel">
+                    <Border Classes="panel" Padding="10,7" Margin="0,0,0,6">
+                      <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="5">
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                          <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding Title}"
+                                     TextTrimming="CharacterEllipsis" />
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Classes="muted" FontSize="11" Text="{Binding TargetLabel}" />
+                            <TextBlock FontSize="11" Foreground="{StaticResource PrimaryBrush}"
+                                       Text="{loc:T goals.queue.active}"
+                                       IsVisible="{Binding IsActive}" />
+                            <TextBlock FontSize="11" Foreground="{StaticResource SuccessBrush}"
+                                       Text="{loc:T goals.queue.done}"
+                                       IsVisible="{Binding IsDone}" />
+                          </StackPanel>
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="icon" Content="↑"
+                                Command="{Binding $parent[UserControl].DataContext.MoveUpCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="2" Classes="icon" Content="↓"
+                                Command="{Binding $parent[UserControl].DataContext.MoveDownCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="3" Classes="icon danger" Content="✕"
+                                ToolTip.Tip="{loc:T goals.delete}"
+                                Command="{Binding $parent[UserControl].DataContext.DeleteGoalCommand}"
+                                CommandParameter="{Binding}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <StackPanel Spacing="6">
+                <TextBlock Classes="muted" Text="{loc:T goals.mode}" />
+                <ItemsControl ItemsSource="{Binding Modes}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:RunChip">
+                      <Button Classes="chip" Classes.active="{Binding IsActive}"
+                              Margin="0,0,6,6" Content="{Binding Label}"
+                              Command="{Binding $parent[UserControl].DataContext.ChooseModeCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
