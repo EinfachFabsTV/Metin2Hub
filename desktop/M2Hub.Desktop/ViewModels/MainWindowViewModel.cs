@@ -41,9 +41,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
         Stream = new StreamOverlay(store);
-        Calculators = new CalcHostViewModel(store, Stream);
+        GuildCalc = new GuildCalcViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
-        Goals = new GoalsViewModel(store, dialogs, Stream);
+        Goals = new GoalsHostViewModel(store, dialogs, Stream);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
             store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages,
@@ -56,6 +56,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
+        ResetStreamStartCommand = new RelayCommand(_ => ResetStreamStart());
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
         OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
@@ -65,7 +66,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Loc.I.PropertyChanged += (_, _) =>
         {
             Accounts.RelabelAfterLanguageChange();
-            Calculators.RelabelAfterLanguageChange();
+            GuildCalc.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Dashboard.Reload();
@@ -90,12 +91,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ItemshopViewModel Itemshop { get; }
 
     /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
-    public CalcHostViewModel Calculators { get; }
+    public GuildCalcViewModel GuildCalc { get; }
 
     /// Schreibt die Zahlen fuer OBS - in Dateien, ohne Server.
     public StreamOverlay Stream { get; }
 
-    public GoalsViewModel Goals { get; }
+    public GoalsHostViewModel Goals { get; }
 
     /// Run Tracker: eingetragene Laeufe, rein lokal.
     public RunsViewModel RunTracker { get; }
@@ -156,6 +157,15 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand ShowRunsCommand { get; }
     public RelayCommand ShowCalcCommand { get; }
     public RelayCommand ShowGoalsCommand { get; }
+
+    /// „Seit Stream-Start" wieder auf jetzt. Der Knopf steht in der
+    /// Seitenleiste, weil man ihn waehrend des Streams drueckt und nicht in
+    /// den Einstellungen suchen will.
+    public RelayCommand ResetStreamStartCommand { get; }
+
+    /// Nur wenn eine Einblendung laeuft, hat der Knopf einen Sinn.
+    public bool HasStreamOverlay =>
+        _store.Settings.Stream.Enabled || _store.Settings.Stream.GoalEnabled;
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
     public RelayCommand ShowItemshopCommand { get; }
@@ -185,8 +195,31 @@ public sealed class MainWindowViewModel : ViewModelBase
         Show(_store.Settings.StartPage);
 
         _timer.Start();
+        await ShowPatchnotesAsync();
         await RefreshAsync(manual: false);
         await CheckUpdateAsync();
+    }
+
+    /// Nach einem Update einmal zeigen, was sich geaendert hat.
+    ///
+    /// Beim allerersten Start nicht: wer die App gerade erst installiert hat,
+    /// braucht keine Liste von Aenderungen an etwas, das er noch nie gesehen
+    /// hat. Dann wird die Fassung nur stillschweigend vermerkt.
+    private async Task ShowPatchnotesAsync()
+    {
+        var version = UpdateService.CurrentVersion;
+        if (_store.Settings.PatchnotesSeen == version) return;
+
+        var first = _store.Settings.PatchnotesSeen is null;
+        _store.Settings.PatchnotesSeen = version;
+        _store.SaveSettings();
+
+        if (first) return;
+
+        var notes = Patchnotes.Latest();
+        if (notes.Length == 0) return;
+
+        await Dialogs.ShowAsync(new PatchnotesDialogViewModel(version, notes));
     }
 
     /// Hinweis auf eine neuere Version, hoechstens einmal je Version.
@@ -248,9 +281,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         Show(PageOrder[next]);
     }
 
+    private void ResetStreamStart()
+    {
+        _store.Settings.Stream.SessionStart = DateTime.Now;
+        _store.SaveSettings();
+        Stream.Write();
+    }
+
     private void Show(string key)
     {
         CurrentKey = key;
+
+        // Die Einblendung laesst sich in den Einstellungen ein- und
+        // ausschalten; beim Verlassen der Seite steht der Knopf richtig.
+        Raise(nameof(HasStreamOverlay));
         CurrentPage = key switch
         {
             "start" => Dashboard,
@@ -258,12 +302,12 @@ public sealed class MainWindowViewModel : ViewModelBase
             "goals" => Goals,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
-            "calc" => Calculators,
+            "calc" => GuildCalc,
             "settings" => Settings,
             _ => Events,
         };
         if (key == "accounts") Accounts.EnsureLoaded();
-        if (key == "calc") Calculators.Reload();
+
         if (key == "goals") Goals.Reload();
         if (key == "start") { Accounts.EnsureLoaded(); Dashboard.Reload(); }
     }

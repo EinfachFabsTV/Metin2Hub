@@ -128,6 +128,20 @@
         <DockPanel>
           <Button DockPanel.Dock="Bottom" Classes="side" Classes.active="{Binding IsSettings}"
                   Command="{Binding ShowSettingsCommand}" Content="{loc:T nav.settings}" />
+
+          <!-- Waehrend eines Streams gebraucht, nicht in den Einstellungen
+               gesucht: setzt „seit Stream-Start" auf jetzt. Steht nur da,
+               wenn eine Einblendung laeuft. -->
+          <Button DockPanel.Dock="Bottom" Classes="side" Margin="0,0,0,6"
+                  IsVisible="{Binding HasStreamOverlay}"
+                  ToolTip.Tip="{loc:T settings.stream.reset}"
+                  Command="{Binding ResetStreamStartCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <TextBlock Text="●" Foreground="{StaticResource DangerBrush}" FontSize="11"
+                         VerticalAlignment="Center" />
+              <TextBlock Text="{loc:T nav.streamStart}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
           <StackPanel Spacing="2">
             <Button Classes="side" Classes.active="{Binding IsStart}"
                     Command="{Binding ShowStartCommand}" Content="{loc:T nav.start}" />

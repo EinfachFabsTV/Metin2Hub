@@ -7,6 +7,23 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.48.0
+
+**Neu**
+
+- Patchnotes erscheinen nach einem Update **einmal als Fenster beim Start** -
+  beim ersten Start nach der Installation nicht.
+- Knopf **„Stream-Start"** in der Seitenleiste: setzt „seit Stream-Start" auf
+  jetzt, ohne Umweg ueber die Einstellungen. Er steht nur da, wenn eine
+  Einblendung laeuft.
+
+**Geaendert**
+
+- Der **Schulden-Rechner** ist von „Rechner" nach **Goals** umgezogen und
+  steht dort neben den Zielen - beide rechnen mit denselben Laeufen.
+- Die **Einstellungen** sind wieder uebersichtlich: die langen Abschnitte
+  (Startseite, Stream-Einblendung, Patchnotes) stecken in Aufklappern.
+
 ## 1.47.0
 
 **Neu**

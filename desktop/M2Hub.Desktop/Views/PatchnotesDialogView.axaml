@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.PatchnotesDialogView"
+             x:DataType="vm:PatchnotesDialogViewModel">
+
+  <StackPanel Spacing="14" Width="520">
+    <TextBlock Classes="h2" Text="{Binding Title}" />
+
+    <!-- Lang genug zum Scrollen, kurz genug, dass das Fenster passt -->
+    <ScrollViewer MaxHeight="360">
+      <SelectableTextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                           Text="{Binding Notes}" />
+    </ScrollViewer>
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button Classes="primary" Content="{loc:T patchnotes.close}"
+              Command="{Binding ConfirmCommand}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

@@ -290,6 +290,10 @@ public sealed class SettingsData
     /// bei jedem Start erneut kommt.
     public string? SkippedVersion { get; set; }
 
+    /// Die Fassung, deren Patchnotes schon gezeigt wurden. Leer heisst: noch
+    /// keine - dann erscheinen sie beim naechsten Start einmal.
+    public string? PatchnotesSeen { get; set; }
+
     /// Was in der Stream-Einblendung steht.
     public StreamData Stream { get; set; } = new();
 

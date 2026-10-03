@@ -1,14 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
-             x:Class="M2Hub.Desktop.Views.CalcHostView"
-             x:DataType="vm:CalcHostViewModel">
+             x:Class="M2Hub.Desktop.Views.GoalsHostView"
+             x:DataType="vm:GoalsHostViewModel">
 
   <DockPanel>
-    <!-- Welcher Rechner. Oben, damit die Rechner darunter unveraendert
-         bleiben - jeder bringt seine eigene Ueberschrift mit. -->
+    <!-- Ziele oder Schulden. Oben, damit die Seiten darunter unveraendert
+         bleiben - jede bringt ihre eigene Ueberschrift mit. -->
     <Border DockPanel.Dock="Top" Padding="18,14,18,0">
-      <ItemsControl ItemsSource="{Binding Calculators}">
+      <ItemsControl ItemsSource="{Binding Pages}">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>

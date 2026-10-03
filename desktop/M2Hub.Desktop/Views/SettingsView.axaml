@@ -42,7 +42,9 @@
               <TextBlock Classes="muted" Text="{loc:T settings.start.hint}" TextWrapping="Wrap" />
               <TextBlock Classes="muted" FontSize="11" Text="{Binding EditingMode}" />
 
-              <ItemsControl ItemsSource="{Binding Sections}">
+              <Expander Header="{loc:T settings.start.sections}" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="10">
+                  <ItemsControl ItemsSource="{Binding Sections}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:DashboardSectionRow">
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5" Margin="0,0,0,5">
@@ -56,7 +58,9 @@
                     </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
-              </ItemsControl>
+                  </ItemsControl>
+                </StackPanel>
+              </Expander>
 
               <StackPanel Spacing="6">
                 <TextBlock Classes="muted" Text="{loc:T settings.start.open}" />
@@ -121,7 +125,9 @@
               <CheckBox Content="{loc:T settings.stream.enabled}" IsChecked="{Binding StreamEnabled}" />
               <TextBlock Classes="muted" Text="{loc:T settings.stream.hint}" TextWrapping="Wrap" />
 
-              <StackPanel Spacing="6" IsEnabled="{Binding StreamEnabled}">
+              <Expander Header="{loc:T settings.stream.details}" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="10">
+                <StackPanel Spacing="6" IsEnabled="{Binding StreamEnabled}">
                 <TextBlock Classes="muted" Text="{loc:T settings.stream.scope}" />
                 <ItemsControl ItemsSource="{Binding StreamScopes}">
                   <ItemsControl.ItemsPanel>
@@ -162,7 +168,9 @@
                               IsChecked="{Binding GoalShowActiveRun}" />
                   </StackPanel>
                 </StackPanel>
-              </StackPanel>
+                </StackPanel>
+                </StackPanel>
+              </Expander>
             </StackPanel>
           </Border>
 
@@ -170,9 +178,13 @@
           <Border Classes="card" IsVisible="{Binding HasPatchnotes}">
             <StackPanel Spacing="10">
               <TextBlock Classes="h2" Text="{loc:T settings.patchnotes}" />
-              <CheckBox Content="{loc:T settings.patchnotes.all}" IsChecked="{Binding AllPatchnotes}" />
-              <SelectableTextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
-                                   Text="{Binding PatchnotesText}" />
+              <Expander Header="{loc:T settings.patchnotes.open}" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="8">
+                  <CheckBox Content="{loc:T settings.patchnotes.all}" IsChecked="{Binding AllPatchnotes}" />
+                  <SelectableTextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                       Text="{Binding PatchnotesText}" />
+                </StackPanel>
+              </Expander>
             </StackPanel>
           </Border>
 

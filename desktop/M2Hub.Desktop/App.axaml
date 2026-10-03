@@ -11,12 +11,13 @@
     <DataTemplate DataType="vm:AccountsViewModel"><views:AccountsView /></DataTemplate>
     <DataTemplate DataType="vm:EventsViewModel"><views:EventsView /></DataTemplate>
     <DataTemplate DataType="vm:ItemshopViewModel"><views:ItemshopView /></DataTemplate>
+    <DataTemplate DataType="vm:GoalsHostViewModel"><views:GoalsHostView /></DataTemplate>
     <DataTemplate DataType="vm:GoalsViewModel"><views:GoalsView /></DataTemplate>
-    <DataTemplate DataType="vm:CalcHostViewModel"><views:CalcHostView /></DataTemplate>
     <DataTemplate DataType="vm:GuildCalcViewModel"><views:GuildCalcView /></DataTemplate>
     <DataTemplate DataType="vm:DebtCalcViewModel"><views:DebtCalcView /></DataTemplate>
     <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>
+    <DataTemplate DataType="vm:PatchnotesDialogViewModel"><views:PatchnotesDialogView /></DataTemplate>
     <DataTemplate DataType="vm:UpdateDialogViewModel"><views:UpdateDialogView /></DataTemplate>
     <DataTemplate DataType="vm:AccountEditViewModel"><views:AccountEditView /></DataTemplate>
     <DataTemplate DataType="vm:CharacterEditViewModel"><views:CharacterEditView /></DataTemplate>
