@@ -32,6 +32,16 @@ public static class Patchnotes
         return Clean(text);
     }
 
+    /// Derselbe Abschnitt, aber ohne die Versionszeile: im Fenster steht die
+    /// Version schon in der Kopfzeile, zweimal untereinander waere sie Beiwerk.
+    public static string LatestBody()
+    {
+        var text = Latest();
+        var cut = text.IndexOf('\n');
+
+        return cut < 0 ? "" : text[(cut + 1)..].Trim();
+    }
+
     /// Alles, von der neuesten Version abwaerts.
     public static string Everything()
     {

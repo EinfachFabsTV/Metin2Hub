@@ -7,6 +7,13 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.50.2
+
+**Geaendert**
+
+- Das Patchnotes-Fenster traegt jetzt „Patch Notes" als Ueberschrift, darunter
+  die Version und erst dann den Inhalt. Die Versionszeile stand vorher doppelt.
+
 ## 1.50.1
 
 **Behoben**

@@ -216,7 +216,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         if (first) return;
 
-        var notes = Patchnotes.Latest();
+        var notes = Patchnotes.LatestBody();
         if (notes.Length == 0) return;
 
         await Dialogs.ShowAsync(new PatchnotesDialogViewModel(version, notes));

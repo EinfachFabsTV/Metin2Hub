@@ -9,10 +9,14 @@ namespace M2Hub.Desktop.ViewModels;
 public sealed class PatchnotesDialogViewModel : DialogViewModelBase
 {
     public PatchnotesDialogViewModel(string version, string notes)
-        : base(Loc.T("patchnotes.title", version))
+        : base(Loc.T("patchnotes.title"))
     {
+        Version = Loc.T("patchnotes.version", version);
         Notes = notes;
     }
+
+    /// „Patch 1.50.1" - unter der Ueberschrift, vor dem Inhalt.
+    public string Version { get; }
 
     public string Notes { get; }
 }
