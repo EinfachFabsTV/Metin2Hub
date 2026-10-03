@@ -329,6 +329,10 @@ public sealed class StreamData
     public bool GoalShowRuns { get; set; } = true;
     public bool GoalShowChests { get; set; }
     public bool GoalShowActiveRun { get; set; } = true;
+
+    /// Schriftgroesse der Goal-Leiste: "s", "m" oder "l". Lieber hier als in
+    /// OBS skalieren - skaliert wird dort auch die Unschaerfe.
+    public string GoalSize { get; set; } = "m";
 }
 
 /// Was der Schulden-Rechner behaelt.

@@ -7,6 +7,18 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.49.0
+
+**Geaendert**
+
+- Die **Goal-Einblendung** ist jetzt eine flache Leiste in einer Zeile statt
+  eines Stapels: Titel, Balken, dahinter die eingeschalteten Angaben durch
+  Punkte getrennt. Sie nimmt deutlich weniger Platz und bleibt lesbar.
+- Statt „noch offen" steht dort, wo es sich schaetzen laesst, **wie viele
+  Laeufe noch fehlen**.
+- Die **Schriftgroesse der Leiste** laesst sich in den Einstellungen in drei
+  Stufen setzen - besser als in OBS kleinzuziehen.
+
 ## 1.48.0
 
 **Neu**

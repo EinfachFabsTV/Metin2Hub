@@ -166,6 +166,23 @@
                               IsChecked="{Binding GoalShowChests}" />
                     <CheckBox Content="{loc:T settings.stream.goal.activeRun}"
                               IsChecked="{Binding GoalShowActiveRun}" />
+
+                    <!-- Lieber hier groesser stellen als in OBS ziehen -->
+                    <TextBlock Classes="muted" Margin="0,6,0,0"
+                               Text="{loc:T settings.stream.goal.size}" />
+                    <ItemsControl ItemsSource="{Binding GoalSizes}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:RunChip">
+                          <Button Classes="chip" Classes.active="{Binding IsActive}"
+                                  Margin="0,0,6,0" Content="{Binding Label}"
+                                  Command="{Binding $parent[UserControl].DataContext.ChooseGoalSizeCommand}"
+                                  CommandParameter="{Binding}" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                   </StackPanel>
                 </StackPanel>
                 </StackPanel>

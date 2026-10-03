@@ -96,10 +96,27 @@ public sealed class StreamOverlay(LocalStore store)
         WriteFile("ziel.txt", goal.Title.Length > 0 ? goal.Title : Won(goal.Target));
         WriteFile("ziel-netto.txt", Won(net));
         WriteFile("ziel-offen.txt", Won(rest));
+        // „Noch ungefaehr X Laeufe" - geschaetzt aus dem, was der aktive Lauf
+        // bisher im Mittel einbrachte. Ohne Eintraege dazu bleibt es leer, und
+        // die Karte zeigt stattdessen, was offen ist.
+        var perRun = PerRun(goal.ActiveRun);
+        var runsLeft = perRun > 0m && rest > 0m
+            ? Loc.T("goals.runsLeft", GoalCalc.Runs(rest, perRun).ToString("N0", CultureInfo.CurrentCulture))
+            : "";
+
         WriteFile("goal.html", GoalPage(
             goal.Title.Length > 0 ? goal.Title : Loc.T("stream.goal.title"),
-            Won(goal.Target), Won(net), Won(rest), Won(runProfit), Won(expenses),
-            progress, entries.Sum(e => e.Chests), entries.Count, run));
+            Won(goal.Target), Won(net), Won(rest), expenses > 0m ? Won(expenses) : "",
+            progress, entries.Sum(e => e.Chests), entries.Count, run, runsLeft));
+    }
+
+    /// Was ein Lauf dieser Art im Mittel einbringt, in Won.
+    private decimal PerRun(string runKey)
+    {
+        var mine = store.Runs.Entries.Where(e => e.Run == runKey).ToList();
+        if (mine.Count == 0) return 0m;
+
+        return mine.Sum(e => e.Chests * PriceOf(e)) / mine.Count / Money.KkPerW;
     }
 
     private decimal PriceOf(RunEntryDto entry)
@@ -113,50 +130,57 @@ public sealed class StreamOverlay(LocalStore store)
 
     /// Die Karte des Ziels. Jedes Stueck steht nur da, wenn es eingeschaltet
     /// ist - in einem Overlay ist Platz das Knappste.
+    /// Die Karte des Ziels - **eine Zeile**, kein Stapel.
+    ///
+    /// Gestapelt wurde sie so hoch, dass man sie im Stream kleinziehen musste,
+    /// und dann war sie nicht mehr zu lesen. Jetzt steht alles nebeneinander:
+    /// Titel, Balken, und dahinter die eingeschalteten Angaben, durch Punkte
+    /// getrennt. Was fehlt, laesst eine Luecke statt einer leeren Zeile.
+    ///
+    /// Die Schriftgroesse steht in den Einstellungen, damit man die Karte
+    /// nicht in OBS skalieren muss - skaliert wird sonst auch die Unschaerfe.
     private string GoalPage(
-        string title, string target, string net, string rest, string profit, string expenses,
-        double progress, int chests, int runs, string run)
+        string title, string target, string net, string rest, string expenses,
+        double progress, int chests, int runs, string run, string runsLeft)
     {
         var s = store.Settings.Stream;
-        var parts = new StringBuilder();
+        var parts = new List<string>();
 
         if (s.GoalShowProgress)
-            parts.Append($"""
-                      <div class="row">
-                        <div><div class="label">{Html(Loc.T("stream.goal.title"))}</div><div class="value">{Html(target)}</div></div>
-                        <div><div class="label">{Html(Loc.T("stream.goal.net"))}</div><div class="value ok">{Html(net)}</div></div>
-                      </div>
-                      <div class="bar"><div class="fill" style="width: {progress.ToString("0.#", CultureInfo.InvariantCulture)}%"></div></div>
+            parts.Add($"""<span class="big">{Html(net)}</span><span class="of">/ {Html(target)}</span>""");
 
-                """);
+        if (s.GoalShowNet && expenses.Length > 0)
+            parts.Add($"""<span class="warn">− {Html(expenses)}</span>""");
 
-        if (s.GoalShowNet)
-            parts.Append($"""
-                      <div class="line"><span>{Html(Loc.T("goals.profit"))}</span><span>{Html(profit)}</span></div>
-                      <div class="line"><span>{Html(Loc.T("goals.expenses"))}</span><span class="warn">− {Html(expenses)}</span></div>
+        if (s.GoalShowRuns && runsLeft.Length > 0)
+            parts.Add($"""<span>{Html(runsLeft)}</span>""");
 
-                """);
-
-        if (s.GoalShowRuns)
-            parts.Append($"""
-                      <div class="line"><span>{Html(Loc.T("stream.goal.rest"))}</span><span>{Html(rest)}</span></div>
-
-                """);
+        if (s.GoalShowRuns && runsLeft.Length == 0)
+            parts.Add($"""<span>{Html(rest)}</span>""");
 
         if (s.GoalShowChests)
-            parts.Append($"""
-                      <div class="line"><span>{Html(Loc.T("stream.label.chests"))} · {Html(Loc.T("stream.label.runs"))}</span><span>{chests} · {runs}</span></div>
-
-                """);
+            parts.Add($"""<span>{chests} ⬦ {runs}</span>""");
 
         if (s.GoalShowActiveRun)
-            parts.Append($"""
-                      <div class="line"><span>{Html(Loc.T("stream.goal.run"))}</span><span>{Html(run)}</span></div>
+            parts.Add($"""<span class="run">{Html(run)}</span>""");
 
-                """);
+        var line = string.Join("""<span class="dot">·</span>""", parts);
+        var bar = s.GoalShowProgress
+            ? $"""
+                <div class="bar"><div class="fill" style="width: {progress.ToString("0.#", CultureInfo.InvariantCulture)}%"></div></div>
+            """
+            : "";
 
-        return Frame(title, parts.ToString());
+        return Frame(title, line, bar, Size(s.GoalSize));
     }
+
+    /// Drei Stufen, damit man die Karte nicht in OBS kleinziehen muss.
+    private static string Size(string? key) => key switch
+    {
+        "s" => "13",
+        "l" => "19",
+        _ => "16",
+    };
 
     /// Die Zahlen, wie sie in der Einblendung stehen.
     public sealed record View(
@@ -278,8 +302,9 @@ public sealed class StreamOverlay(LocalStore store)
         </html>
         """;
 
-    /// Der Rahmen der Goal-Karte - dieselben Farben wie die erste.
-    private static string Frame(string title, string body) => $$"""
+    /// Der Rahmen der Goal-Karte: eine flache Leiste, dieselben Farben wie
+    /// die erste Karte.
+    private static string Frame(string title, string line, string bar, string size) => $$"""
         <!doctype html>
         <html lang="de">
         <head>
@@ -290,38 +315,34 @@ public sealed class StreamOverlay(LocalStore store)
           body {
             font-family: "Segoe UI", system-ui, sans-serif;
             color: #F9FAFB; font-variant-numeric: tabular-nums;
+            font-size: {{size}}px;
           }
           .card {
-            display: inline-block; min-width: 300px;
+            display: inline-flex; align-items: center; gap: .75em;
             background: rgba(11, 17, 31, .82);
             border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 14px; padding: 14px 18px;
+            border-radius: 999px; padding: .5em 1.1em;
+            white-space: nowrap;
           }
-          .title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
-          .row { display: flex; gap: 26px; align-items: flex-end; }
-          .label {
-            font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
-            color: #9CA3AF; margin-bottom: 2px;
-          }
-          .value { font-size: 24px; font-weight: 700; line-height: 1; }
-          .ok { color: #10B981; }
-          .warn { color: #F59E0B; }
+          .title { font-weight: 700; }
           .bar {
-            margin-top: 12px; height: 8px; border-radius: 999px;
-            background: rgba(255, 255, 255, .08); overflow: hidden;
+            width: 7em; height: .45em; border-radius: 999px;
+            background: rgba(255, 255, 255, .1); overflow: hidden;
           }
           .fill { height: 100%; background: #10B981; border-radius: 999px; }
-          .line {
-            display: flex; justify-content: space-between; gap: 18px;
-            font-size: 12px; color: #9CA3AF; margin-top: 7px;
-          }
-          .line span:last-child { color: #F9FAFB; font-weight: 600; }
+          .line { display: inline-flex; align-items: baseline; gap: .45em; }
+          .big { font-weight: 700; color: #10B981; }
+          .of { color: #9CA3AF; font-size: .85em; }
+          .warn { color: #F59E0B; }
+          .run { color: #3B82F6; }
+          .dot { color: #4B5563; }
         </style>
         </head>
         <body>
           <div class="card">
-            <div class="title">{{Html(title)}}</div>
-        {{body}}  </div>
+            <span class="title">{{Html(title)}}</span>
+        {{bar}}    <span class="line">{{line}}</span>
+          </div>
           <script>
             setTimeout(function () { location.reload(); }, 5000);
           </script>

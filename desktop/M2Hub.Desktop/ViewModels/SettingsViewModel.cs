@@ -127,6 +127,8 @@ public sealed class SettingsViewModel : ViewModelBase
                         ?? HeaderServers[0];
 
         StreamScopes = BuildStreamScopes();
+        GoalSizes = BuildGoalSizes();
+        ChooseGoalSizeCommand = new RelayCommand(p => { if (p is RunChip o) GoalSize = o; });
         ChooseStreamScopeCommand = new RelayCommand(p => { if (p is RunChip o) StreamScope = o; });
         ResetStreamStartCommand = new RelayCommand(_ => ResetStreamStart());
         OpenStreamFolderCommand = new RelayCommand(_ => Platform.OpenFolder(StreamOverlay.FolderPath));
@@ -500,6 +502,40 @@ public sealed class SettingsViewModel : ViewModelBase
         _store.SaveSettings();
         _stream.Write();
         Raise(name);
+    }
+
+    /// Die Schriftgroesse der Goal-Leiste - drei Stufen, damit man die Karte
+    /// nicht in OBS kleinziehen muss.
+    public ObservableCollection<RunChip> GoalSizes { get; private set; } = new();
+
+    public RunChip GoalSize
+    {
+        get => GoalSizes.FirstOrDefault(o => o.Key == _store.Settings.Stream.GoalSize)
+               ?? GoalSizes[0];
+        set
+        {
+            if (value is null || _store.Settings.Stream.GoalSize == value.Key) return;
+
+            _store.Settings.Stream.GoalSize = value.Key;
+            foreach (var o in GoalSizes) o.IsActive = o.Key == value.Key;
+            _store.SaveSettings();
+            _stream.Write();
+            Raise(nameof(GoalSize));
+        }
+    }
+
+    public RelayCommand ChooseGoalSizeCommand { get; private set; } = new(_ => { });
+
+    private ObservableCollection<RunChip> BuildGoalSizes()
+    {
+        var list = new ObservableCollection<RunChip>
+        {
+            new("s", Loc.T("settings.stream.goal.size.s")),
+            new("m", Loc.T("settings.stream.goal.size.m")),
+            new("l", Loc.T("settings.stream.goal.size.l")),
+        };
+        foreach (var o in list) o.IsActive = o.Key == _store.Settings.Stream.GoalSize;
+        return list;
     }
 
     public RelayCommand ChooseStreamScopeCommand { get; }
