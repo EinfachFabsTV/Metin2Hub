@@ -553,7 +553,13 @@ public sealed class RunsViewModel : ViewModelBase
         Quick.Clear();
         foreach (var value in Current.Quick) Quick.Add(new QuickChest(value) { IsActive = value == _chests });
 
-        ResetTimer();
+        // Eine laufende Abklingzeit bleibt stehen. Reload laeuft nach jedem
+        // Eintragen - wer waehrend der Wartezeit seine Truhen eintraegt, hatte
+        // die Uhr sonst wieder auf Anfang.
+        //
+        // Beim Wechsel des Laufs ist sie ohnehin schon gestoppt (siehe Run),
+        // dort setzt sie StopTimer zurueck.
+        if (!_running) ResetTimer();
 
         Raise(nameof(HasQuick));
         Raise(nameof(Subtitle));

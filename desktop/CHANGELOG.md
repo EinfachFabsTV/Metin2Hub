@@ -7,6 +7,13 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.50.1
+
+**Behoben**
+
+- Die **Abklingzeit sprang beim Eintragen auf Anfang**, wenn sie gerade lief.
+  Sie misst den Lauf, nicht die Eingabe - und bleibt jetzt stehen.
+
 ## 1.50.0
 
 **Neu**
