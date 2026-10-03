@@ -5,8 +5,10 @@
              x:Class="M2Hub.Desktop.Views.PatchnotesDialogView"
              x:DataType="vm:PatchnotesDialogViewModel">
 
-  <StackPanel Spacing="14" Width="520">
-    <TextBlock Classes="h2" Text="{Binding Title}" />
+  <!-- Keine eigene Breite: die Maske in MainWindow ist 470 breit, alles
+       Breitere wird abgeschnitten. -->
+  <StackPanel Spacing="14">
+    <TextBlock Classes="h2" Text="{Binding Title}" TextWrapping="Wrap" />
 
     <!-- Lang genug zum Scrollen, kurz genug, dass das Fenster passt -->
     <ScrollViewer MaxHeight="360">

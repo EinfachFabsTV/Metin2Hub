@@ -7,6 +7,18 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.49.1
+
+**Behoben**
+
+- Das Patchnotes-Fenster war breiter als die Maske und wurde an den Raendern
+  abgeschnitten.
+
+**Geaendert**
+
+- Die Aufklapper in den Einstellungen sehen aus wie der Rest der App: sie
+  sind aus denselben Teilen gebaut, nicht aus dem mitgelieferten Expander.
+
 ## 1.49.0
 
 **Geaendert**

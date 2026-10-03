@@ -356,6 +356,24 @@
     <Setter Property="Background" Value="#333B82F6" />
   </Style>
 
+  <!-- Aufklapper in den Einstellungen: sieht aus wie eine Zeile, ist aber der
+       Knopf zum Auf- und Zuklappen. Ein Expander braechte sein eigenes
+       Aussehen mit und stuende fremd zwischen den Karten. -->
+  <Style Selector="Button.fold">
+    <Setter Property="Background" Value="#22111827" />
+    <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="11,8" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="Button.fold:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SubtleBrush}" />
+  </Style>
+
   <!-- Zeile eines Tages in der Eintragsliste: sieht aus wie Text, ist aber
        der Knopf zum Auf- und Zuklappen. -->
   <Style Selector="Button.dayrow">

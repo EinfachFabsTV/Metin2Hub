@@ -76,6 +76,9 @@ public sealed class SettingsViewModel : ViewModelBase
     private readonly UpdateService _updates;
     private readonly StreamOverlay _stream;
     private bool _allPatchnotes;
+    private bool _sectionsOpen;
+    private bool _streamOpen;
+    private bool _notesOpen;
     private readonly Action _headerChanged;
     private readonly Action _cacheCleared;
     private readonly Func<UpdateService.UpdateInfo, Task> _showUpdate;
@@ -125,6 +128,10 @@ public sealed class SettingsViewModel : ViewModelBase
         Servers = BuildServerRows(store);
         _headerServer = HeaderServers.FirstOrDefault(o => o.Key == store.Settings.HeaderServer)
                         ?? HeaderServers[0];
+
+        ToggleSectionsCommand = new RelayCommand(_ => SectionsOpen = !SectionsOpen);
+        ToggleStreamCommand = new RelayCommand(_ => StreamOpen = !StreamOpen);
+        ToggleNotesCommand = new RelayCommand(_ => NotesOpen = !NotesOpen);
 
         StreamScopes = BuildStreamScopes();
         GoalSizes = BuildGoalSizes();
@@ -561,6 +568,37 @@ public sealed class SettingsViewModel : ViewModelBase
         _stream.Write();
         Status = Loc.T("settings.stream.resetDone");
     }
+
+    /* ---------- Aufklapper ---------- */
+
+    /// Die langen Abschnitte stehen zugeklappt da. Gebaut aus denselben
+    /// Teilen wie der Rest - ein `Expander` bringt sein eigenes Aussehen mit
+    /// und stand fremd zwischen den Karten.
+    public bool SectionsOpen
+    {
+        get => _sectionsOpen;
+        set { if (Set(ref _sectionsOpen, value)) Raise(nameof(SectionsChevron)); }
+    }
+
+    public bool StreamOpen
+    {
+        get => _streamOpen;
+        set { if (Set(ref _streamOpen, value)) Raise(nameof(StreamChevron)); }
+    }
+
+    public bool NotesOpen
+    {
+        get => _notesOpen;
+        set { if (Set(ref _notesOpen, value)) Raise(nameof(NotesChevron)); }
+    }
+
+    public string SectionsChevron => _sectionsOpen ? "▾" : "▸";
+    public string StreamChevron => _streamOpen ? "▾" : "▸";
+    public string NotesChevron => _notesOpen ? "▾" : "▸";
+
+    public RelayCommand ToggleSectionsCommand { get; private set; } = new(_ => { });
+    public RelayCommand ToggleStreamCommand { get; private set; } = new(_ => { });
+    public RelayCommand ToggleNotesCommand { get; private set; } = new(_ => { });
 
     /* ---------- Patchnotes ---------- */
 
