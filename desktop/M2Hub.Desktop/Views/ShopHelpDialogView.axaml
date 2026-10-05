@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.ShopHelpDialogView"
+             x:DataType="vm:ShopHelpDialogViewModel">
+
+  <StackPanel Spacing="14">
+    <StackPanel Spacing="2">
+      <TextBlock Classes="h2" Text="{Binding Title}" TextWrapping="Wrap" />
+      <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                 Text="{loc:T goals.shop.help.lead}" />
+    </StackPanel>
+
+    <!-- Die Bilder sind breiter als die Maske; sie werden auf die Breite
+         gerechnet, nicht beschnitten. -->
+    <ScrollViewer MaxHeight="420">
+      <ItemsControl ItemsSource="{Binding Steps}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:ShopHelpStep">
+            <StackPanel Spacing="6" Margin="0,0,0,14">
+              <Border Classes="panel" Padding="0" ClipToBounds="True">
+                <Image Source="{Binding Image}" Stretch="Uniform" />
+              </Border>
+              <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                         Text="{Binding Text}" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <Button Classes="primary" HorizontalAlignment="Right"
+            Content="{loc:T patchnotes.close}" Command="{Binding ConfirmCommand}" />
+  </StackPanel>
+</UserControl>

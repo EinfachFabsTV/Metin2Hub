@@ -143,8 +143,14 @@
               <!-- Nur beim Shop-Bestand: die Truhen, die im Betrag stecken
                    und ueber die Laeufe schon gezaehlt sind. -->
               <StackPanel Spacing="8" IsVisible="{Binding IsShop}">
-                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
-                           Text="{loc:T goals.shop.hint}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="11" TextWrapping="Wrap"
+                             Text="{loc:T goals.shop.hint}" />
+                  <Button Grid.Column="1" Classes="chip" VerticalAlignment="Top"
+                          Content="{loc:T goals.shop.help}"
+                          ToolTip.Tip="{loc:T goals.shop.help.title}"
+                          Command="{Binding ShopHelpCommand}" />
+                </Grid>
 
                 <Grid ColumnDefinitions="*,70,110,Auto" ColumnSpacing="8">
                   <ComboBox Grid.Column="0" HorizontalAlignment="Stretch"

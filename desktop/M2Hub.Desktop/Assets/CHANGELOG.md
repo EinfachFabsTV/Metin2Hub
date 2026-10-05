@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.52.0
+
+**Neu**
+
+- **Hilfe-Knopf** beim Shop-Bestand: vier gezeichnete Schritte zeigen, wo der
+  Gesamtwert des eigenen Ladens steht - Server waehlen, Verkaeufersuche mit dem
+  Charakternamen, Laden-Symbol anklicken, Summe ablesen.
+
 ## 1.51.0
 
 **Neu**

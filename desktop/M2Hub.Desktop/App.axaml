@@ -18,6 +18,7 @@
     <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>
     <DataTemplate DataType="vm:PatchnotesDialogViewModel"><views:PatchnotesDialogView /></DataTemplate>
+    <DataTemplate DataType="vm:ShopHelpDialogViewModel"><views:ShopHelpDialogView /></DataTemplate>
     <DataTemplate DataType="vm:UpdateDialogViewModel"><views:UpdateDialogView /></DataTemplate>
     <DataTemplate DataType="vm:AccountEditViewModel"><views:AccountEditView /></DataTemplate>
     <DataTemplate DataType="vm:CharacterEditViewModel"><views:CharacterEditView /></DataTemplate>

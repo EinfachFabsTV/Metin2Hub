@@ -54,6 +54,7 @@ public sealed class GoalsViewModel : ViewModelBase
         AddGoalCommand = new RelayCommand(_ => AddGoal());
         AddBookingCommand = new RelayCommand(_ => AddBooking());
         AddChestCommand = new RelayCommand(_ => AddChest());
+        ShopHelpCommand = new AsyncRelayCommand(_ => _dialogs.ShowAsync(new ShopHelpDialogViewModel()));
         RemoveChestCommand = new RelayCommand(p => RemoveChest(p as GoalChestRowViewModel));
         ChooseKindCommand = new RelayCommand(p => { if (p is RunChip c) Kind = c.Key; });
         ChooseRunCommand = new RelayCommand(p => { if (p is RunChip c) ActiveRun = c.Key; });
@@ -256,6 +257,9 @@ public sealed class GoalsViewModel : ViewModelBase
     public bool HasNewChests => NewChests.Count > 0;
 
     public RelayCommand AddChestCommand { get; }
+
+    /// „Wie sehe ich meinen Shop-Wert?" - vier gezeichnete Schritte.
+    public AsyncRelayCommand ShopHelpCommand { get; }
     public RelayCommand RemoveChestCommand { get; }
 
     private void AddChest()
