@@ -268,8 +268,8 @@ public sealed class GoalBookingDto
     public int Id { get; set; }
 
     /// "push" (Standard: Traenke, Taus, Energiekristall), "extra"
-    /// (Zusatz-Push, etwa Kostueme), "expense" (einmalige Ausgabe) oder
-    /// "income" (Zusatzeinnahme).
+    /// (Zusatz-Push, etwa Kostueme), "expense" (einmalige Ausgabe),
+    /// "income" (Zusatzeinnahme) oder "shop" (was im Shop liegt).
     public string Kind { get; set; } = "push";
 
     /// Betrag in **Won**, immer positiv - das Vorzeichen steckt in der Art.
@@ -277,6 +277,29 @@ public sealed class GoalBookingDto
 
     public string Note { get; set; } = "";
     public DateTime AddedAt { get; set; } = DateTime.Now;
+
+    /// Nur bei "shop": die Truhen, die in diesem Betrag stecken und ueber die
+    /// Laeufe **schon** gezaehlt sind. Sie werden abgezogen, sonst zaehlte
+    /// dieselbe Truhe zweimal - einmal beim Eintragen des Laufs, einmal als
+    /// Ware im Shop.
+    public List<GoalChestDto> Chests { get; set; } = new();
+}
+
+/// Truhen in einem Shop-Bestand, je Lauf eine Zeile.
+///
+/// Die Zeile haengt am **Lauf**, nicht am aktiven Lauf des Ziels: in den
+/// Gewinn zaehlen alle Laufarten, also koennen auch Truhen aus jeder darin
+/// stecken.
+public sealed class GoalChestDto
+{
+    public string Run { get; set; } = "hydra";
+
+    public int Chests { get; set; }
+
+    /// Preis je Truhe in **kk**. 0 heisst: der Preis, der fuer diesen Lauf
+    /// zuletzt hinterlegt wurde - verkauft wird aber nicht zwingend zu dem,
+    /// deshalb laesst er sich je Zeile ueberschreiben.
+    public decimal Price { get; set; }
 }
 
 /// Die Ziele, wie sie in goals.json stehen.

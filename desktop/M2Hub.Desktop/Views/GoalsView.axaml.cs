@@ -19,6 +19,16 @@ public partial class GoalsView : UserControl
         Commit(e);
     }
 
+    /// Enter haengt die Truhenzeile an - der Posten selbst wird erst mit
+    /// „Eintragen" gebucht, sonst waere die erste Zeile zugleich der Abschluss.
+    private void AddChestKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || DataContext is not GoalsViewModel vm) return;
+
+        vm.AddChestCommand.Execute(null);
+        Commit(e);
+    }
+
     /// Enter legt das Ziel an.
     private void AddGoalKeyDown(object? sender, KeyEventArgs e)
     {

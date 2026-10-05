@@ -140,6 +140,55 @@
                         Command="{Binding AddBookingCommand}" />
               </Grid>
 
+              <!-- Nur beim Shop-Bestand: die Truhen, die im Betrag stecken
+                   und ueber die Laeufe schon gezaehlt sind. -->
+              <StackPanel Spacing="8" IsVisible="{Binding IsShop}">
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T goals.shop.hint}" />
+
+                <Grid ColumnDefinitions="*,70,110,Auto" ColumnSpacing="8">
+                  <ComboBox Grid.Column="0" HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding ChestRuns}"
+                            SelectedItem="{Binding ChestRun, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate DataType="vm:RunChip">
+                        <TextBlock Text="{Binding Label}" />
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <TextBox Grid.Column="1" Text="{Binding ChestCount, Mode=TwoWay}"
+                           Watermark="{loc:T goals.shop.chests}" KeyDown="AddChestKeyDown" />
+                  <TextBox Grid.Column="2" Text="{Binding ChestPriceText, Mode=TwoWay}"
+                           Watermark="{loc:T goals.shop.price}" KeyDown="AddChestKeyDown" />
+                  <Button Grid.Column="3" Classes="chip" Content="+"
+                          ToolTip.Tip="{loc:T goals.shop.addChest}"
+                          Command="{Binding AddChestCommand}" />
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding NewChests}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:GoalChestRowViewModel">
+                      <Border Classes="panel" Padding="9,6" Margin="0,0,0,5">
+                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="9">
+                          <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center"
+                                     TextTrimming="CharacterEllipsis" Text="{Binding RunLabel}" />
+                          <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
+                                     VerticalAlignment="Center" Text="{Binding ChestsLabel}" />
+                          <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
+                                     VerticalAlignment="Center" Text="{Binding PriceLabel}" />
+                          <Button Grid.Column="3" Classes="icon danger" Content="✕"
+                                  Command="{Binding $parent[UserControl].DataContext.RemoveChestCommand}"
+                                  CommandParameter="{Binding}" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Classes="muted" FontSize="11" IsVisible="{Binding HasNewChests}"
+                           Text="{Binding NewChestsLabel}" />
+              </StackPanel>
+
               <TextBlock Classes="muted" Text="{loc:T goals.booking.none}"
                          IsVisible="{Binding !HasBookings}" />
 
@@ -152,9 +201,13 @@
                                    VerticalAlignment="Center" Text="{Binding DayLabel}" />
                         <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
                                    VerticalAlignment="Center" Text="{Binding AmountLabel}" />
-                        <TextBlock Grid.Column="2" Classes="muted" FontSize="11"
-                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
-                                   Text="{Binding KindLabel}" />
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                          <TextBlock Classes="muted" FontSize="11"
+                                     TextTrimming="CharacterEllipsis" Text="{Binding KindLabel}" />
+                          <TextBlock Classes="muted" FontSize="10"
+                                     IsVisible="{Binding HasMinus}"
+                                     TextTrimming="CharacterEllipsis" Text="{Binding MinusLabel}" />
+                        </StackPanel>
                         <Button Grid.Column="3" Classes="icon danger" Content="✕"
                                 ToolTip.Tip="{loc:T goals.booking.delete}"
                                 Command="{Binding $parent[UserControl].DataContext.DeleteBookingCommand}"

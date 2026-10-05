@@ -17,6 +17,18 @@ public static class GoalCalc
     public static decimal Net(decimal runs, decimal income, decimal expenses, decimal carryIn) =>
         runs + income + carryIn - expenses;
 
+    /// Was ein Shop-Bestand zusaetzlich einbringt.
+    ///
+    /// `amount` ist, was im Shop liegt (in Won), `counted` der Teil davon, der
+    /// ueber die Laeufe schon im Gewinn steckt. Nur der Rest ist neu - sonst
+    /// zaehlte dieselbe Truhe zweimal.
+    ///
+    /// Unter null geht es nicht: wer mehr abzieht, als im Shop liegt, hat sich
+    /// vertan, und ein negativer Posten machte daraus stillschweigend eine
+    /// Ausgabe.
+    public static decimal ShopNet(decimal amount, decimal counted) =>
+        Math.Max(0m, amount - counted);
+
     /// Was noch fehlt. Mehr als das Ziel ergibt keine negative Luecke.
     public static decimal Rest(decimal target, decimal net) => Math.Max(0m, target - net);
 

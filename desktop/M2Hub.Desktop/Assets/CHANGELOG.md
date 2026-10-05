@@ -7,6 +7,18 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.51.0
+
+**Neu**
+
+- **„Im Shop"** als eigener Posten bei den Zielen: was unverkauft im Shop
+  liegt, zaehlt zum Ziel mit. Damit nichts doppelt zaehlt, traegt man darunter
+  die Truhen ein, die im Betrag stecken - sie werden herausgerechnet, weil sie
+  ueber die Runs schon im Gewinn stehen.
+- Die Truhenzeilen gehen ueber **alle Laufarten**, nicht nur den aktiven Lauf,
+  und der Preis je Zeile ist frei: leer nimmt den zuletzt hinterlegten Preis
+  des Laufs, eine Zahl den Preis, zu dem tatsaechlich verkauft wird.
+
 ## 1.50.2
 
 **Geaendert**

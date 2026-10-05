@@ -30,6 +30,9 @@ public sealed class GoalsViewModel : ViewModelBase
     private string _amount = "";
     private string _note = "";
     private string _kind = GoalBooking.Push;
+    private RunChip? _chestRun;
+    private string _chestCount = "";
+    private string _chestPrice = "";
 
     public GoalsViewModel(LocalStore store, IDialogService dialogs, StreamOverlay stream)
     {
@@ -37,13 +40,21 @@ public sealed class GoalsViewModel : ViewModelBase
         _dialogs = dialogs;
         _stream = stream;
 
-        foreach (var run in RunCatalog.Runs) Runs.Add(new RunChip(run.Key, run.Name));
+        foreach (var run in RunCatalog.Runs)
+        {
+            Runs.Add(new RunChip(run.Key, run.Name));
+            ChestRuns.Add(new RunChip(run.Key, run.Name));
+        }
+
+        _chestRun = ChestRuns.FirstOrDefault();
 
         BuildKinds();
         BuildModes();
 
         AddGoalCommand = new RelayCommand(_ => AddGoal());
         AddBookingCommand = new RelayCommand(_ => AddBooking());
+        AddChestCommand = new RelayCommand(_ => AddChest());
+        RemoveChestCommand = new RelayCommand(p => RemoveChest(p as GoalChestRowViewModel));
         ChooseKindCommand = new RelayCommand(p => { if (p is RunChip c) Kind = c.Key; });
         ChooseRunCommand = new RelayCommand(p => { if (p is RunChip c) ActiveRun = c.Key; });
         ChooseModeCommand = new RelayCommand(p => { if (p is RunChip c) OnReached = c.Key; });
@@ -84,10 +95,32 @@ public sealed class GoalsViewModel : ViewModelBase
     }
 
     private decimal Expenses(GoalDto goal) =>
-        goal.Bookings.Where(b => b.Kind != GoalBooking.Income).Sum(b => b.Amount);
+        goal.Bookings
+            .Where(b => b.Kind != GoalBooking.Income && b.Kind != GoalBooking.Shop)
+            .Sum(b => b.Amount);
 
+    /// Zusatzeinnahmen und, was im Shop liegt - letzteres ohne die Truhen,
+    /// die ueber die Laeufe schon im Gewinn stehen.
     private decimal Income(GoalDto goal) =>
-        goal.Bookings.Where(b => b.Kind == GoalBooking.Income).Sum(b => b.Amount);
+        goal.Bookings.Where(b => b.Kind == GoalBooking.Income).Sum(b => b.Amount)
+        + goal.Bookings.Where(b => b.Kind == GoalBooking.Shop).Sum(ShopNet);
+
+    /// Was ein Shop-Posten unter dem Strich beitraegt.
+    private decimal ShopNet(GoalBookingDto booking) =>
+        GoalCalc.ShopNet(booking.Amount, Counted(booking));
+
+    /// Der Teil eines Shop-Bestands, der ueber die Laeufe schon gezaehlt ist.
+    private decimal Counted(GoalBookingDto booking) =>
+        booking.Chests.Sum(c => c.Chests * ChestPrice(c)) / Money.KkPerW;
+
+    /// Der Preis einer Truhenzeile in kk: ihr eigener, sonst der Tagespreis,
+    /// den der Run Tracker fuer diesen Lauf zuletzt kennt.
+    private decimal ChestPrice(GoalChestDto chest)
+    {
+        if (chest.Price > 0m) return chest.Price;
+
+        return _store.Runs.ChestPrice.TryGetValue(chest.Run, out var p) ? p : RunCatalog.DefaultChestPrice;
+    }
 
     private decimal Net(GoalDto goal) =>
         GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn);
@@ -187,6 +220,7 @@ public sealed class GoalsViewModel : ViewModelBase
             if (!Set(ref _kind, value)) return;
 
             foreach (var c in Kinds) c.IsActive = c.Key == _kind;
+            Raise(nameof(IsShop));
         }
     }
 
@@ -199,21 +233,101 @@ public sealed class GoalsViewModel : ViewModelBase
 
     public ObservableCollection<GoalBookingViewModel> Bookings { get; } = new();
 
+    /* ---------- Shop-Bestand: die Truhen, die schon zaehlen ---------- */
+
+    /// Nur beim Shop-Bestand steht die Truhenmaske da - bei einer Ausgabe
+    /// gaebe es nichts herauszurechnen.
+    public bool IsShop => _kind == GoalBooking.Shop;
+
+    /// Alle Laufarten zur Auswahl: in den Gewinn zaehlen sie alle, also kann
+    /// auch aus jeder etwas im Shop liegen - nicht nur aus dem aktiven Lauf.
+    public ObservableCollection<RunChip> ChestRuns { get; } = new();
+
+    public RunChip? ChestRun { get => _chestRun; set => Set(ref _chestRun, value); }
+    public string ChestCount { get => _chestCount; set => Set(ref _chestCount, value); }
+
+    /// Leer heisst: der Tagespreis des Laufs. Verkauft wird aber nicht
+    /// zwingend zu dem, deshalb ist er ueberschreibbar.
+    public string ChestPriceText { get => _chestPrice; set => Set(ref _chestPrice, value); }
+
+    /// Die Zeilen, die beim naechsten „Eintragen" an den Posten gehen.
+    public ObservableCollection<GoalChestRowViewModel> NewChests { get; } = new();
+
+    public bool HasNewChests => NewChests.Count > 0;
+
+    public RelayCommand AddChestCommand { get; }
+    public RelayCommand RemoveChestCommand { get; }
+
+    private void AddChest()
+    {
+        if (_chestRun is null) return;
+        if (!int.TryParse(_chestCount.Trim(), out var count) || count <= 0) return;
+
+        var price = Read(_chestPrice, out var p) ? p : 0m;
+
+        NewChests.Add(new GoalChestRowViewModel(
+            new GoalChestDto { Run = _chestRun.Key, Chests = count, Price = price },
+            _chestRun.Label,
+            ChestPriceLabel(_chestRun.Key, price)));
+
+        ChestCount = "";
+        Raise(nameof(HasNewChests));
+        Raise(nameof(NewChestsLabel));
+    }
+
+    private void RemoveChest(GoalChestRowViewModel? row)
+    {
+        if (row is null) return;
+
+        NewChests.Remove(row);
+        Raise(nameof(HasNewChests));
+        Raise(nameof(NewChestsLabel));
+    }
+
+    /// Was von dem Betrag abginge, wenn man jetzt eintruege.
+    public string NewChestsLabel
+    {
+        get
+        {
+            var counted = NewChests.Sum(r => r.Dto.Chests * ChestPrice(r.Dto)) / Money.KkPerW;
+
+            return Loc.T("goals.shop.counted", Won(counted));
+        }
+    }
+
+    private string ChestPriceLabel(string run, decimal price)
+    {
+        var kk = price > 0m
+            ? price
+            : _store.Runs.ChestPrice.TryGetValue(run, out var p) ? p : RunCatalog.DefaultChestPrice;
+
+        return Money.FormatYang((double)kk) + (price > 0m ? "" : " *");
+    }
+
     private void AddBooking()
     {
         if (Active is null || !Read(_amount, out var amount) || amount <= 0m) return;
 
-        Active.Bookings.Add(new GoalBookingDto
+        var booking = new GoalBookingDto
         {
             Id = Data.TakeId(),
             Kind = _kind,
             Amount = amount,
             Note = _note.Trim(),
             AddedAt = DateTime.Now,
-        });
+        };
+
+        // Die Truhen gehoeren zum Posten, nicht zum Ziel: wird er geloescht,
+        // verschwindet der Abzug mit ihm.
+        if (IsShop) booking.Chests.AddRange(NewChests.Select(r => r.Dto));
+
+        Active.Bookings.Add(booking);
 
         Amount = "";
         Note = "";
+        NewChests.Clear();
+        Raise(nameof(HasNewChests));
+        Raise(nameof(NewChestsLabel));
         Save();
     }
 
@@ -354,7 +468,14 @@ public sealed class GoalsViewModel : ViewModelBase
         Bookings.Clear();
         if (Active is not null)
             foreach (var b in Active.Bookings.OrderByDescending(b => b.AddedAt))
-                Bookings.Add(new GoalBookingViewModel(b, Won(b.Amount)));
+                Bookings.Add(new GoalBookingViewModel(
+                    b,
+                    Won(b.Kind == GoalBooking.Shop ? ShopNet(b) : b.Amount),
+                    b.Kind == GoalBooking.Shop && b.Chests.Count > 0
+                        ? Loc.T("goals.shop.minus",
+                            b.Chests.Sum(c => c.Chests).ToString("N0", CultureInfo.CurrentCulture),
+                            Won(Counted(b)))
+                        : ""));
 
         foreach (var c in Runs) c.IsActive = c.Key == ActiveRun;
         foreach (var c in Kinds) c.IsActive = c.Key == _kind;
@@ -377,6 +498,9 @@ public sealed class GoalsViewModel : ViewModelBase
         Raise(nameof(RunsLeftLabel));
         Raise(nameof(ActiveRun));
         Raise(nameof(HasBookings));
+        Raise(nameof(IsShop));
+        Raise(nameof(HasNewChests));
+        Raise(nameof(NewChestsLabel));
     }
 
     public bool HasBookings => Bookings.Count > 0;
@@ -396,6 +520,7 @@ public sealed class GoalsViewModel : ViewModelBase
         Kinds.Add(new RunChip(GoalBooking.Extra, Loc.T("goals.kind.extra")));
         Kinds.Add(new RunChip(GoalBooking.Expense, Loc.T("goals.kind.expense")));
         Kinds.Add(new RunChip(GoalBooking.Income, Loc.T("goals.kind.income")));
+        Kinds.Add(new RunChip(GoalBooking.Shop, Loc.T("goals.kind.shop")));
         foreach (var c in Kinds) c.IsActive = c.Key == _kind;
     }
 
@@ -427,6 +552,9 @@ public static class GoalBooking
     public const string Expense = "expense";
     public const string Income = "income";
 
+    /// Was im Shop liegt und noch nicht verkauft ist.
+    public const string Shop = "shop";
+
     public static string Label(string kind) => Loc.T("goals.kind." + kind);
 }
 
@@ -439,18 +567,32 @@ public static class GoalMode
 }
 
 /// Ein Posten in der Liste.
-public sealed class GoalBookingViewModel(GoalBookingDto dto, string amount)
+public sealed class GoalBookingViewModel(GoalBookingDto dto, string amount, string minus = "")
 {
     public int Id { get; } = dto.Id;
     public string KindLabel { get; } = GoalBooking.Label(dto.Kind);
     public string AmountLabel { get; } = amount;
+
+    /// Beim Shop-Bestand: was abgezogen wurde, weil es ueber die Laeufe schon
+    /// zaehlt. Sonst leer.
+    public string MinusLabel { get; } = minus;
+    public bool HasMinus { get; } = minus.Length > 0;
     public string Note { get; } = dto.Note;
     public bool HasNote { get; } = dto.Note.Length > 0;
     public string DayLabel { get; } = dto.AddedAt.ToString("dd.MM.");
 
     /// Zusatzeinnahmen stehen gruen da, Ausgaben in Bernstein - man sieht auf
     /// einen Blick, was dazukam und was abging.
-    public bool IsIncome { get; } = dto.Kind == GoalBooking.Income;
+    public bool IsIncome { get; } = dto.Kind is GoalBooking.Income or GoalBooking.Shop;
+}
+
+/// Eine Truhenzeile eines Shop-Bestands, so wie sie in der Maske steht.
+public sealed class GoalChestRowViewModel(GoalChestDto dto, string run, string price)
+{
+    public GoalChestDto Dto { get; } = dto;
+    public string RunLabel { get; } = run;
+    public string ChestsLabel { get; } = dto.Chests.ToString("N0", CultureInfo.CurrentCulture);
+    public string PriceLabel { get; } = price;
 }
 
 /// Eine Zeile der Warteschlange.
