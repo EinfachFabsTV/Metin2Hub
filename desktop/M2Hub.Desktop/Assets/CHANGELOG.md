@@ -7,6 +7,13 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.52.1
+
+**Neu**
+
+- In der Shop-Hilfe steht die Markt-Seite jetzt mit Adresse und einem Knopf,
+  der sie im Browser oeffnet - abtippen muss sie niemand mehr.
+
 ## 1.52.0
 
 **Neu**

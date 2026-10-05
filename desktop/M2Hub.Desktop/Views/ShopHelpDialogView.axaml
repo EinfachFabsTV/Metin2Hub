@@ -12,6 +12,18 @@
                  Text="{loc:T goals.shop.help.lead}" />
     </StackPanel>
 
+    <Border Classes="panel" Padding="12,10">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+          <TextBlock FontSize="12" FontWeight="SemiBold" Text="{loc:T goals.shop.help.open}" />
+          <SelectableTextBlock Classes="muted" FontSize="11" Text="{Binding MarketUrl}" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="primary" VerticalAlignment="Center"
+                Content="{loc:T goals.shop.help.openButton}"
+                Command="{Binding OpenMarketCommand}" />
+      </Grid>
+    </Border>
+
     <!-- Die Bilder sind breiter als die Maske; sie werden auf die Breite
          gerechnet, nicht beschnitten. -->
     <ScrollViewer MaxHeight="420">

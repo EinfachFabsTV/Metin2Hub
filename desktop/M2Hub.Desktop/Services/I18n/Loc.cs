@@ -456,6 +456,8 @@ public sealed class Loc : INotifyPropertyChanged
         ["goals.shop.help.step2"] = ["Verkäufersuche öffnen und den Namen des Charakters eintragen, dem der Laden gehört – nicht den Ladentitel.", "Open the seller search and enter the name of the character that owns the shop – not the shop title.", "Satıcı aramasını aç ve dükkanın sahibi karakterin adını gir – dükkan başlığını değil.", "Apri la ricerca venditore e inserisci il nome del personaggio proprietario del negozio – non il titolo del negozio."],
         ["goals.shop.help.step3"] = ["In der Trefferliste auf das Laden-Symbol neben dem Verkäufer klicken.", "In the results, click the shop icon next to the seller.", "Sonuç listesinde satıcının yanındaki dükkan simgesine tıkla.", "Nei risultati, clicca sull’icona del negozio accanto al venditore."],
         ["goals.shop.help.step4"] = ["Der Laden öffnet sich. Unten steht der Gesamtwert – genau diese Zahl trägst du als „Im Shop“ ein.", "The shop opens. At the bottom is the total value – that is the number you enter as “in the shop”.", "Dükkan açılır. Altta toplam değer yazar – bu sayıyı “Dükkanda” olarak gir.", "Il negozio si apre. In basso c’è il valore totale – quel numero va inserito come «Nel negozio»."],
+        ["goals.shop.help.open"] = ["Markt-Seite öffnen", "Open the market site", "Pazar sitesini aç", "Apri il sito di mercato"],
+        ["goals.shop.help.openButton"] = ["Öffnen", "Open", "Aç", "Apri"],
         ["patchnotes.title"] = ["Patch Notes", "Patch notes", "Sürüm notları", "Note di rilascio"],
         ["patchnotes.version"] = ["Patch {0}", "Patch {0}", "Sürüm {0}", "Patch {0}"],
         ["patchnotes.close"] = ["Alles klar", "Got it", "Tamam", "Ho capito"],
