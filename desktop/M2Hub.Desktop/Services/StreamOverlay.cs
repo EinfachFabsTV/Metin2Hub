@@ -21,6 +21,12 @@ namespace M2Hub.Desktop.Services;
 ///   fortschritt.txt
 ///   truhen.txt
 ///   runs.txt
+///   ziel.txt       dasselbe fuer die zweite Karte: Titel, Zielbetrag, Netto,
+///   ziel-wert.txt  Offenes, Ausgaben, Fortschritt, Truhen, Runs, der aktive
+///   ziel-netto.txt Lauf und die geschaetzten Restlaeufe. Jede Angabe, die in
+///   ...            `goal.html` steht, steht auch als eigene Datei da - wer
+///                  die Karte selbst bauen will, soll nichts nachrechnen
+///                  muessen.
 ///
 /// Geschrieben wird bei jeder Aenderung (Lauf eingetragen, Schuld angepasst)
 /// und beim Umschalten des Zeitraums, nicht in einem Takt - sonst haengt die
@@ -84,8 +90,14 @@ public sealed class StreamOverlay(LocalStore store)
             .Where(e => e.AddedAt >= goal.StartedAt)
             .Sum(e => e.Chests * PriceOf(e)) / Money.KkPerW;
 
-        var income = goal.Bookings.Where(b => b.Kind == "income").Sum(b => b.Amount);
-        var expenses = goal.Bookings.Where(b => b.Kind != "income").Sum(b => b.Amount);
+        // Dieselbe Aufteilung wie im Bereich Goals: der Shop-Bestand ist
+        // weder Ausgabe noch volle Einnahme - von ihm zaehlt nur, was nicht
+        // ueber die Laeufe schon im Gewinn steht.
+        var income = goal.Bookings.Where(b => b.Kind == "income").Sum(b => b.Amount)
+            + goal.Bookings.Where(b => b.Kind == "shop").Sum(ShopNet);
+        var expenses = goal.Bookings
+            .Where(b => b.Kind != "income" && b.Kind != "shop")
+            .Sum(b => b.Amount);
         var net = GoalCalc.Net(runProfit, income, expenses, goal.CarryIn);
         var rest = GoalCalc.Rest(goal.Target, net);
         var progress = GoalCalc.Progress(goal.Target, net);
@@ -94,8 +106,20 @@ public sealed class StreamOverlay(LocalStore store)
         var run = RunCatalog.Find(goal.ActiveRun)?.Name ?? goal.ActiveRun;
 
         WriteFile("ziel.txt", goal.Title.Length > 0 ? goal.Title : Won(goal.Target));
+        WriteFile("ziel-wert.txt", Won(goal.Target));
         WriteFile("ziel-netto.txt", Won(net));
         WriteFile("ziel-offen.txt", Won(rest));
+        WriteFile("ziel-ausgaben.txt", Won(expenses));
+        WriteFile("ziel-einnahmen.txt", Won(income));
+        WriteFile("ziel-fortschritt.txt", progress.ToString("0.#", CultureInfo.CurrentCulture) + " %");
+
+        // Truhen und Runs im eingestellten Zeitraum. Sie stehen auch in
+        // truhen.txt und runs.txt - aber nur, wenn die erste Karte an ist;
+        // wer allein das Ziel zeigt, haette sie sonst nicht.
+        WriteFile("ziel-truhen.txt", entries.Sum(e => e.Chests).ToString("N0", CultureInfo.CurrentCulture));
+        WriteFile("ziel-runs.txt", entries.Count.ToString("N0", CultureInfo.CurrentCulture));
+
+        WriteFile("ziel-lauf.txt", run);
         // „Noch ungefaehr X Laeufe" - geschaetzt aus dem, was der aktive Lauf
         // bisher im Mittel einbrachte. Ohne Eintraege dazu bleibt es leer, und
         // die Karte zeigt stattdessen, was offen ist.
@@ -104,10 +128,36 @@ public sealed class StreamOverlay(LocalStore store)
             ? Loc.T("goals.runsLeft", GoalCalc.Runs(rest, perRun).ToString("N0", CultureInfo.CurrentCulture))
             : "";
 
+        // „Noch ungefaehr X Laeufe" als blanke Zahl daneben - fuer eine
+        // Text-Quelle, die ihre Beschriftung selbst mitbringt.
+        WriteFile("ziel-laeufe.txt", runsLeft);
+        WriteFile("ziel-laeufe-zahl.txt", perRun > 0m && rest > 0m
+            ? GoalCalc.Runs(rest, perRun).ToString("N0", CultureInfo.CurrentCulture)
+            : "");
+
         WriteFile("goal.html", GoalPage(
             goal.Title.Length > 0 ? goal.Title : Loc.T("stream.goal.title"),
             Won(goal.Target), Won(net), Won(rest), expenses > 0m ? Won(expenses) : "",
             progress, entries.Sum(e => e.Chests), entries.Count, run, runsLeft));
+    }
+
+    /// Was ein Shop-Posten beitraegt: der Betrag ohne die Truhen, die ueber
+    /// die Laeufe schon gezaehlt sind.
+    private decimal ShopNet(GoalBookingDto booking)
+    {
+        var counted = booking.Chests.Sum(c => c.Chests * ChestPrice(c)) / Money.KkPerW;
+
+        return GoalCalc.ShopNet(booking.Amount, counted);
+    }
+
+    /// Der Preis einer Truhenzeile in kk: ihr eigener, sonst der des Laufs.
+    private decimal ChestPrice(GoalChestDto chest)
+    {
+        if (chest.Price > 0m) return chest.Price;
+
+        return store.Runs.ChestPrice.TryGetValue(chest.Run, out var p)
+            ? p
+            : RunCatalog.DefaultChestPrice;
     }
 
     /// Was ein Lauf dieser Art im Mittel einbringt, in Won.

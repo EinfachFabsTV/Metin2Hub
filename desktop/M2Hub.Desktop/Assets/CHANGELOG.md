@@ -7,6 +7,21 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.53.0
+
+**Neu**
+
+- Jede Angabe der Goal-Einblendung liegt jetzt auch als eigene `.txt` im
+  Stream-Ordner: Zielbetrag, Netto, Offenes, Ausgaben, Einnahmen, Fortschritt,
+  Truhen, Runs, der aktive Lauf und die geschaetzten Restlaeufe. Wer die Karte
+  in OBS selbst baut, muss nichts mehr nachrechnen.
+
+**Behoben**
+
+- In der Goal-Einblendung zaehlte ein Shop-Bestand als Ausgabe. Er wird jetzt
+  wie im Bereich Goals gerechnet - abzueglich der Truhen, die ueber die Runs
+  schon im Gewinn stehen.
+
 ## 1.52.1
 
 **Neu**
