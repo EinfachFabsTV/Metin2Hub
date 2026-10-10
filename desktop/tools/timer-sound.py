@@ -19,6 +19,21 @@ def tone(data, freq, seconds, start, level, decay=4.2, attack=0.008, harmonic=0.
         if at < len(data):
             data[at] += level * env * wave_
 
+def lowpass(data, cutoff):
+    """Ein einfacher Tiefpass: nimmt die Schaerfe heraus, ohne den Ton zu
+    verschlucken - das ist der Unterschied zwischen dumpf und stumpf."""
+    a = math.exp(-2 * math.pi * cutoff / RATE)
+    last = 0.0
+    for i, v in enumerate(data):
+        last = (1 - a) * v + a * last
+        data[i] = last
+
+def fade(data, seconds=0.05):
+    """Das Ende weich auslaufen lassen - ein harter Schnitt knackt."""
+    n = int(seconds * RATE)
+    for i in range(n):
+        data[len(data) - n + i] *= 1 - i / n
+
 def write(name, seconds, build):
     data = [0.0] * int(seconds * RATE)
     build(data)
@@ -35,6 +50,19 @@ def write(name, seconds, build):
             struct.pack("<h", max(-32768, min(32767, int(v * scale * 32767)))) for v in data))
 
     print(name, "ok")
+
+# Weich: der Standard. Tief und rund wie ein angeschlagenes Holz, mit
+# langsamem Anschlag und Tiefpass - faellt auf, ohne zu erschrecken.
+def soft(d):
+    # Grundton und Quinte darueber, beide ohne scharfe Oberwellen
+    tone(d, 196.0, 1.5, 0, 1.0, decay=3.0, attack=0.025, harmonic=0.12)
+    tone(d, 293.7, 1.3, int(0.03 * RATE), 0.55, decay=3.4, attack=0.03, harmonic=0.08)
+    # Eine Terz spaeter macht aus dem Schlag einen kurzen Zweiklang
+    tone(d, 246.9, 1.2, int(0.3 * RATE), 0.5, decay=3.2, attack=0.03, harmonic=0.08)
+    lowpass(d, 1400)
+    fade(d)
+
+write("weich", 1.9, soft)
 
 # Glocke: zwei weiche Toene, A5 und E6 - der Standard.
 write("glocke", 1.6, lambda d: (

@@ -7,6 +7,13 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.58.0
+
+**Neu**
+
+- Ein vierter Ton **„Weich"** - tief und rund, mit langsamem Anschlag: faellt
+  neben dem Spiel auf, ohne zu erschrecken. Er ist jetzt der Standard.
+
 ## 1.57.0
 
 **Neu**

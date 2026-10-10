@@ -361,8 +361,9 @@ public sealed class TimersData
     /// Fenster schauen muesste - und genau das soll man nicht muessen.
     public bool Sound { get; set; } = true;
 
-    /// Welcher Ton: "glocke", "doppelton" oder "gong" (siehe `Sound.All`).
-    public string SoundName { get; set; } = "glocke";
+    /// Welcher Ton: "weich" (Standard), "glocke", "doppelton" oder "gong"
+    /// (siehe `Sound.All`).
+    public string SoundName { get; set; } = "weich";
 
     public int NextId { get; set; } = 1;
 

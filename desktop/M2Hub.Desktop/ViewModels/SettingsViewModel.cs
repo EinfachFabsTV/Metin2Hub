@@ -418,6 +418,7 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         var chips = new ObservableCollection<RunChip>
         {
+            new(Sound.Soft, Loc.T("settings.timers.sound.soft")),
             new(Sound.Chime, Loc.T("settings.timers.sound.chime")),
             new(Sound.Double, Loc.T("settings.timers.sound.double")),
             new(Sound.Gong, Loc.T("settings.timers.sound.gong")),

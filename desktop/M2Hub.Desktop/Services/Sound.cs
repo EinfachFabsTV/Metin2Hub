@@ -21,11 +21,14 @@ public static class Sound
 {
     /// Die drei Toene zur Auswahl. Der Schluessel steht in `TimersData.Sound`
     /// und zugleich im Dateinamen.
+    /// Der Standard: tief und rund, faellt auf, ohne zu erschrecken.
+    public const string Soft = "weich";
+
     public const string Chime = "glocke";
     public const string Double = "doppelton";
     public const string Gong = "gong";
 
-    public static readonly string[] All = [Chime, Double, Gong];
+    public static readonly string[] All = [Soft, Chime, Double, Gong];
 
     private static readonly Dictionary<string, string> Paths = new();
 
@@ -42,13 +45,13 @@ public static class Sound
     private static extern bool PlaySound(string? sound, IntPtr module, uint flags);
 
     /// Spielt den eingestellten Ton. `name` ist einer aus `All`; was nicht
-    /// dabei ist, faellt auf die Glocke zurueck - eine umbenannte Datei soll
-    /// die Uhr nicht stumm machen.
+    /// dabei ist, faellt auf den Standard zurueck - eine umbenannte Datei
+    /// soll die Uhr nicht stumm machen.
     public static void Timer(string? name = null)
     {
         try
         {
-            var file = Extract(All.Contains(name) ? name! : Chime);
+            var file = Extract(All.Contains(name) ? name! : Soft);
             if (file is null) return;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

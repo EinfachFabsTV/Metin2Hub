@@ -482,6 +482,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["settings.timers.sound"] = ["Ton, wenn eine Abklingzeit abläuft", "Sound when a cooldown ends", "Bekleme süresi dolunca ses", "Suono alla fine di un recupero"],
         ["settings.timers.soundHint"] = ["Hörbar neben dem Spiel, aber kein Alarm. Beim Umschalten hörst du den Ton einmal.", "Audible next to the game, but no alarm. You hear the sound once when switching.", "Oyunun yanında duyulur ama alarm değil. Seçerken sesi bir kez duyarsın.", "Udibile accanto al gioco, ma non un allarme. Senti il suono una volta quando lo scegli."],
         ["settings.timers.timeHint"] = ["Zeit als „5:30“ für 5 Minuten 30 Sekunden – eine blanke Zahl zählt als Minuten.", "Time as “5:30” for 5 minutes 30 seconds – a plain number counts as minutes.", "Süre “5:30” = 5 dakika 30 saniye – düz bir sayı dakika sayılır.", "Tempo come «5:30» per 5 minuti e 30 secondi – un numero semplice conta come minuti."],
+        ["settings.timers.sound.soft"] = ["Weich", "Soft", "Yumuşak", "Morbido"],
         ["settings.timers.sound.chime"] = ["Glocke", "Chime", "Çan", "Campana"],
         ["settings.timers.sound.double"] = ["Doppelton", "Double beep", "Çift ton", "Doppio tono"],
         ["settings.timers.sound.gong"] = ["Gong", "Gong", "Gong", "Gong"],
