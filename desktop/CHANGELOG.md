@@ -7,6 +7,19 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.59.1
+
+**Behoben**
+
+- Die **Timer-Dateien wurden nie aufgeraeumt**: wer die Zahl der Setups
+  verkleinerte oder einen eigenen Timer loeschte, behielt dessen `.txt` im
+  Ordner - sie blieb auf der letzten Zeit stehen und zeigte im Stream etwas
+  Falsches. Jetzt verschwindet mit dem Timer auch seine Datei.
+- Ebenso weg sind die Dateien aus den Fassungen vor 1.57.0, die noch neben
+  dem Ordner lagen. **Wer damals eine Browser-Quelle auf `stream\timer.html`
+  gerichtet hat, stellt sie auf `stream\timer\timer.html` um** - seit dem
+  Umzug in den eigenen Ordner wurde die alte Datei nicht mehr beschrieben.
+
 ## 1.59.0
 
 **Neu**

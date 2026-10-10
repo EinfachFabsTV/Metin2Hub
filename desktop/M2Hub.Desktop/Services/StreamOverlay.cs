@@ -276,6 +276,48 @@ public sealed class StreamOverlay(LocalStore store)
             WriteTimerFile("naechster.txt", next.Label is null ? "" : next.Label + "  " + next.Text);
 
             WriteTimerFile("timer.html", TimerPage(timers));
+
+            Tidy(timers);
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
+
+    /// Raeumt auf, was nicht mehr dazugehoert.
+    ///
+    /// Zwei Sorten Altlasten: Dateien geloeschter Timer (wer die Zahl der
+    /// Setups verkleinert, haette sonst ewig eine Uhr im Ordner, die
+    /// stehenbleibt und im Stream falsche Zeiten zeigt) und die Dateien aus
+    /// den Fassungen vor 1.57.0, die noch im Ordner darueber liegen - dort
+    /// zeigte eine Browser-Quelle auf `stream/timer.html`, die seitdem
+    /// niemand mehr beschreibt.
+    private static void Tidy(IReadOnlyList<(string Key, string Label, string Text, bool Running)> timers)
+    {
+        var keep = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "aktiv.txt", "alle.txt", "naechster.txt", "timer.html",
+        };
+
+        foreach (var t in timers)
+        {
+            keep.Add(FileKey(t.Key) + ".txt");
+            keep.Add(FileKey(t.Key) + "-name.txt");
+        }
+
+        foreach (var file in System.IO.Directory.EnumerateFiles(TimerDirectory))
+            if (!keep.Contains(Path.GetFileName(file)))
+                Delete(file);
+
+        // Die alten Dateien daneben, einmalig.
+        foreach (var file in System.IO.Directory.EnumerateFiles(Directory, "timer*.*"))
+            Delete(file);
+    }
+
+    private static void Delete(string file)
+    {
+        try
+        {
+            File.Delete(file);
         }
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
