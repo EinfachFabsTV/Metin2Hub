@@ -339,6 +339,10 @@ public sealed class TimersData
     /// Die Dateien fuer OBS schreiben, solange ein Timer laeuft.
     public bool WriteFiles { get; set; } = true;
 
+    /// Ton, wenn eine Abklingzeit ablaeuft. An, weil man sonst auf das
+    /// Fenster schauen muesste - und genau das soll man nicht muessen.
+    public bool Sound { get; set; } = true;
+
     public int NextId { get; set; } = 1;
 
     public int TakeId() => NextId++;

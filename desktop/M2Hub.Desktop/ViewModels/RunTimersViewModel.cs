@@ -117,7 +117,13 @@ public sealed class RunTimersViewModel : ViewModelBase
     private void Update()
     {
         var now = DateTime.Now;
-        foreach (var timer in Timers) timer.Refresh(now);
+        var done = false;
+
+        foreach (var timer in Timers) done |= timer.Refresh(now);
+
+        // Einmal, auch wenn zwei Uhren im selben Takt ablaufen - zwei Toene
+        // uebereinander klaengen nach Fehler.
+        if (done && Data.Sound) Sound.Timer();
 
         // Ohne Timer gibt es nichts zu schreiben - sonst legte die App
         // Dateien an, die niemand bestellt hat.
@@ -150,13 +156,15 @@ public sealed class RunTimerViewModel(string key, string label, int seconds) : V
 
     public bool IsRunning { get => _running; private set => Set(ref _running, value); }
 
-    public void Refresh(DateTime now)
+    /// Liefert true, wenn die Uhr **in diesem Takt** abgelaufen ist - dann
+    /// gibt es einen Ton.
+    public bool Refresh(DateTime now)
     {
         if (EndsAt is not { } ends)
         {
             IsRunning = false;
             Text = Format(Seconds);
-            return;
+            return false;
         }
 
         var left = (int)Math.Ceiling((ends - now).TotalSeconds);
@@ -167,11 +175,13 @@ public sealed class RunTimerViewModel(string key, string label, int seconds) : V
             EndsAt = null;
             IsRunning = false;
             Text = Format(Seconds);
-            return;
+            return true;
         }
 
         IsRunning = true;
         Text = Format(left);
+
+        return false;
     }
 
     private static string Format(int seconds) =>

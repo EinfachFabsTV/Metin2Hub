@@ -7,6 +7,20 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.56.0
+
+**Neu**
+
+- **Ton am Ende einer Abklingzeit**: zwei weiche Glockentoene - hoerbar neben
+  dem Spiel, aber kein Alarm. Abschaltbar in den Einstellungen; beim
+  Einschalten hoerst du ihn einmal.
+
+**Geaendert**
+
+- Die **Einstellungen haben Reiter**: Allgemein, Streaming und Programm. Vorher
+  stand alles untereinander, und wer die Sprache suchte, scrollte an der
+  Stream-Einblendung vorbei.
+
 ## 1.55.0
 
 **Geaendert**

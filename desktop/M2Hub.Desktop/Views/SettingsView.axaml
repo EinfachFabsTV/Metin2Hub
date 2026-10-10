@@ -14,10 +14,30 @@
         <TextBlock Classes="muted" Text="{loc:T settings.subtitle}" />
       </StackPanel>
 
+
+      <!-- Reiter statt einer langen Seite: die Einstellungen sind ueber die
+           Jahre gewachsen, und wer die Sprache sucht, soll nicht an der
+           Stream-Einblendung vorbeiscrollen. Dieselbe Knopfreihe wie in den
+           anderen Bereichen - ein TabControl braechte sein eigenes Aussehen
+           mit. -->
+      <ItemsControl ItemsSource="{Binding Tabs}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:RunChip">
+            <Button Classes="chip" Classes.active="{Binding IsActive}"
+                    Margin="0,0,6,6" Content="{Binding Label}"
+                    Command="{Binding $parent[UserControl].DataContext.ChooseTabCommand}"
+                    CommandParameter="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
       <!-- Zwei Stapel nebeneinander, solange das Fenster breit genug ist,
-           darunter untereinander. Vorher stand alles in einer Spalte: viel
-           Scrollen, waehrend rechts die halbe Seite leer blieb. -->
-      <UniformGrid Columns="{Binding $parent[ScrollViewer].Bounds.Width,
+           darunter untereinander. -->
+      <UniformGrid IsVisible="{Binding IsGeneralTab}"
+                   Columns="{Binding $parent[ScrollViewer].Bounds.Width,
                              Converter={x:Static views:SettingsColumns.Instance}}">
 
         <StackPanel Spacing="14" Margin="0,0,7,0" VerticalAlignment="Top">
@@ -121,7 +141,16 @@
               </ComboBox>
             </StackPanel>
           </Border>
+        </StackPanel>
+      </UniformGrid>
 
+      <!-- Zwei Stapel nebeneinander, solange das Fenster breit genug ist,
+           darunter untereinander. -->
+      <UniformGrid IsVisible="{Binding IsStreamTab}"
+                   Columns="{Binding $parent[ScrollViewer].Bounds.Width,
+                             Converter={x:Static views:SettingsColumns.Instance}}">
+
+        <StackPanel Spacing="14" Margin="0,0,7,0" VerticalAlignment="Top">
           <!-- Abklingzeiten ueber dem Spiel: ein Knopf je Setup -->
           <Border Classes="card">
             <StackPanel Spacing="10">
@@ -199,13 +228,19 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
+                <CheckBox Content="{loc:T settings.timers.sound}" IsChecked="{Binding TimerSound}" />
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.soundHint}" />
+
                 <CheckBox Content="{loc:T settings.timers.files}" IsChecked="{Binding TimerFiles}" />
                 <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
                            Text="{loc:T settings.timers.filesHint}" />
               </StackPanel>
             </StackPanel>
           </Border>
+        </StackPanel>
 
+        <StackPanel Spacing="14" Margin="7,0,0,0" VerticalAlignment="Top">
           <!-- Zahlen fuer OBS: Dateien im Profil, kein Server -->
           <Border Classes="card">
             <StackPanel Spacing="10">
@@ -295,7 +330,16 @@
               </StackPanel>
             </StackPanel>
           </Border>
+        </StackPanel>
+      </UniformGrid>
 
+      <!-- Zwei Stapel nebeneinander, solange das Fenster breit genug ist,
+           darunter untereinander. -->
+      <UniformGrid IsVisible="{Binding IsAppTab}"
+                   Columns="{Binding $parent[ScrollViewer].Bounds.Width,
+                             Converter={x:Static views:SettingsColumns.Instance}}">
+
+        <StackPanel Spacing="14" Margin="0,0,7,0" VerticalAlignment="Top">
           <!-- Was sich geaendert hat -->
           <Border Classes="card" IsVisible="{Binding HasPatchnotes}">
             <StackPanel Spacing="10">
@@ -328,7 +372,9 @@
               </StackPanel>
             </StackPanel>
           </Border>
+        </StackPanel>
 
+        <StackPanel Spacing="14" Margin="7,0,0,0" VerticalAlignment="Top">
           <Border Classes="card">
             <StackPanel Spacing="10">
               <TextBlock Classes="h2" Text="{loc:T settings.data}" />

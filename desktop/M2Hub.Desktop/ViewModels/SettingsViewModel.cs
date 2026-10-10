@@ -134,6 +134,9 @@ public sealed class SettingsViewModel : ViewModelBase
         _headerServer = HeaderServers.FirstOrDefault(o => o.Key == store.Settings.HeaderServer)
                         ?? HeaderServers[0];
 
+        Tabs = BuildTabs();
+        ChooseTabCommand = new RelayCommand(p => { if (p is RunChip c) Tab = c.Key; });
+
         ToggleSectionsCommand = new RelayCommand(_ => SectionsOpen = !SectionsOpen);
         ToggleStreamCommand = new RelayCommand(_ => StreamOpen = !StreamOpen);
         ToggleNotesCommand = new RelayCommand(_ => NotesOpen = !NotesOpen);
@@ -158,6 +161,54 @@ public sealed class SettingsViewModel : ViewModelBase
         ClearCacheCommand = new AsyncRelayCommand(_ => ClearCacheAsync());
     }
 
+
+
+    /* ---------- Reiter ---------- */
+
+    private string _tab = GeneralTab;
+
+    public const string GeneralTab = "general";
+    public const string StreamTab = "stream";
+    public const string AppTab = "app";
+
+    /// Drei Reiter statt einer langen Seite: **Allgemein** (Sprache,
+    /// Startseite, Server), **Streaming** (Abklingzeiten und die beiden
+    /// Einblendungen) und **Programm** (Patchnotes, Updates, Daten). Wer die
+    /// Sprache sucht, soll nicht an der Stream-Einblendung vorbeiscrollen.
+    public ObservableCollection<RunChip> Tabs { get; }
+
+    public string Tab
+    {
+        get => _tab;
+        set
+        {
+            if (!Set(ref _tab, value)) return;
+
+            foreach (var c in Tabs) c.IsActive = c.Key == value;
+            Raise(nameof(IsGeneralTab));
+            Raise(nameof(IsStreamTab));
+            Raise(nameof(IsAppTab));
+        }
+    }
+
+    public bool IsGeneralTab => _tab == GeneralTab;
+    public bool IsStreamTab => _tab == StreamTab;
+    public bool IsAppTab => _tab == AppTab;
+
+    public RelayCommand ChooseTabCommand { get; }
+
+    private ObservableCollection<RunChip> BuildTabs()
+    {
+        var tabs = new ObservableCollection<RunChip>
+        {
+            new(GeneralTab, Loc.T("settings.tab.general")),
+            new(StreamTab, Loc.T("settings.tab.stream")),
+            new(AppTab, Loc.T("settings.tab.app")),
+        };
+        foreach (var c in tabs) c.IsActive = c.Key == _tab;
+
+        return tabs;
+    }
 
     /* ---------- Abklingzeiten ---------- */
 
@@ -197,6 +248,24 @@ public sealed class SettingsViewModel : ViewModelBase
             _store.Settings.Timers.WriteFiles = value;
             _store.SaveSettings();
             Raise(nameof(TimerFiles));
+        }
+    }
+
+    /// Ton, wenn eine Abklingzeit ablaeuft.
+    public bool TimerSound
+    {
+        get => _store.Settings.Timers.Sound;
+        set
+        {
+            if (_store.Settings.Timers.Sound == value) return;
+
+            _store.Settings.Timers.Sound = value;
+            _store.SaveSettings();
+            Raise(nameof(TimerSound));
+
+            // Beim Einschalten einmal vorspielen - sonst weiss man nicht,
+            // worauf man im Spiel hoert.
+            if (value) Sound.Timer();
         }
     }
 
