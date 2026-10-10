@@ -7,6 +7,23 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.57.0
+
+**Neu**
+
+- Eigene Timer nehmen jetzt **Sekunden**: „5:30" sind fuenf Minuten dreissig.
+  Eine blanke Zahl zaehlt weiter als Minuten.
+- **Drei Toene zur Auswahl**: Glocke, Doppelton und Gong. Beim Umschalten
+  hoerst du den Ton einmal.
+- Die Timer-Dateien fuer OBS liegen in einem **eigenen Ordner** `timer` neben
+  den Dateien der Einblendung; ein Knopf in den Einstellungen oeffnet ihn.
+
+**Behoben**
+
+- **Der Ton war oft nicht zu hoeren**: er wurde stillschweigend uebersprungen,
+  sobald der Rechner gerade einen anderen Ton abspielte - und er war zu leise.
+  Jetzt spielt er immer und deutlich lauter.
+
 ## 1.56.0
 
 **Neu**

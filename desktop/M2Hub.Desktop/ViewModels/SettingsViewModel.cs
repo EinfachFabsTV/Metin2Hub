@@ -143,6 +143,9 @@ public sealed class SettingsViewModel : ViewModelBase
         ToggleTimersSectionCommand = new RelayCommand(_ => TimersOpen = !TimersOpen);
 
         TimerSizes = BuildTimerSizes();
+        TimerSounds = BuildTimerSounds();
+        ChooseTimerSoundCommand = new RelayCommand(p => { if (p is RunChip o) TimerSoundName = o; });
+        OpenTimerFolderCommand = new RelayCommand(_ => Platform.OpenFolder(StreamOverlay.TimerFolderPath));
         ChooseTimerSizeCommand = new RelayCommand(p => { if (p is RunChip o) TimerSize = o; });
         AddCustomTimerCommand = new RelayCommand(_ => AddCustomTimer());
         DeleteCustomTimerCommand = new AsyncRelayCommand(p => DeleteCustomTimerAsync(p as CustomTimerRow));
@@ -265,7 +268,7 @@ public sealed class SettingsViewModel : ViewModelBase
 
             // Beim Einschalten einmal vorspielen - sonst weiss man nicht,
             // worauf man im Spiel hoert.
-            if (value) Sound.Timer();
+            if (value) Sound.Timer(_store.Settings.Timers.SoundName);
         }
     }
 
@@ -332,13 +335,14 @@ public sealed class SettingsViewModel : ViewModelBase
 
     private void AddCustomTimer()
     {
-        if (!int.TryParse(_newTimerMinutes.Trim(), out var minutes) || minutes <= 0) return;
+        var seconds = ReadTime(_newTimerMinutes);
+        if (seconds <= 0) return;
 
         _store.Settings.Timers.Custom.Add(new CustomTimerDto
         {
             Id = _store.Settings.Timers.TakeId(),
             Name = _newTimerName.Trim(),
-            Minutes = minutes,
+            Seconds = seconds,
         });
 
         NewTimerName = "";
@@ -360,6 +364,67 @@ public sealed class SettingsViewModel : ViewModelBase
         _store.SaveSettings();
         RebuildTimers();
         _timersChanged();
+    }
+
+    /// Liest „5:30" als fuenf Minuten dreissig Sekunden und eine blanke Zahl
+    /// als Minuten - „30" bleibt also eine halbe Stunde, wie bisher. Drei
+    /// Teile gehen auch: „1:05:30".
+    internal static int ReadTime(string? text)
+    {
+        var parts = (text ?? "").Trim().Split(':');
+        if (parts.Length > 3) return 0;
+
+        var seconds = 0;
+        foreach (var part in parts)
+        {
+            if (!int.TryParse(part.Trim(), out var value) || value < 0) return 0;
+
+            seconds = seconds * 60 + value;
+        }
+
+        // Eine blanke Zahl sind Minuten, nicht Sekunden.
+        return parts.Length == 1 ? seconds * 60 : seconds;
+    }
+
+    /// Die drei Toene zur Auswahl.
+    public ObservableCollection<RunChip> TimerSounds { get; private set; } = new();
+
+    public RunChip TimerSoundName
+    {
+        get => TimerSounds.FirstOrDefault(o => o.Key == _store.Settings.Timers.SoundName)
+               ?? TimerSounds[0];
+        set
+        {
+            if (value is null) return;
+
+            _store.Settings.Timers.SoundName = value.Key;
+            _store.SaveSettings();
+            foreach (var c in TimerSounds) c.IsActive = c.Key == value.Key;
+            Raise(nameof(TimerSoundName));
+
+            // Vorspielen: anders laesst sich nicht entscheiden, welcher es
+            // sein soll.
+            Sound.Timer(value.Key);
+        }
+    }
+
+    public RelayCommand ChooseTimerSoundCommand { get; private set; } = null!;
+
+    /// Der eigene Ordner der Abklingzeiten - in OBS sucht man ihn sonst
+    /// zwischen den Dateien der Einblendung.
+    public RelayCommand OpenTimerFolderCommand { get; private set; } = null!;
+
+    private ObservableCollection<RunChip> BuildTimerSounds()
+    {
+        var chips = new ObservableCollection<RunChip>
+        {
+            new(Sound.Chime, Loc.T("settings.timers.sound.chime")),
+            new(Sound.Double, Loc.T("settings.timers.sound.double")),
+            new(Sound.Gong, Loc.T("settings.timers.sound.gong")),
+        };
+        foreach (var c in chips) c.IsActive = c.Key == _store.Settings.Timers.SoundName;
+
+        return chips;
     }
 
     private ObservableCollection<RunChip> BuildTimerSizes()
@@ -940,5 +1005,7 @@ public sealed class CustomTimerRow(CustomTimerDto dto)
 {
     public int Id { get; } = dto.Id;
     public string Name { get; } = dto.Name.Length > 0 ? dto.Name : Loc.T("timers.custom");
-    public string MinutesLabel { get; } = Loc.T("settings.timers.minutes", dto.Minutes);
+    public string MinutesLabel { get; } = dto.Seconds % 60 == 0
+        ? Loc.T("settings.timers.minutes", dto.Seconds / 60)
+        : $"{dto.Seconds / 60}:{dto.Seconds % 60:00}";
 }

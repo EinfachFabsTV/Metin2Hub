@@ -189,10 +189,14 @@
                   <TextBox Grid.Column="0" Text="{Binding NewTimerName, Mode=TwoWay}"
                            Watermark="{loc:T settings.timers.name}" />
                   <TextBox Grid.Column="1" Text="{Binding NewTimerMinutes, Mode=TwoWay}"
-                           Watermark="{loc:T settings.timers.minutesIn}" />
+                           Watermark="{loc:T settings.timers.minutesIn}"
+                           ToolTip.Tip="{loc:T settings.timers.timeHint}" />
                   <Button Grid.Column="2" Classes="chip" Content="{loc:T settings.timers.add}"
                           Command="{Binding AddCustomTimerCommand}" />
                 </Grid>
+
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.timeHint}" />
 
                 <ItemsControl ItemsSource="{Binding CustomTimers}" IsVisible="{Binding HasCustomTimers}">
                   <ItemsControl.ItemTemplate>
@@ -232,9 +236,26 @@
                 <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
                            Text="{loc:T settings.timers.soundHint}" />
 
+                <ItemsControl ItemsSource="{Binding TimerSounds}" IsEnabled="{Binding TimerSound}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:RunChip">
+                      <Button Classes="chip" Classes.active="{Binding IsActive}"
+                              Margin="0,0,6,6" Content="{Binding Label}"
+                              Command="{Binding $parent[UserControl].DataContext.ChooseTimerSoundCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
                 <CheckBox Content="{loc:T settings.timers.files}" IsChecked="{Binding TimerFiles}" />
                 <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
                            Text="{loc:T settings.timers.filesHint}" />
+                <Button Classes="chip" HorizontalAlignment="Left"
+                        Content="{loc:T settings.stream.open}"
+                        Command="{Binding OpenTimerFolderCommand}" />
               </StackPanel>
             </StackPanel>
           </Border>

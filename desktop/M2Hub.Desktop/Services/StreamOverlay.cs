@@ -41,6 +41,13 @@ public sealed class StreamOverlay(LocalStore store)
 
     public static string FolderPath => Directory;
 
+    /// Die Abklingzeiten liegen in einem **eigenen Ordner**: es sind schnell
+    /// zwei Dutzend Dateien, und wer in OBS eine Quelle sucht, soll sie nicht
+    /// zwischen den Zahlen der Einblendung suchen muessen.
+    private static string TimerDirectory => Path.Combine(Directory, "timer");
+
+    public static string TimerFolderPath => TimerDirectory;
+
     /// Die drei Zeitraeume, zwischen denen umgeschaltet wird.
     public const string Today = "today";
     public const string Session = "session";
@@ -242,33 +249,33 @@ public sealed class StreamOverlay(LocalStore store)
     /// die Karte sagt, dass nichts laeuft.
     ///
     /// Die Dateinamen folgen dem Schluessel des Timers: `hydra#1` wird zu
-    /// `timer-hydra-1.txt`. Ein Schluessel wandert nicht, solange die Anzahl
+    /// `timer/hydra-1.txt`. Ein Schluessel wandert nicht, solange die Anzahl
     /// der Setups steht - eine Text-Quelle in OBS soll nicht jedes Mal neu
     /// zugeordnet werden muessen.
     public void WriteTimers(IReadOnlyList<(string Key, string Label, string Text, bool Running)> timers)
     {
         try
         {
-            System.IO.Directory.CreateDirectory(Directory);
+            System.IO.Directory.CreateDirectory(TimerDirectory);
 
             foreach (var t in timers)
             {
-                WriteFile("timer-" + FileKey(t.Key) + ".txt", t.Text);
-                WriteFile("timer-" + FileKey(t.Key) + "-name.txt", t.Label);
+                WriteTimerFile(FileKey(t.Key) + ".txt", t.Text);
+                WriteTimerFile(FileKey(t.Key) + "-name.txt", t.Label);
             }
 
             var running = timers.Where(t => t.Running).ToList();
 
-            WriteFile("timer-aktiv.txt", running.Count.ToString(CultureInfo.CurrentCulture));
-            WriteFile("timer-alle.txt", string.Join(
+            WriteTimerFile("aktiv.txt", running.Count.ToString(CultureInfo.CurrentCulture));
+            WriteTimerFile("alle.txt", string.Join(
                 Environment.NewLine, running.Select(t => t.Label + "  " + t.Text)));
 
             // Die naechste Uhr, die ablaeuft - oft die einzige Zahl, die man
             // im Stream wirklich sehen will.
             var next = running.OrderBy(t => t.Text, StringComparer.Ordinal).FirstOrDefault();
-            WriteFile("timer-naechster.txt", next.Label is null ? "" : next.Label + "  " + next.Text);
+            WriteTimerFile("naechster.txt", next.Label is null ? "" : next.Label + "  " + next.Text);
 
-            WriteFile("timer.html", TimerPage(timers));
+            WriteTimerFile("timer.html", TimerPage(timers));
         }
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
@@ -386,6 +393,9 @@ public sealed class StreamOverlay(LocalStore store)
 
     private static string Won(decimal value) =>
         value.ToString("#,0.##", CultureInfo.CurrentCulture) + " " + Loc.T("stream.won");
+
+    private static void WriteTimerFile(string name, string content) =>
+        File.WriteAllText(Path.Combine(TimerDirectory, name), content, Encoding.UTF8);
 
     private static void WriteFile(string name, string content) =>
         File.WriteAllText(Path.Combine(Directory, name), content, Encoding.UTF8);

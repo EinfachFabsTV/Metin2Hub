@@ -77,7 +77,7 @@ public sealed class RunTimersViewModel : ViewModelBase
         {
             var label = own.Name.Length > 0 ? own.Name : Loc.T("timers.custom");
 
-            Add($"custom#{own.Id}", label, Math.Max(1, own.Minutes) * 60, running);
+            Add($"custom#{own.Id}", label, Math.Max(1, own.Seconds), running);
         }
 
         Raise(nameof(HasTimers));
@@ -123,7 +123,7 @@ public sealed class RunTimersViewModel : ViewModelBase
 
         // Einmal, auch wenn zwei Uhren im selben Takt ablaufen - zwei Toene
         // uebereinander klaengen nach Fehler.
-        if (done && Data.Sound) Sound.Timer();
+        if (done && Data.Sound) Sound.Timer(Data.SoundName);
 
         // Ohne Timer gibt es nichts zu schreiben - sonst legte die App
         // Dateien an, die niemand bestellt hat.
@@ -184,6 +184,10 @@ public sealed class RunTimerViewModel(string key, string label, int seconds) : V
         return false;
     }
 
+    /// „05:30", ab einer Stunde „1:05:30" - laenger laeuft kein Lauf, aber
+    /// ein eigener Timer darf es.
     private static string Format(int seconds) =>
-        $"{seconds / 60:00}:{seconds % 60:00}";
+        seconds >= 3600
+            ? $"{seconds / 3600}:{seconds / 60 % 60:00}:{seconds % 60:00}"
+            : $"{seconds / 60:00}:{seconds % 60:00}";
 }

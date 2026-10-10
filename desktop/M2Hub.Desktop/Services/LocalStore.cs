@@ -51,6 +51,24 @@ public sealed class LocalStore
         Settings = Read<SettingsData>(SettingsPath) ?? new SettingsData();
         Prune();
         StampRunPrices();
+        StampTimerSeconds();
+    }
+
+    /// Rechnet eigene Timer aus Fassungen vor 1.57.0 von Minuten in Sekunden
+    /// um. Seitdem laesst sich „5:30" eintragen, und dafuer braucht es die
+    /// feinere Einheit; `Minutes` wird danach auf null gesetzt und nie
+    /// wieder gelesen.
+    private void StampTimerSeconds()
+    {
+        var changed = false;
+        foreach (var timer in Settings.Timers.Custom.Where(t => t.Minutes > 0))
+        {
+            if (timer.Seconds <= 0) timer.Seconds = timer.Minutes * 60;
+            timer.Minutes = 0;
+            changed = true;
+        }
+
+        if (changed) SaveSettings();
     }
 
     /// Schreibt den Preis in Eintraege, die noch keinen haben.
@@ -343,6 +361,9 @@ public sealed class TimersData
     /// Fenster schauen muesste - und genau das soll man nicht muessen.
     public bool Sound { get; set; } = true;
 
+    /// Welcher Ton: "glocke", "doppelton" oder "gong" (siehe `Sound.All`).
+    public string SoundName { get; set; } = "glocke";
+
     public int NextId { get; set; } = 1;
 
     public int TakeId() => NextId++;
@@ -355,9 +376,15 @@ public sealed class CustomTimerDto
 
     public string Name { get; set; } = "";
 
-    /// Abklingzeit in Minuten - bei den Laufen kommt sie aus `RunCatalog`,
-    /// hier traegt sie der Nutzer ein.
-    public int Minutes { get; set; } = 30;
+    /// Abklingzeit in **Sekunden** - bei den Laeufen kommt sie aus
+    /// `RunCatalog`, hier traegt sie der Nutzer ein, als „5:30" oder als
+    /// blanke Minutenzahl.
+    public int Seconds { get; set; } = 1800;
+
+    /// Vor 1.57.0 standen hier Minuten. Alte Dateien bringen das Feld noch
+    /// mit; beim Laden wird es einmal in Sekunden umgerechnet
+    /// (`LocalStore.StampTimerSeconds`) und danach nicht mehr geschrieben.
+    public int Minutes { get; set; }
 }
 
 /// Einstellungen der Stream-Einblendung (`StreamOverlay`).
