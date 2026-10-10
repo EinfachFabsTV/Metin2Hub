@@ -133,6 +133,20 @@
     <Setter Property="CornerRadius" Value="999" />
   </Style>
 
+  <!-- Eingetragen: der Knopf blinkt kurz gruen auf. Das Fenster liegt ueber
+       dem Spiel, und der Eintrag passiert woanders - ohne Rueckmeldung weiss
+       man nicht, ob der Klick angekommen ist. -->
+  <Style Selector="Button.chip.done">
+    <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
+  <!-- Auch beim Ueberfahren gruen: sonst schluckt der Hover-Stil die
+       Rueckmeldung genau dort, wo der Zeiger gerade steht. -->
+  <Style Selector="Button.chip.done /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+  </Style>
+
   <!-- Abklingzeit-Kachel im Knopffenster ueber dem Spiel: gross genug, um
        sie im Spielen zu treffen; laufende stehen hell und blau umrandet. -->
   <Style Selector="Button.timer">

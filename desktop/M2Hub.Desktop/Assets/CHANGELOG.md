@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.60.0
+
+**Neu**
+
+- Die Truhen-Knoepfe im Timer-Fenster **blinken nach dem Klick kurz gruen** -
+  so sieht man, dass der Lauf eingetragen ist, ohne ins Hauptfenster zu
+  wechseln.
+
 ## 1.59.1
 
 **Behoben**

@@ -86,9 +86,30 @@ public sealed class RunTimersViewModel : ViewModelBase
         });
         _store.SaveRuns();
 
+        Flash(button);
+
         // Der Run Tracker, die Startseite und die Einblendung zeigen danach
         // dasselbe wie dieses Fenster.
         _entered();
+    }
+
+    /// Kurzes gruenes Aufblinken des Knopfes, den man gedrueckt hat.
+    ///
+    /// Das Fenster liegt ueber dem Spiel, und der Eintrag passiert woanders -
+    /// ohne Rueckmeldung weiss man nicht, ob der Klick angekommen ist. Eine
+    /// halbe Sekunde reicht; laenger stuende die Farbe noch, wenn der
+    /// naechste Lauf laengst laeuft.
+    private static void Flash(ChestButton button)
+    {
+        button.Done = true;
+
+        var off = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(550) };
+        off.Tick += (s, _) =>
+        {
+            button.Done = false;
+            if (s is DispatcherTimer t) t.Stop();
+        };
+        off.Start();
     }
 
     /// Der Preis, mit dem der Eintrag rechnet: der des heutigen Tages, sonst
@@ -280,9 +301,15 @@ public sealed class ChestRow(string run, IEnumerable<ChestButton> buttons)
 }
 
 /// Ein Knopf der Schnelleingabe: „8" traegt acht Truhen dieses Laufs ein.
-public sealed class ChestButton(string run, int chests)
+public sealed class ChestButton(string run, int chests) : ViewModelBase
 {
+    private bool _done;
+
     public string Run { get; } = run;
     public int Chests { get; } = chests;
     public string Label { get; } = chests.ToString();
+
+    /// Kurz nach dem Klick: der Knopf steht gruen und sagt damit, dass der
+    /// Lauf eingetragen ist.
+    public bool Done { get => _done; set => Set(ref _done, value); }
 }
