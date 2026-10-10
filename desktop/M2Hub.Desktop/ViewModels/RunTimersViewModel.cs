@@ -1,0 +1,176 @@
+using System.Collections.ObjectModel;
+using Avalonia.Threading;
+using M2Hub.Desktop.Services;
+using M2Hub.Desktop.Services.Calc;
+
+namespace M2Hub.Desktop.ViewModels;
+
+/// Die Abklingzeiten der Setups - ein Knopf je Setup.
+///
+/// **Je Setup ein Timer, nicht je Laufart.** Wer zwei Hydra-Chars hat, laeuft
+/// abwechselnd und braucht zwei Uhren; wie viele es je Lauf sind, steht in
+/// den Einstellungen (`TimersData.Counts`). Dazu kommen selbst angelegte
+/// Timer fuer alles, was zu keinem Lauf gehoert.
+///
+/// **Ein Klick startet, ein zweiter startet neu** - mehr tut der Knopf nicht.
+/// Der Lauf wird weiterhin im Run Tracker eingetragen: ein Klick, der
+/// nebenbei bucht, traegt frueher oder spaeter etwas ein, das nicht stimmt.
+///
+/// Die Uhr laeuft im ViewModel, nicht im Fenster: das Knopffenster laesst
+/// sich schliessen, ohne dass die Abklingzeiten verlorengehen.
+public sealed class RunTimersViewModel : ViewModelBase
+{
+    private readonly LocalStore _store;
+    private readonly StreamOverlay _stream;
+    private readonly DispatcherTimer _tick;
+
+    public RunTimersViewModel(LocalStore store, StreamOverlay stream)
+    {
+        _store = store;
+        _stream = stream;
+
+        StartCommand = new RelayCommand(p => Start(p as RunTimerViewModel));
+        StopCommand = new RelayCommand(p => Stop(p as RunTimerViewModel));
+
+        Build();
+
+        // Sekundentakt: die Knoepfe zaehlen sichtbar herunter, und die
+        // Dateien fuer OBS sollen nicht hinterherhinken.
+        _tick = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _tick.Tick += (_, _) => Update();
+        _tick.Start();
+    }
+
+    private TimersData Data => _store.Settings.Timers;
+
+    public ObservableCollection<RunTimerViewModel> Timers { get; } = new();
+
+    public bool HasTimers => Timers.Count > 0;
+
+    public RelayCommand StartCommand { get; }
+    public RelayCommand StopCommand { get; }
+
+    /// Baut die Knoepfe aus den Einstellungen neu. **Laufende Uhren bleiben
+    /// stehen**: wer waehrend des Spielens einen Timer dazunimmt, soll die
+    /// anderen nicht verlieren.
+    public void Build()
+    {
+        var running = Timers.Where(t => t.EndsAt is not null)
+            .ToDictionary(t => t.Key, t => t.EndsAt);
+
+        Timers.Clear();
+
+        foreach (var run in RunCatalog.Runs)
+        {
+            var count = Data.Counts.TryGetValue(run.Key, out var n) ? n : 0;
+
+            for (var i = 1; i <= count; i++)
+            {
+                // Bei nur einem Setup waere „Hydra 1" eine Zahl ohne Zweck.
+                var label = count > 1 ? $"{run.Name} {i}" : run.Name;
+
+                Add($"{run.Key}#{i}", label, run.CooldownMinutes * 60, running);
+            }
+        }
+
+        foreach (var own in Data.Custom)
+        {
+            var label = own.Name.Length > 0 ? own.Name : Loc.T("timers.custom");
+
+            Add($"custom#{own.Id}", label, Math.Max(1, own.Minutes) * 60, running);
+        }
+
+        Raise(nameof(HasTimers));
+        Update();
+    }
+
+    private void Add(string key, string label, int seconds, Dictionary<string, DateTime?> running)
+    {
+        var timer = new RunTimerViewModel(key, label, seconds);
+        if (running.TryGetValue(key, out var ends)) timer.EndsAt = ends;
+
+        Timers.Add(timer);
+    }
+
+    private void Start(RunTimerViewModel? timer)
+    {
+        if (timer is null) return;
+
+        timer.EndsAt = DateTime.Now.AddSeconds(timer.Seconds);
+        Update();
+    }
+
+    /// Rechtsklick haelt an und setzt zurueck - ein Lauf, der abgebrochen
+    /// wurde, soll keine Uhr hinterlassen, die weiterzaehlt.
+    private void Stop(RunTimerViewModel? timer)
+    {
+        if (timer is null) return;
+
+        timer.EndsAt = null;
+        Update();
+    }
+
+    /// Einmal je Sekunde: Knoepfe nachfuehren und die Dateien schreiben.
+    private void Update()
+    {
+        var now = DateTime.Now;
+        foreach (var timer in Timers) timer.Refresh(now);
+
+        // Ohne Timer gibt es nichts zu schreiben - sonst legte die App
+        // Dateien an, die niemand bestellt hat.
+        if (Data.WriteFiles && Timers.Count > 0)
+            _stream.WriteTimers(Timers.Select(t => (t.Key, t.Label, t.Text, t.IsRunning)).ToList());
+    }
+
+    /// Nach einem Sprachwechsel - die Namen stehen als feste Zeichenketten.
+    public void RelabelAfterLanguageChange() => Build();
+}
+
+/// Ein Knopf: Name, Abklingzeit, Restzeit.
+public sealed class RunTimerViewModel(string key, string label, int seconds) : ViewModelBase
+{
+    private string _text = "";
+    private bool _running;
+
+    public string Key { get; } = key;
+    public string Label { get; } = label;
+
+    /// Die volle Abklingzeit in Sekunden.
+    public int Seconds { get; } = seconds;
+
+    /// Wann sie ablaeuft. Null heisst: steht still.
+    public DateTime? EndsAt { get; set; }
+
+    /// „19:59", oder die volle Zeit, solange nichts laeuft - ein leerer Knopf
+    /// saehe aus, als waere er kaputt.
+    public string Text { get => _text; private set => Set(ref _text, value); }
+
+    public bool IsRunning { get => _running; private set => Set(ref _running, value); }
+
+    public void Refresh(DateTime now)
+    {
+        if (EndsAt is not { } ends)
+        {
+            IsRunning = false;
+            Text = Format(Seconds);
+            return;
+        }
+
+        var left = (int)Math.Ceiling((ends - now).TotalSeconds);
+        if (left <= 0)
+        {
+            // Abgelaufen heisst bereit: die Uhr faellt weg, der Knopf zeigt
+            // wieder die volle Zeit und laedt zum naechsten Lauf ein.
+            EndsAt = null;
+            IsRunning = false;
+            Text = Format(Seconds);
+            return;
+        }
+
+        IsRunning = true;
+        Text = Format(left);
+    }
+
+    private static string Format(int seconds) =>
+        $"{seconds / 60:00}:{seconds % 60:00}";
+}

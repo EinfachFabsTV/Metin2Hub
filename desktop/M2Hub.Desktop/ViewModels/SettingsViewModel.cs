@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using M2Hub.Desktop.Models;
 using M2Hub.Desktop.Services;
+using M2Hub.Desktop.Services.Calc;
 
 namespace M2Hub.Desktop.ViewModels;
 
@@ -81,6 +83,7 @@ public sealed class SettingsViewModel : ViewModelBase
     private bool _notesOpen;
     private readonly Action _headerChanged;
     private readonly Action _cacheCleared;
+    private readonly Action _timersChanged;
     private readonly Func<UpdateService.UpdateInfo, Task> _showUpdate;
 
     private LanguageOption _language;
@@ -102,6 +105,7 @@ public sealed class SettingsViewModel : ViewModelBase
         StreamOverlay stream,
         Action headerChanged,
         Action cacheCleared,
+        Action timersChanged,
         Func<UpdateService.UpdateInfo, Task> showUpdate)
     {
         _store = store;
@@ -110,6 +114,7 @@ public sealed class SettingsViewModel : ViewModelBase
         _stream = stream;
         _headerChanged = headerChanged;
         _cacheCleared = cacheCleared;
+        _timersChanged = timersChanged;
         _showUpdate = showUpdate;
 
         _checkUpdates = store.Settings.CheckUpdates;
@@ -132,6 +137,13 @@ public sealed class SettingsViewModel : ViewModelBase
         ToggleSectionsCommand = new RelayCommand(_ => SectionsOpen = !SectionsOpen);
         ToggleStreamCommand = new RelayCommand(_ => StreamOpen = !StreamOpen);
         ToggleNotesCommand = new RelayCommand(_ => NotesOpen = !NotesOpen);
+        ToggleTimersSectionCommand = new RelayCommand(_ => TimersOpen = !TimersOpen);
+
+        TimerSizes = BuildTimerSizes();
+        ChooseTimerSizeCommand = new RelayCommand(p => { if (p is RunChip o) TimerSize = o; });
+        AddCustomTimerCommand = new RelayCommand(_ => AddCustomTimer());
+        DeleteCustomTimerCommand = new AsyncRelayCommand(p => DeleteCustomTimerAsync(p as CustomTimerRow));
+        RebuildTimers();
 
         StreamScopes = BuildStreamScopes();
         GoalSizes = BuildGoalSizes();
@@ -144,6 +156,154 @@ public sealed class SettingsViewModel : ViewModelBase
         OpenReleasesCommand = new RelayCommand(_ => Platform.OpenUrl(UpdateService.ReleasePage));
         CheckNowCommand = new AsyncRelayCommand(_ => CheckNowAsync());
         ClearCacheCommand = new AsyncRelayCommand(_ => ClearCacheAsync());
+    }
+
+
+    /* ---------- Abklingzeiten ---------- */
+
+    private bool _timersOpen;
+    private string _newTimerName = "";
+    private string _newTimerMinutes = "30";
+
+    /// Der lange Abschnitt steckt wie die anderen in einem Aufklapper.
+    public bool TimersOpen { get => _timersOpen; set => Set(ref _timersOpen, value); }
+    public string TimersChevron => TimersOpen ? "▴" : "▾";
+
+    public RelayCommand ToggleTimersSectionCommand { get; private set; } = null!;
+
+    /// Zeigt das Knopffenster ueber dem Spiel.
+    public bool TimersEnabled
+    {
+        get => _store.Settings.Timers.Enabled;
+        set
+        {
+            if (_store.Settings.Timers.Enabled == value) return;
+
+            _store.Settings.Timers.Enabled = value;
+            _store.SaveSettings();
+            Raise(nameof(TimersEnabled));
+            _timersChanged();
+        }
+    }
+
+    /// Schreibt die App die Abklingzeiten fuer OBS mit?
+    public bool TimerFiles
+    {
+        get => _store.Settings.Timers.WriteFiles;
+        set
+        {
+            if (_store.Settings.Timers.WriteFiles == value) return;
+
+            _store.Settings.Timers.WriteFiles = value;
+            _store.SaveSettings();
+            Raise(nameof(TimerFiles));
+        }
+    }
+
+    /// Je Lauf eine Zeile: wie viele Setups davon laufen nebeneinander.
+    public ObservableCollection<TimerCountRow> TimerCounts { get; } = new();
+
+    /// Die selbst angelegten Timer.
+    public ObservableCollection<CustomTimerRow> CustomTimers { get; } = new();
+
+    public bool HasCustomTimers => CustomTimers.Count > 0;
+
+    public string NewTimerName { get => _newTimerName; set => Set(ref _newTimerName, value); }
+    public string NewTimerMinutes { get => _newTimerMinutes; set => Set(ref _newTimerMinutes, value); }
+
+    public RelayCommand AddCustomTimerCommand { get; private set; } = null!;
+    public AsyncRelayCommand DeleteCustomTimerCommand { get; private set; } = null!;
+
+    public ObservableCollection<RunChip> TimerSizes { get; private set; } = new();
+
+    public RunChip TimerSize
+    {
+        get => TimerSizes.FirstOrDefault(o => o.Key == _store.Settings.Timers.Size) ?? TimerSizes[0];
+        set
+        {
+            if (value is null || _store.Settings.Timers.Size == value.Key) return;
+
+            _store.Settings.Timers.Size = value.Key;
+            _store.SaveSettings();
+            foreach (var c in TimerSizes) c.IsActive = c.Key == value.Key;
+            Raise(nameof(TimerSize));
+            _timersChanged();
+        }
+    }
+
+    public RelayCommand ChooseTimerSizeCommand { get; private set; } = null!;
+
+    private void RebuildTimers()
+    {
+        TimerCounts.Clear();
+        foreach (var run in RunCatalog.Runs)
+        {
+            var count = _store.Settings.Timers.Counts.TryGetValue(run.Key, out var n) ? n : 0;
+
+            TimerCounts.Add(new TimerCountRow(run.Key, run.Name, count, SetCount));
+        }
+
+        CustomTimers.Clear();
+        foreach (var own in _store.Settings.Timers.Custom)
+            CustomTimers.Add(new CustomTimerRow(own));
+
+        Raise(nameof(HasCustomTimers));
+    }
+
+    /// Null Setups heisst: kein Knopf. Der Eintrag faellt dann ganz weg,
+    /// statt als Null in der Datei stehen zu bleiben.
+    private void SetCount(string run, int count)
+    {
+        if (count <= 0) _store.Settings.Timers.Counts.Remove(run);
+        else _store.Settings.Timers.Counts[run] = count;
+
+        _store.SaveSettings();
+        _timersChanged();
+    }
+
+    private void AddCustomTimer()
+    {
+        if (!int.TryParse(_newTimerMinutes.Trim(), out var minutes) || minutes <= 0) return;
+
+        _store.Settings.Timers.Custom.Add(new CustomTimerDto
+        {
+            Id = _store.Settings.Timers.TakeId(),
+            Name = _newTimerName.Trim(),
+            Minutes = minutes,
+        });
+
+        NewTimerName = "";
+        _store.SaveSettings();
+        RebuildTimers();
+        _timersChanged();
+    }
+
+    private async Task DeleteCustomTimerAsync(CustomTimerRow? row)
+    {
+        if (row is null) return;
+
+        var ok = await _dialogs.ConfirmAsync(
+            Loc.T("settings.timers.delete"),
+            Loc.T("settings.timers.deleteAsk", row.Name));
+        if (!ok) return;
+
+        _store.Settings.Timers.Custom.RemoveAll(t => t.Id == row.Id);
+        _store.SaveSettings();
+        RebuildTimers();
+        _timersChanged();
+    }
+
+    private ObservableCollection<RunChip> BuildTimerSizes()
+    {
+        var chips = new ObservableCollection<RunChip>
+        {
+            new("s", Loc.T("settings.stream.goal.size.s")),
+            new("m", Loc.T("settings.stream.goal.size.m")),
+            new("l", Loc.T("settings.stream.goal.size.l")),
+        };
+        foreach (var c in chips) c.IsActive = c.Key == _store.Settings.Timers.Size;
+
+        return chips;
     }
 
     /// Sprache der Oberflaeche. „Automatisch" folgt Windows.
@@ -682,4 +842,34 @@ public sealed class SettingsViewModel : ViewModelBase
         _cacheCleared();
         Status = Loc.T("settings.data.cleared");
     }
+}
+
+/// Eine Zeile „Lauf - wie viele Setups".
+public sealed class TimerCountRow(string key, string name, int count, Action<string, int> save)
+    : ViewModelBase
+{
+    private string _text = count.ToString();
+
+    public string Key { get; } = key;
+    public string Name { get; } = name;
+
+    /// Als Text, damit ein leeres Feld beim Tippen nicht sofort auf 0 springt.
+    public string CountText
+    {
+        get => _text;
+        set
+        {
+            if (!Set(ref _text, value)) return;
+
+            save(Key, int.TryParse(value.Trim(), out var n) && n > 0 ? n : 0);
+        }
+    }
+}
+
+/// Ein selbst angelegter Timer in der Liste.
+public sealed class CustomTimerRow(CustomTimerDto dto)
+{
+    public int Id { get; } = dto.Id;
+    public string Name { get; } = dto.Name.Length > 0 ? dto.Name : Loc.T("timers.custom");
+    public string MinutesLabel { get; } = Loc.T("settings.timers.minutes", dto.Minutes);
 }

@@ -43,10 +43,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         Stream = new StreamOverlay(store);
         GuildCalc = new GuildCalcViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
+        Timers = new RunTimersViewModel(store, Stream);
         Goals = new GoalsHostViewModel(store, dialogs, Stream);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
-            store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages,
+            store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages, ReloadTimers,
             info => dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart)));
 
         ShowStartCommand = new RelayCommand(_ => Show("start"));
@@ -57,6 +58,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
         ResetStreamStartCommand = new RelayCommand(_ => ResetStreamStart());
+        ToggleTimersCommand = new RelayCommand(_ => ToggleTimers());
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
         OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
@@ -69,6 +71,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             GuildCalc.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
+            Timers.RelabelAfterLanguageChange();
             Dashboard.Reload();
             Events.Reload();
             Itemshop.Reload();
@@ -162,6 +165,19 @@ public sealed class MainWindowViewModel : ViewModelBase
     /// Seitenleiste, weil man ihn waehrend des Streams drueckt und nicht in
     /// den Einstellungen suchen will.
     public RelayCommand ResetStreamStartCommand { get; }
+
+    /// Blendet das Knopffenster ein und aus. Es steht in der Seitenleiste,
+    /// weil es waehrend des Spielens gebraucht wird.
+    public RelayCommand ToggleTimersCommand { get; }
+
+    /// Das Fenster soll sich zeigen oder verstecken. Die Ansicht haengt sich
+    /// hier ein - ein ViewModel oeffnet keine Fenster.
+    public event Action<bool>? TimersVisibilityChanged;
+
+    public RunTimersViewModel Timers { get; }
+
+    /// Der Knopf steht nur da, wenn ueberhaupt ein Timer eingerichtet ist.
+    public bool HasTimers => Timers.HasTimers;
 
     /// Nur wenn eine Einblendung laeuft, hat der Knopf einen Sinn.
     public bool HasStreamOverlay =>
@@ -281,6 +297,23 @@ public sealed class MainWindowViewModel : ViewModelBase
         Show(PageOrder[next]);
     }
 
+    private void ToggleTimers()
+    {
+        var on = !_store.Settings.Timers.Enabled;
+
+        _store.Settings.Timers.Enabled = on;
+        _store.SaveSettings();
+        TimersVisibilityChanged?.Invoke(on);
+    }
+
+    /// Von den Einstellungen: die Knoepfe wurden geaendert.
+    public void ReloadTimers()
+    {
+        Timers.Build();
+        Raise(nameof(HasTimers));
+        TimersVisibilityChanged?.Invoke(_store.Settings.Timers.Enabled);
+    }
+
     private void ResetStreamStart()
     {
         _store.Settings.Stream.SessionStart = DateTime.Now;
@@ -295,6 +328,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         // Die Einblendung laesst sich in den Einstellungen ein- und
         // ausschalten; beim Verlassen der Seite steht der Knopf richtig.
         Raise(nameof(HasStreamOverlay));
+        Raise(nameof(HasTimers));
         CurrentPage = key switch
         {
             "start" => Dashboard,

@@ -45,6 +45,38 @@ public partial class MainWindow : Window
         // worauf die Eingabe gerade liegt. Deshalb im Tunnel, nicht im
         // Bubble - ein TextBox verschluckt die Tasten sonst.
         AddHandler(KeyDownEvent, WindowKeyDown, RoutingStrategies.Tunnel);
+
+        // Das Knopffenster der Abklingzeiten gehoert der Ansicht, nicht dem
+        // ViewModel. Es wird einmal gebaut und danach nur noch gezeigt oder
+        // versteckt - neu gebaut verloere es seine Stelle auf dem Schirm.
+        DataContextChanged += (_, _) => HookTimers();
+        Closed += (_, _) => _timers?.Close();
+    }
+
+    private TimerOverlayWindow? _timers;
+
+    private void HookTimers()
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        vm.TimersVisibilityChanged -= ShowTimers;
+        vm.TimersVisibilityChanged += ShowTimers;
+
+        if (App.Store is { } store && store.Settings.Timers.Enabled) ShowTimers(true);
+    }
+
+    private void ShowTimers(bool show)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        if (!show)
+        {
+            _timers?.Hide();
+            return;
+        }
+
+        _timers ??= new TimerOverlayWindow(App.Store) { DataContext = vm.Timers };
+        _timers.Show();
     }
 
     private void WindowKeyDown(object? sender, KeyEventArgs e)

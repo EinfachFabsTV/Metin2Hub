@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:M2Hub.Desktop.ViewModels"
+        x:Class="M2Hub.Desktop.Views.TimerOverlayWindow"
+        x:DataType="vm:RunTimersViewModel"
+        Title="M2Hub Timer"
+        Topmost="True" ShowInTaskbar="False" CanResize="False"
+        SystemDecorations="None" SizeToContent="WidthAndHeight"
+        Background="Transparent">
+
+  <!-- Das Fenster haengt ueber dem Spiel und wird im Spielen getroffen, nicht
+       gelesen: grosse Flaechen, viel Abstand, keine Feinheiten. -->
+  <Border Background="{StaticResource HeaderBrush}"
+          BorderBrush="{StaticResource SubtleBrush}" BorderThickness="1"
+          CornerRadius="12" Padding="8" Name="Frame">
+    <StackPanel Spacing="6">
+      <!-- Griff zum Ziehen: das Fenster hat keine Leiste vom Betriebssystem. -->
+      <Grid ColumnDefinitions="*,Auto" Name="Handle">
+        <TextBlock Grid.Column="0" Classes="muted" FontSize="10" Text="M2Hub"
+                   VerticalAlignment="Center" Margin="4,0,0,0" />
+        <Button Grid.Column="1" Classes="icon" Content="✕" FontSize="10"
+                Name="HideButton" />
+      </Grid>
+
+      <ItemsControl ItemsSource="{Binding Timers}" Name="Tiles">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" MaxWidth="420" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:RunTimerViewModel">
+            <Button Classes="timer" Classes.running="{Binding IsRunning}"
+                    Margin="0,0,6,6"
+                    Command="{Binding $parent[ItemsControl].DataContext.StartCommand}"
+                    CommandParameter="{Binding}"
+                    PointerPressed="TilePointerPressed">
+              <StackPanel>
+                <TextBlock Classes="muted" FontSize="10" HorizontalAlignment="Center"
+                           Text="{Binding Label}" />
+                <TextBlock FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"
+                           Text="{Binding Text}" />
+              </StackPanel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
+</Window>

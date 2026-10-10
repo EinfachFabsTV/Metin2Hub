@@ -122,6 +122,90 @@
             </StackPanel>
           </Border>
 
+          <!-- Abklingzeiten ueber dem Spiel: ein Knopf je Setup -->
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T settings.timers}" />
+              <CheckBox Content="{loc:T settings.timers.enabled}" IsChecked="{Binding TimersEnabled}" />
+              <TextBlock Classes="muted" Text="{loc:T settings.timers.hint}" TextWrapping="Wrap" />
+
+              <Button Classes="fold" Command="{Binding ToggleTimersSectionCommand}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Text="{loc:T settings.timers.counts}" />
+                  <TextBlock Grid.Column="1" Classes="muted" Text="{Binding TimersChevron}" />
+                </Grid>
+              </Button>
+
+              <StackPanel Spacing="10" IsVisible="{Binding TimersOpen}">
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.countsHint}" />
+
+                <ItemsControl ItemsSource="{Binding TimerCounts}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:TimerCountRow">
+                      <Grid ColumnDefinitions="*,70" ColumnSpacing="8" Margin="0,0,0,5">
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12"
+                                   TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                        <TextBox Grid.Column="1" Text="{Binding CountText, Mode=TwoWay}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Classes="muted" Text="{loc:T settings.timers.custom}" />
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.customHint}" />
+
+                <Grid ColumnDefinitions="*,80,Auto" ColumnSpacing="8">
+                  <TextBox Grid.Column="0" Text="{Binding NewTimerName, Mode=TwoWay}"
+                           Watermark="{loc:T settings.timers.name}" />
+                  <TextBox Grid.Column="1" Text="{Binding NewTimerMinutes, Mode=TwoWay}"
+                           Watermark="{loc:T settings.timers.minutesIn}" />
+                  <Button Grid.Column="2" Classes="chip" Content="{loc:T settings.timers.add}"
+                          Command="{Binding AddCustomTimerCommand}" />
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding CustomTimers}" IsVisible="{Binding HasCustomTimers}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:CustomTimerRow">
+                      <Border Classes="panel" Padding="9,6" Margin="0,0,0,5">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9">
+                          <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center"
+                                     TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                          <TextBlock Grid.Column="1" Classes="muted" FontSize="11"
+                                     VerticalAlignment="Center" Text="{Binding MinutesLabel}" />
+                          <Button Grid.Column="2" Classes="icon danger" Content="✕"
+                                  ToolTip.Tip="{loc:T settings.timers.delete}"
+                                  Command="{Binding $parent[UserControl].DataContext.DeleteCustomTimerCommand}"
+                                  CommandParameter="{Binding}" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Classes="muted" Text="{loc:T settings.timers.size}" />
+                <ItemsControl ItemsSource="{Binding TimerSizes}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:RunChip">
+                      <Button Classes="chip" Classes.active="{Binding IsActive}"
+                              Margin="0,0,6,6" Content="{Binding Label}"
+                              Command="{Binding $parent[UserControl].DataContext.ChooseTimerSizeCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <CheckBox Content="{loc:T settings.timers.files}" IsChecked="{Binding TimerFiles}" />
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.filesHint}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
           <!-- Zahlen fuer OBS: Dateien im Profil, kein Server -->
           <Border Classes="card">
             <StackPanel Spacing="10">

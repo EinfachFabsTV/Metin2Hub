@@ -129,6 +129,14 @@
           <Button DockPanel.Dock="Bottom" Classes="side" Classes.active="{Binding IsSettings}"
                   Command="{Binding ShowSettingsCommand}" Content="{loc:T nav.settings}" />
 
+          <!-- Die Abklingzeiten ueber dem Spiel: ein Griff waehrend des
+               Spielens, deshalb hier und nicht in den Einstellungen. -->
+          <Button DockPanel.Dock="Bottom" Classes="side" Margin="0,0,0,6"
+                  IsVisible="{Binding HasTimers}"
+                  ToolTip.Tip="{loc:T settings.timers.hint}"
+                  Command="{Binding ToggleTimersCommand}"
+                  Content="{loc:T nav.timers}" />
+
           <!-- Waehrend eines Streams gebraucht, nicht in den Einstellungen
                gesucht: setzt „seit Stream-Start" auf jetzt. Steht nur da,
                wenn eine Einblendung laeuft. -->

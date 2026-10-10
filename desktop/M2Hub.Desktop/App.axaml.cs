@@ -9,6 +9,10 @@ namespace M2Hub.Desktop;
 
 public partial class App : Application
 {
+    /// Die Ablage, damit Fenster sie erreichen, die kein ViewModel bekommen
+    /// (das Knopffenster der Abklingzeiten merkt sich dort seine Stelle).
+    public static LocalStore? Store { get; private set; }
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
@@ -19,6 +23,7 @@ public partial class App : Application
             UpdateService.CleanupBackup();
 
             var store = new LocalStore();
+            Store = store;
             // Sprache vor dem ersten Fenster setzen, sonst steht kurz Deutsch da
             Loc.I.SetLanguage(store.Settings.Language);
             var forum = new ForumService(store);

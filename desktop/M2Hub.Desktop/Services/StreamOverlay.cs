@@ -234,6 +234,110 @@ public sealed class StreamOverlay(LocalStore store)
 
     private string BorderAlpha => (Opacity * 0.1).ToString("0.###", CultureInfo.InvariantCulture);
 
+    /// Die Abklingzeiten: je Timer eine Datei, dazu eine fertige Karte.
+    ///
+    /// Geschrieben wird im Sekundentakt - eine Uhr, die im Stream eine Sekunde
+    /// hinterherhinkt, sieht nach Fehler aus. Steht alles still, bleiben die
+    /// Dateien trotzdem stehen: `timer-...txt` zeigt dann die volle Zeit, und
+    /// die Karte sagt, dass nichts laeuft.
+    ///
+    /// Die Dateinamen folgen dem Schluessel des Timers: `hydra#1` wird zu
+    /// `timer-hydra-1.txt`. Ein Schluessel wandert nicht, solange die Anzahl
+    /// der Setups steht - eine Text-Quelle in OBS soll nicht jedes Mal neu
+    /// zugeordnet werden muessen.
+    public void WriteTimers(IReadOnlyList<(string Key, string Label, string Text, bool Running)> timers)
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(Directory);
+
+            foreach (var t in timers)
+            {
+                WriteFile("timer-" + FileKey(t.Key) + ".txt", t.Text);
+                WriteFile("timer-" + FileKey(t.Key) + "-name.txt", t.Label);
+            }
+
+            var running = timers.Where(t => t.Running).ToList();
+
+            WriteFile("timer-aktiv.txt", running.Count.ToString(CultureInfo.CurrentCulture));
+            WriteFile("timer-alle.txt", string.Join(
+                Environment.NewLine, running.Select(t => t.Label + "  " + t.Text)));
+
+            // Die naechste Uhr, die ablaeuft - oft die einzige Zahl, die man
+            // im Stream wirklich sehen will.
+            var next = running.OrderBy(t => t.Text, StringComparer.Ordinal).FirstOrDefault();
+            WriteFile("timer-naechster.txt", next.Label is null ? "" : next.Label + "  " + next.Text);
+
+            WriteFile("timer.html", TimerPage(timers));
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
+
+    /// `hydra#1` → `hydra-1`; alles, was in keinen Dateinamen gehoert, faellt
+    /// weg, statt das Schreiben scheitern zu lassen.
+    private static string FileKey(string key)
+    {
+        var clean = key.Replace('#', '-');
+
+        return new string(clean.Where(c => char.IsLetterOrDigit(c) || c is '-' or '_').ToArray());
+    }
+
+    /// Die Karte der Abklingzeiten: je Timer eine Kachel, wie im Fenster.
+    /// Laufende stehen hell, stehende blass - so sieht man im Stream auf einen
+    /// Blick, welches Setup bereit ist.
+    private string TimerPage(IReadOnlyList<(string Key, string Label, string Text, bool Running)> timers)
+    {
+        var size = Size(store.Settings.Timers.Size);
+        var tiles = string.Concat(timers.Select(t => $$"""
+            <div class="t{{(t.Running ? " run" : "")}}">
+              <span class="n">{{Html(t.Label)}}</span>
+              <span class="v">{{Html(t.Text)}}</span>
+            </div>
+        """));
+
+        return $$"""
+        <!doctype html>
+        <html lang="de">
+        <head>
+        <meta charset="utf-8">
+        <title>M2Hub</title>
+        <meta http-equiv="refresh" content="1">
+        <style>
+          html, body { margin: 0; background: transparent; }
+          body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            color: #e5edf8;
+            display: flex; flex-wrap: wrap; gap: 8px;
+            padding: 10px;
+          }
+          .t {
+            background: rgba(11, 17, 31, {{Alpha}});
+            border: 1px solid rgba(255, 255, 255, {{BorderAlpha}});
+            border-radius: 10px;
+            padding: 8px 12px;
+            min-width: 86px;
+            text-align: center;
+            opacity: .55;
+          }
+          .t.run { opacity: 1; border-color: #3b82f6; }
+          .n { display: block; font-size: {{size}}px; color: #8ea0bd; }
+          .v {
+            display: block;
+            font-size: calc({{size}}px * 1.5);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+          }
+          .t.run .v { color: #3b82f6; }
+        </style>
+        </head>
+        <body>
+        {{tiles}}
+        </body>
+        </html>
+        """;
+    }
+
     private static string Size(string? key) => key switch
     {
         "s" => "13",

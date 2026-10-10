@@ -300,6 +300,60 @@ public sealed class SettingsData
     /// Stand des Schulden-Rechners. Er gehoert in die Einstellungen und nicht
     /// zu den Laeufen: es ist **eine** Schuld, kein Wert je Lauf.
     public DebtData Debt { get; set; } = new();
+
+    /// Die Abklingzeiten der Setups und das Fenster, das sie zeigt.
+    public TimersData Timers { get; set; } = new();
+}
+
+/// Die Abklingzeit-Knoepfe (`RunTimersViewModel`, `TimerOverlayWindow`).
+///
+/// **Je Setup ein Timer**, nicht je Laufart: wer zwei Hydra-Chars hat, laesst
+/// zwei Abklingzeiten nebeneinander laufen. Wie viele es je Lauf sind, steht
+/// in `Counts`; was dort fehlt oder auf 0 steht, hat keinen Knopf.
+public sealed class TimersData
+{
+    /// Zeigt das Knopffenster. Es liegt ueber allen Fenstern - gedacht ist es
+    /// fuer das Spiel, aber Windows kennt kein „nur ueber diesem Programm".
+    public bool Enabled { get; set; }
+
+    /// Wie viele Setups je Lauf. Schluessel ist der Lauf aus `RunCatalog`.
+    public Dictionary<string, int> Counts { get; set; } = new();
+
+    /// Zusaetzliche Timer, die zu keinem Lauf gehoeren - anderer Charakter,
+    /// andere Zeit. Die Knoepfe je Lauf reichen fuer den Alltag; das hier ist
+    /// fuer alles, was danebensteht.
+    public List<CustomTimerDto> Custom { get; set; } = new();
+
+    /// Wo das Fenster zuletzt stand. Es laesst sich ziehen; beim naechsten
+    /// Start steht es wieder dort.
+    public double X { get; set; } = 40;
+    public double Y { get; set; } = 40;
+
+    /// Spalten im Knopffenster. Eine Reihe waere bei acht Timern breiter als
+    /// das Spielbild.
+    public int Columns { get; set; } = 4;
+
+    /// Schriftgroesse der Knoepfe: "s", "m" oder "l".
+    public string Size { get; set; } = "m";
+
+    /// Die Dateien fuer OBS schreiben, solange ein Timer laeuft.
+    public bool WriteFiles { get; set; } = true;
+
+    public int NextId { get; set; } = 1;
+
+    public int TakeId() => NextId++;
+}
+
+/// Ein selbst angelegter Timer.
+public sealed class CustomTimerDto
+{
+    public int Id { get; set; }
+
+    public string Name { get; set; } = "";
+
+    /// Abklingzeit in Minuten - bei den Laufen kommt sie aus `RunCatalog`,
+    /// hier traegt sie der Nutzer ein.
+    public int Minutes { get; set; } = 30;
 }
 
 /// Einstellungen der Stream-Einblendung (`StreamOverlay`).

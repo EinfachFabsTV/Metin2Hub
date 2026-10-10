@@ -7,6 +7,21 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.54.0 - 1.54.1
+
+**Neu**
+
+- **Abklingzeiten ueber dem Spiel**: ein kleines Fenster mit einem Knopf je
+  Setup. Linksklick startet die Uhr, ein zweiter startet sie neu, Rechtsklick
+  haelt sie an. Wer zwei Hydra-Chars hat, traegt in den Einstellungen „2" ein
+  und bekommt zwei Knoepfe; dazu lassen sich eigene Timer mit eigenem Namen
+  und eigener Zeit anlegen. Das Streamdeck wird dafuer nicht mehr gebraucht.
+- Das Fenster liegt ueber allen Fenstern, laesst sich ziehen und merkt sich
+  seine Stelle; ein Knopf in der Seitenleiste blendet es ein und aus.
+- Fuer OBS schreibt M2Hub die Abklingzeiten im Sekundentakt mit: je Timer eine
+  `.txt` mit der Restzeit, dazu `timer-aktiv`, `timer-alle`, `timer-naechster`
+  und eine fertige `timer.html`, die sich selbst aktuell haelt.
+
 ## 1.53.0
 
 **Neu**
