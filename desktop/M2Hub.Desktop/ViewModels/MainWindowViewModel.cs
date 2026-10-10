@@ -43,7 +43,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Stream = new StreamOverlay(store);
         GuildCalc = new GuildCalcViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
-        Timers = new RunTimersViewModel(store, Stream);
+        Timers = new RunTimersViewModel(store, Stream, AfterTimerEntry);
         Goals = new GoalsHostViewModel(store, dialogs, Stream);
         Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
         Settings = new SettingsViewModel(
@@ -295,6 +295,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (at < 0) at = 0;
         var next = ((at + step) % PageOrder.Length + PageOrder.Length) % PageOrder.Length;
         Show(PageOrder[next]);
+    }
+
+    /// Im Timer-Fenster wurde ein Lauf eingetragen - die Seiten, die ihn
+    /// zeigen, holen ihn nach.
+    private void AfterTimerEntry()
+    {
+        RunTracker.Reload();
+        Goals.Reload();
+        Dashboard.Reload();
+        Stream.Write();
     }
 
     private void ToggleTimers()

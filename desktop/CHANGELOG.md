@@ -7,6 +7,17 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.59.0
+
+**Neu**
+
+- **Truhen direkt im Timer-Fenster eintragen** (in den Einstellungen
+  einschalten): unter den Timern steht je Lauf eine Reihe Knoepfe mit den
+  Truhenzahlen, die er ueblicherweise abwirft - Hydra 0 bis 5, Razador,
+  Nemere und Beran 8 bis 10, Jotun 17 bis 21, Schlangenrun ein Knopf mit 64.
+  Ein Klick traegt den Lauf sofort fuer heute ein, ohne Tastatur; Run Tracker,
+  Goals, Startseite und Einblendung ziehen mit.
+
 ## 1.58.0
 
 **Neu**

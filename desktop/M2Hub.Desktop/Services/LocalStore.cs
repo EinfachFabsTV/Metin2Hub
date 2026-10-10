@@ -354,6 +354,11 @@ public sealed class TimersData
     /// Schriftgroesse der Knoepfe: "s", "m" oder "l".
     public string Size { get; set; } = "m";
 
+    /// Schnelleingabe unter den Timern: je Lauf eine Reihe Knoepfe mit den
+    /// Truhenzahlen, die er ueblicherweise abwirft. Ein Klick traegt den Lauf
+    /// fuer heute ein. Aus, weil nicht jeder im Spiel buchen will.
+    public bool QuickEntry { get; set; }
+
     /// Die Dateien fuer OBS schreiben, solange ein Timer laeuft.
     public bool WriteFiles { get; set; } = true;
 

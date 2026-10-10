@@ -232,6 +232,10 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
+                <CheckBox Content="{loc:T settings.timers.quick}" IsChecked="{Binding TimerQuickEntry}" />
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T settings.timers.quickHint}" />
+
                 <CheckBox Content="{loc:T settings.timers.sound}" IsChecked="{Binding TimerSound}" />
                 <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
                            Text="{loc:T settings.timers.soundHint}" />

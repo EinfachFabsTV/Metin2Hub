@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:M2Hub.Desktop.ViewModels"
+        xmlns:loc="using:M2Hub.Desktop.Services"
         x:Class="M2Hub.Desktop.Views.TimerOverlayWindow"
         x:DataType="vm:RunTimersViewModel"
         Title="M2Hub Timer"
@@ -47,6 +48,37 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+      <!-- Schnelleingabe: je Lauf die Truhenzahlen, die er ueblicherweise
+           abwirft. Ein Klick traegt den Lauf fuer heute ein - keine
+           Tastatur, im Spiel hat man die Hand an der Maus. -->
+      <StackPanel Spacing="4" IsVisible="{Binding HasChestRows}">
+        <TextBlock Classes="muted" FontSize="10" Margin="4,2,0,0"
+                   Text="{loc:T timers.chests}" />
+
+        <ItemsControl ItemsSource="{Binding ChestRows}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:ChestRow">
+              <StackPanel Spacing="2" Margin="0,0,0,4">
+                <TextBlock Classes="muted" FontSize="10" Margin="4,0,0,0"
+                           Text="{Binding Run}" />
+                <ItemsControl ItemsSource="{Binding Buttons}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" MaxWidth="420" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ChestButton">
+                      <Button Classes="chip" Margin="0,0,5,0" MinWidth="34"
+                              Content="{Binding Label}"
+                              Command="{Binding $parent[Window].DataContext.EnterCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
     </StackPanel>
   </Border>
 </Window>

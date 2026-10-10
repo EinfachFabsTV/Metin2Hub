@@ -254,6 +254,21 @@ public sealed class SettingsViewModel : ViewModelBase
         }
     }
 
+    /// Schnelleingabe im Timer-Fenster.
+    public bool TimerQuickEntry
+    {
+        get => _store.Settings.Timers.QuickEntry;
+        set
+        {
+            if (_store.Settings.Timers.QuickEntry == value) return;
+
+            _store.Settings.Timers.QuickEntry = value;
+            _store.SaveSettings();
+            Raise(nameof(TimerQuickEntry));
+            _timersChanged();
+        }
+    }
+
     /// Ton, wenn eine Abklingzeit ablaeuft.
     public bool TimerSound
     {

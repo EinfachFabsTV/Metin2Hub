@@ -26,7 +26,9 @@ public static class RunCatalog
         string[] Loot,
         int? MaxPerDay = null,
         string? Chest = null,
-        int? QuickChests = null)
+        int? QuickChests = null,
+        int FromChests = 0,
+        int ToChests = 0)
     {
         /// Die Truhe, die der Lauf abwirft - sie steht neben dem Eingabefeld.
         /// Meist ist das die Beute selbst; bei der Hydra nicht, dort faellt
@@ -40,6 +42,15 @@ public static class RunCatalog
         public int[] Quick => QuickChests is { } max
             ? Enumerable.Range(0, max + 1).ToArray()
             : [];
+
+        /// Die Knoepfe der Schnelleingabe im Timer-Fenster: was dieser Lauf
+        /// ueblicherweise abwirft. Wirft er immer gleich viel (Schlangenrun:
+        /// vierundsechzig), ist es ein einziger Knopf; sonst die Spanne aus
+        /// dem Hinweis (Razador: 8 bis 10). Ohne Angabe faellt sie auf die
+        /// Schnellwahl des Run Trackers zurueck.
+        public int[] Entry => ToChests > 0
+            ? Enumerable.Range(FromChests, ToChests - FromChests + 1).ToArray()
+            : Quick;
     }
 
     /// Vorgabe fuer den Preis je Truhe, **in kk**. Gerechnet wird ueberall in
@@ -59,31 +70,38 @@ public static class RunCatalog
         new("razador", "Razador",
             "8–10 Truhen des Razador pro Run",
             30, true,
-            ["Truhe des Razador"]),
+            ["Truhe des Razador"],
+            FromChests: 8, ToChests: 10),
 
         new("nemere", "Nemere",
             "8–10 Truhen des Nemere pro Run",
             240, true,
-            ["Truhe des Nemere"]),
+            ["Truhe des Nemere"],
+            FromChests: 8, ToChests: 10),
 
         // Hier wird nur der Lauf abgeschlossen; die Truhen ergeben sich aus
         // den beiden Beutearten.
         new("jotun", "Jotun",
             "9–11 Truhen des Bagjanamu + 8–10 Truhen des Jotun Thrym pro Run",
             180, false,
-            ["Truhe des Bagjanamu", "Truhe des Jotun Thrym"]),
+            ["Truhe des Bagjanamu", "Truhe des Jotun Thrym"],
+            // Beide Beutearten zusammen: 9-11 plus 8-10.
+            FromChests: 17, ToChests: 21),
 
         new("beran", "Beran",
             "8–10 Truhen des Beran-Setaou pro Run",
             1440, true,
             ["Truhe des Beran-Setaou"],
-            MaxPerDay: 6),
+            MaxPerDay: 6,
+            FromChests: 8, ToChests: 10),
 
         new("schlangenrun", "Schlangenrun",
             "Schlangenschatz · 64 Truhen pro Run",
             60, true,
             ["Schlangenschatz"],
-            MaxPerDay: 10),
+            MaxPerDay: 10,
+            // Immer vierundsechzig - ein einziger Knopf.
+            FromChests: 64, ToChests: 64),
     ];
 
     public static Run? Find(string? key) => Runs.FirstOrDefault(r => r.Key == key);
