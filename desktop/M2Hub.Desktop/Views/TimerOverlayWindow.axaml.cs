@@ -14,8 +14,8 @@ namespace M2Hub.Desktop.Views;
 /// Kreuz oder ueber die Seitenleiste aus.
 ///
 /// Keine Leiste vom Betriebssystem (`SystemDecorations=None`): sie waere im
-/// Spiel nur im Weg. Gezogen wird an der schmalen Zeile oben, und wo das
-/// Fenster stand, merkt sich `TimersData`.
+/// Spiel nur im Weg. **Gezogen wird an der ganzen Flaeche** - im Spiel sucht
+/// man keinen Griff -, und wo das Fenster stand, merkt sich `TimersData`.
 public partial class TimerOverlayWindow : Window
 {
     private readonly LocalStore? _store;
@@ -28,23 +28,33 @@ public partial class TimerOverlayWindow : Window
         _store = store;
         AvaloniaXamlLoader.Load(this);
 
-        if (this.FindControl<Grid>("Handle") is { } handle)
-        {
-            handle.PointerPressed += (_, e) =>
+        // Gezogen wird an der ganzen Flaeche, nicht nur an der Leiste: im
+        // Spiel sucht man keinen Griff. Die Knoepfe nehmen den Klick vorher
+        // selbst, hier kommt nur an, was daneben liegt.
+        if (this.FindControl<Border>("Frame") is { } frame)
+            frame.PointerPressed += (_, e) =>
             {
                 if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
             };
-
-            // Erst beim Loslassen gespeichert, nicht bei jedem Pixel - sonst
-            // schriebe ein Zug quer ueber den Bildschirm hundert Dateien.
-            handle.PointerReleased += (_, _) => Remember();
-        }
 
         if (this.FindControl<Button>("HideButton") is { } hide)
             hide.Click += (_, _) => HideAndRemember();
 
         if (_store is { } s)
+        {
             Position = new PixelPoint((int)s.Settings.Timers.X, (int)s.Settings.Timers.Y);
+
+            // Die Stelle wird beim Ziehen nur gemerkt und erst beim
+            // Ausblenden oder Schliessen geschrieben - ein Zug quer ueber den
+            // Bildschirm schriebe sonst hundert Dateien.
+            PositionChanged += (_, _) =>
+            {
+                s.Settings.Timers.X = Position.X;
+                s.Settings.Timers.Y = Position.Y;
+            };
+
+            Closing += (_, _) => Remember();
+        }
     }
 
     /// Linksklick startet (das macht der Knopf selbst), **Rechtsklick haelt
@@ -62,21 +72,11 @@ public partial class TimerOverlayWindow : Window
 
     private void HideAndRemember()
     {
-        if (_store is { } s)
-        {
-            s.Settings.Timers.Enabled = false;
-            s.SaveSettings();
-        }
+        if (_store is { } s) s.Settings.Timers.Enabled = false;
 
+        Remember();
         Hide();
     }
 
-    private void Remember()
-    {
-        if (_store is not { } s) return;
-
-        s.Settings.Timers.X = Position.X;
-        s.Settings.Timers.Y = Position.Y;
-        s.SaveSettings();
-    }
+    private void Remember() => _store?.SaveSettings();
 }

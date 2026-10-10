@@ -12,7 +12,7 @@ namespace M2Hub.Desktop.ViewModels;
 /// den Einstellungen (`TimersData.Counts`). Dazu kommen selbst angelegte
 /// Timer fuer alles, was zu keinem Lauf gehoert.
 ///
-/// **Ein Klick startet, ein zweiter startet neu** - mehr tut der Knopf nicht.
+/// **Ein Klick startet, der naechste haelt an** - mehr tut der Knopf nicht.
 /// Der Lauf wird weiterhin im Run Tracker eingetragen: ein Klick, der
 /// nebenbei bucht, traegt frueher oder spaeter etwas ein, das nicht stimmt.
 ///
@@ -29,7 +29,7 @@ public sealed class RunTimersViewModel : ViewModelBase
         _store = store;
         _stream = stream;
 
-        StartCommand = new RelayCommand(p => Start(p as RunTimerViewModel));
+        StartCommand = new RelayCommand(p => Toggle(p as RunTimerViewModel));
         StopCommand = new RelayCommand(p => Stop(p as RunTimerViewModel));
 
         Build();
@@ -92,16 +92,19 @@ public sealed class RunTimersViewModel : ViewModelBase
         Timers.Add(timer);
     }
 
-    private void Start(RunTimerViewModel? timer)
+    /// **Ein Klick schaltet um**: steht die Uhr, laeuft sie los; laeuft sie,
+    /// haelt sie an. Im Spiel trifft man einen Knopf, nicht zwei - und wer
+    /// den Lauf abbricht, will dieselbe Flaeche treffen wie beim Starten.
+    private void Toggle(RunTimerViewModel? timer)
     {
         if (timer is null) return;
 
-        timer.EndsAt = DateTime.Now.AddSeconds(timer.Seconds);
+        timer.EndsAt = timer.EndsAt is null ? DateTime.Now.AddSeconds(timer.Seconds) : null;
         Update();
     }
 
-    /// Rechtsklick haelt an und setzt zurueck - ein Lauf, der abgebrochen
-    /// wurde, soll keine Uhr hinterlassen, die weiterzaehlt.
+    /// Anhalten, ohne umzuschalten - fuer den Rechtsklick, der auch dann
+    /// zurueckstellt, wenn gerade nichts laeuft.
     private void Stop(RunTimerViewModel? timer)
     {
         if (timer is null) return;

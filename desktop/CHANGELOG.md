@@ -7,6 +7,20 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.55.0
+
+**Geaendert**
+
+- Das Timer-Fenster laesst sich **an der ganzen Flaeche** verschieben, nicht
+  mehr nur an der schmalen Leiste oben.
+- **Ein Klick schaltet um**: steht die Uhr, laeuft sie los; laeuft sie, haelt
+  sie an. Vorher startete der zweite Klick sie neu.
+
+**Behoben**
+
+- Das Timer-Fenster hatte **schwarze Ecken**. Es zeichnet auf eine Flaeche,
+  die nicht durchsichtig sein kann - die runden Ecken sind deshalb weg.
+
 ## 1.54.0 - 1.54.1
 
 **Neu**

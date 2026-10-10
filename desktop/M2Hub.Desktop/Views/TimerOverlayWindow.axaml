@@ -6,15 +6,19 @@
         Title="M2Hub Timer"
         Topmost="True" ShowInTaskbar="False" CanResize="False"
         SystemDecorations="None" SizeToContent="WidthAndHeight"
-        Background="Transparent">
+        Background="{StaticResource HeaderBrush}">
 
   <!-- Das Fenster haengt ueber dem Spiel und wird im Spielen getroffen, nicht
        gelesen: grosse Flaechen, viel Abstand, keine Feinheiten. -->
+  <!-- Keine runden Ecken und derselbe Grund wie das Fenster: Avalonia
+       zeichnet hier auf eine Weiterleitungsflaeche (siehe Program.cs, noetig
+       fuer die Fensteraufnahme in OBS), und die kann nicht durchsichtig sein.
+       Runde Ecken haetten also schwarze Zwickel. -->
   <Border Background="{StaticResource HeaderBrush}"
           BorderBrush="{StaticResource SubtleBrush}" BorderThickness="1"
-          CornerRadius="12" Padding="8" Name="Frame">
+          Padding="8" Name="Frame">
     <StackPanel Spacing="6">
-      <!-- Griff zum Ziehen: das Fenster hat keine Leiste vom Betriebssystem. -->
+      <!-- Gezogen wird an der ganzen Karte; hier steht nur das Kreuz. -->
       <Grid ColumnDefinitions="*,Auto" Name="Handle">
         <TextBlock Grid.Column="0" Classes="muted" FontSize="10" Text="M2Hub"
                    VerticalAlignment="Center" Margin="4,0,0,0" />
