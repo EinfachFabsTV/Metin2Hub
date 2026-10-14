@@ -27,38 +27,41 @@ public static class BioCalc
 
     public enum BioTab { Normal, Champion }
 
-    /// Feste Zahl Akzeleratoren, um eine Abgabe zu ueberspringen, je Stufe.
-    public sealed record AccelPerSkip(int P10, int P20, int P30);
-
     public sealed record Price(double Regular, double Sale, double? Flash = null);
 
     public sealed record BioSettings(
-        AccelPerSkip PerSkipNormal,
-        AccelPerSkip PerSkipSpecial,
-        int[] SpecialLevels,
+        /// Grund-Cooldown in Minuten: normale Abgaben 1440 (24 h), Lv 92/94 720 (12 h).
+        int BaseMin,
+        int Sp92,
+        int Sp94,
+        /// Multiplikator je Akzelerator-Stufe: 10 % -> 0,9 usw.
+        double F10,
+        double F20,
+        double F30,
         Price P10,
         Price P20,
         Price P30,
         int ItemsPerPack,
         double PackRegular,
         double PackFlash,
-        int DefaultPerDay,
-        int DefaultCooldownMin);
+        int DefaultPerDay);
 
-    /// Werte aus der Referenzrechnung (wie in bio.ts). Flash-Sale gibt es nur
-    /// fuer den 30-%-Akzelerator.
+    /// Werte aus der laufenden Referenz (M2Tools server/utils/bio-calc.ts) plus
+    /// den dort gepflegten Preisen samt Flash-Sale (nur 30-%-Akzelerator).
     public static readonly BioSettings Settings = new(
-        PerSkipNormal: new(30, 14, 9),
-        PerSkipSpecial: new(24, 12, 7),
-        SpecialLevels: [92, 94],
+        BaseMin: 1440,
+        Sp92: 720,
+        Sp94: 720,
+        F10: 0.9,
+        F20: 0.8,
+        F30: 0.7,
         P10: new(12, 8),
         P20: new(25, 17),
         P30: new(45, 29, 22.5),
         ItemsPerPack: 10,
         PackRegular: 119,
         PackFlash: 79,
-        DefaultPerDay: 10,
-        DefaultCooldownMin: 60);
+        DefaultPerDay: 10);
 
     /// Die normalen Biologen-Abgaben (Level 30 bis 94). Champion-Abgaben folgen
     /// spaeter, sobald die Daten vorliegen. Icons liegen in Assets/Bio, benannt
@@ -87,9 +90,22 @@ public static class BioCalc
             ["+1100 TP oder", "+140 Verteidigung oder", "+60 Angriffswert"]),
     ];
 
-    /// Gehoert die Bio zu den guenstigeren Level-92/94-Bios? Champions zaehlen nie dazu.
-    public static bool IsSpecial(Bio b, BioTab tab) =>
-        tab == BioTab.Normal && Settings.SpecialLevels.Contains(b.Level);
+    /// Wie viele Akzeleratoren braucht es, um den Cooldown von 'baseMin' auf
+    /// 'targetMin' zu druecken? Jeder Einsatz multipliziert mit 'f' (< 1).
+    /// Portiert aus bio-calc.ts.
+    public static int AccelNeeded(int baseMin, int targetMin, double f)
+    {
+        if (targetMin <= 0 || targetMin >= baseMin) return 0;
+        var k = (int)Math.Ceiling(Math.Log((double)targetMin / baseMin) / Math.Log(f));
+        return Math.Max(0, k);
+    }
+
+    /// Grund-Cooldown je Abgabe: Lv 92/94 sind halbiert, alles andere voll.
+    public static int BaseFor(Bio b, BioTab tab) =>
+        tab == BioTab.Champion ? Settings.BaseMin
+        : b.Level == 92 ? Settings.Sp92
+        : b.Level == 94 ? Settings.Sp94
+        : Settings.BaseMin;
 
     public sealed record BioResult(
         int TotalSubs,
@@ -107,38 +123,43 @@ public static class BioCalc
         // Elixier-Packs: Anzahl, regulaer und Flash-Sale
         int Pk, double PkDr, double PkFlash);
 
-    public sealed record BioOpts(int CooldownMin, int Already, int PerDay);
+    /// `TargetMin` ist der Ziel-Cooldown, den die Akzeleratoren erreichen sollen
+    /// (das Eingabefeld „Cooldown"); er dient zugleich als Zeit je Abgabe.
+    public sealed record BioOpts(int TargetMin, int Already, int PerDay);
 
     public static BioResult Compute(IReadOnlyList<Bio> list, BioTab tab, BioOpts opts)
     {
         var s = Settings;
         var already = Math.Max(0, opts.Already);
         var perDay = Math.Max(1, opts.PerDay == 0 ? s.DefaultPerDay : opts.PerDay);
-        var cooldownMin = Math.Max(0, opts.CooldownMin);
+        var target = Math.Max(0, opts.TargetMin);
 
         var totalSubsRaw = list.Sum(b => b.Submissions);
         var totalSubs = Math.Max(0, totalSubsRaw - already);
 
         // Benoetigte Zeit = Abgaben x Cooldown je Abgabe.
-        var totalHoursNone = totalSubs * cooldownMin / 60.0;
+        var totalHoursNone = totalSubs * target / 60.0;
         var totalDays = (double)totalSubs / perDay;
 
-        // Akzeleratoren je Skip sind feste Werte - Normal und die guenstigeren 92/94-Bios.
-        var psN10 = s.PerSkipNormal.P10;
-        var psN20 = s.PerSkipNormal.P20;
-        var psN30 = s.PerSkipNormal.P30;
-        var psH10 = tab == BioTab.Normal ? s.PerSkipSpecial.P10 : 0;
-        var psH20 = tab == BioTab.Normal ? s.PerSkipSpecial.P20 : 0;
-        var psH30 = tab == BioTab.Normal ? s.PerSkipSpecial.P30 : 0;
+        // Akzeleratoren je Skip haengen am Cooldown: wie oft beschleunigen, bis
+        // der Grund-Cooldown auf das Ziel faellt. Normale Reihe aus BaseMin, die
+        // guenstigere aus dem halbierten Cooldown der Lv-92/94-Abgaben.
+        var psN10 = AccelNeeded(s.BaseMin, target, s.F10);
+        var psN20 = AccelNeeded(s.BaseMin, target, s.F20);
+        var psN30 = AccelNeeded(s.BaseMin, target, s.F30);
+        var halfBase = Math.Min(s.Sp92, s.Sp94);
+        var psH10 = tab == BioTab.Normal ? AccelNeeded(halfBase, target, s.F10) : 0;
+        var psH20 = tab == BioTab.Normal ? AccelNeeded(halfBase, target, s.F20) : 0;
+        var psH30 = tab == BioTab.Normal ? AccelNeeded(halfBase, target, s.F30) : 0;
 
-        // Gesamtbedarf je Bio: 92/94-Bios zaehlen mit den guenstigeren Werten.
+        // Gesamtbedarf je Bio: 92/94-Bios rechnen mit ihrem halbierten Cooldown.
         long acc10 = 0, acc20 = 0, acc30 = 0;
         foreach (var b in list)
         {
-            var per = IsSpecial(b, tab) ? s.PerSkipSpecial : s.PerSkipNormal;
-            acc10 += (long)b.Submissions * per.P10;
-            acc20 += (long)b.Submissions * per.P20;
-            acc30 += (long)b.Submissions * per.P30;
+            var baseMin = BaseFor(b, tab);
+            acc10 += (long)b.Submissions * AccelNeeded(baseMin, target, s.F10);
+            acc20 += (long)b.Submissions * AccelNeeded(baseMin, target, s.F20);
+            acc30 += (long)b.Submissions * AccelNeeded(baseMin, target, s.F30);
         }
 
         var dr10 = acc10 * s.P10.Regular;

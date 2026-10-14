@@ -7,6 +7,22 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.65.0
+
+**Behoben**
+
+- Der **Biologen-Rechner** rechnete die Akzeleratoren je Skip mit festen Werten.
+  Richtig ist, dass sie am **Cooldown** hängen: wie oft man beschleunigen muss,
+  bis der Grund-Cooldown (24 h, bei Lv 92/94 12 h) auf den gewünschten Wert
+  fällt. Jetzt wie in der laufenden Referenz.
+
+**Geändert**
+
+- Die Preise im Biologen-Rechner sind nach Höhe eingefärbt: **Drachenmünzen rot**
+  (teuerste), **im Angebot orange**, **Flash-Sale grün** (günstigste).
+- Die **Lv-92/94-Reihe** bei „Akzeleratoren je Skip" erscheint nur noch, wenn
+  die Auswahl eine solche Abgabe enthält.
+
 ## 1.64.0
 
 **Geändert**

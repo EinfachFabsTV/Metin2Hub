@@ -118,10 +118,10 @@
                 <TextBlock Grid.Row="1" Grid.Column="2" Classes="muted" FontSize="12" Text="{Binding PsN20}" />
                 <TextBlock Grid.Row="1" Grid.Column="3" Classes="muted" FontSize="12" Text="{Binding PsN30}" />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.rowSpecial}" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Classes="muted" FontSize="12" Text="{Binding PsH10}" />
-                <TextBlock Grid.Row="2" Grid.Column="2" Classes="muted" FontSize="12" Text="{Binding PsH20}" />
-                <TextBlock Grid.Row="2" Grid.Column="3" Classes="muted" FontSize="12" Text="{Binding PsH30}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.rowSpecial}" IsVisible="{Binding ShowSpecialRow}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Classes="muted" FontSize="12" Text="{Binding PsH10}" IsVisible="{Binding ShowSpecialRow}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Classes="muted" FontSize="12" Text="{Binding PsH20}" IsVisible="{Binding ShowSpecialRow}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Classes="muted" FontSize="12" Text="{Binding PsH30}" IsVisible="{Binding ShowSpecialRow}" />
               </Grid>
             </StackPanel>
           </Border>
@@ -142,19 +142,19 @@
                 <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="SemiBold" FontSize="12" Text="{Binding Acc30}" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.dr}" />
-                <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr10}" />
-                <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr20}" />
-                <TextBlock Grid.Row="2" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr30}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource DangerBrush}" Text="{Binding Dr10}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource DangerBrush}" Text="{Binding Dr20}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource DangerBrush}" Text="{Binding Dr30}" />
 
                 <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.drSale}" />
-                <TextBlock Grid.Row="3" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs10}" />
-                <TextBlock Grid.Row="3" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs20}" />
-                <TextBlock Grid.Row="3" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs30}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Drs10}" />
+                <TextBlock Grid.Row="3" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Drs20}" />
+                <TextBlock Grid.Row="3" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Drs30}" />
 
                 <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.drFlash}" />
                 <TextBlock Grid.Row="4" Grid.Column="1" Classes="muted" FontSize="12" Text="–" />
                 <TextBlock Grid.Row="4" Grid.Column="2" Classes="muted" FontSize="12" Text="–" />
-                <TextBlock Grid.Row="4" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Drf30}" />
+                <TextBlock Grid.Row="4" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drf30}" />
               </Grid>
             </StackPanel>
           </Border>
@@ -174,14 +174,14 @@
                 <Grid ColumnDefinitions="*,Auto">
                   <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.dr}" />
                   <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
-                             Foreground="{StaticResource AmberBrush}" Text="{Binding PacksDr}" />
+                             Foreground="{StaticResource DangerBrush}" Text="{Binding PacksDr}" />
                 </Grid>
               </Border>
               <Border Classes="statrow">
                 <Grid ColumnDefinitions="*,Auto">
                   <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.elixirFlash}" />
                   <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
-                             Foreground="{StaticResource PrimaryBrush}" Text="{Binding PacksFlash}" />
+                             Foreground="{StaticResource SuccessBrush}" Text="{Binding PacksFlash}" />
                 </Grid>
               </Border>
             </StackPanel>

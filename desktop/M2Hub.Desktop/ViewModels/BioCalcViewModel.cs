@@ -18,7 +18,7 @@ public sealed class BioCalcViewModel : ViewModelBase
 {
     private BioOption? _start;
     private BioOption? _end;
-    private string _cooldownText = "1h";
+    private string _cooldownText = "1m";
     private string _alreadyText = "0";
     private string _perDayText = BioCalc.Settings.DefaultPerDay.ToString();
 
@@ -119,12 +119,16 @@ public sealed class BioCalcViewModel : ViewModelBase
 
     public string SelectionNote { get; private set; } = "";
 
+    /// Die guenstigere Lv-92/94-Reihe nur zeigen, wenn die Auswahl eine solche
+    /// Abgabe enthaelt - sonst steht da eine Zahl ohne Bezug.
+    public bool ShowSpecialRow { get; private set; }
+
     private void Recalculate()
     {
         var r = Result();
 
         TotalSubs = Fmt(r.TotalSubs);
-        TotalHours = Fmt(r.TotalHoursNone);
+        TotalHours = Fmt2(r.TotalHoursNone);
         TotalDays = Fmt2(r.TotalDays);
 
         PsN10 = r.PsN10.ToString(); PsN20 = r.PsN20.ToString(); PsN30 = r.PsN30.ToString();
@@ -138,6 +142,7 @@ public sealed class BioCalcViewModel : ViewModelBase
         Packs = Fmt(r.Pk); PacksDr = Fmt(r.PkDr); PacksFlash = Fmt(r.PkFlash);
 
         var sel = Selection();
+        ShowSpecialRow = sel.Any(b => b.Level is 92 or 94);
         SelectionNote = Loc.T("calc.bio.selectionNote", sel.Count, Sorted.Count);
 
         Cards.Clear();
@@ -151,7 +156,7 @@ public sealed class BioCalcViewModel : ViewModelBase
             nameof(Dr10), nameof(Dr20), nameof(Dr30),
             nameof(Drs10), nameof(Drs20), nameof(Drs30), nameof(Drf30),
             nameof(Packs), nameof(PacksDr), nameof(PacksFlash),
-            nameof(SelectionNote),
+            nameof(SelectionNote), nameof(ShowSpecialRow),
         }) Raise(name);
     }
 
