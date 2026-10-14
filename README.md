@@ -13,6 +13,10 @@
 
 **Kostenlos · ohne Installation · ohne Konto · ohne Werbung**
 
+<br>
+
+<sub>**Deutsch** · [English](README.en.md) · [Türkçe](README.tr.md) · [Italiano](README.it.md)</sub>
+
 </div>
 
 ---
