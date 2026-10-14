@@ -7,6 +7,24 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.63.0
+
+**Neu**
+
+- Der **Pet-Rechner** im Bereich „Rechner". Zwei Teile: **Fütterbedarf** zeigt,
+  wie viele Waffen +7, Leckerli+ oder Köstliche Leckerli ein Levelaufstieg
+  kostet - mit Preisen auch, welcher Weg günstiger ist. **Petwerte** schätzt die
+  Werte nach Pettyp, Level und Alter, für normale Level und Championlevel.
+- Der **Biologen-Rechner**. Für einen Bereich von Abgaben rechnet er die
+  nötigen Akzeleratoren, Drachenmünzen (regulär, im Angebot, Flash-Sale) und
+  Elixier-Packs aus. Die Level-92/94-Abgaben zählen mit dem günstigeren Bedarf.
+- Eine **Knopfreihe im Rechner-Bereich** wählt zwischen Gilde, Pet und Biologen.
+
+**Geändert**
+
+- Der Rechner-Bereich zeigte bisher nur den Gilden-Rechner; er fasst jetzt alle
+  Rechner unter einer Knopfreihe zusammen.
+
 ## 1.62.0
 
 **Entfernt**

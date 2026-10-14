@@ -13,7 +13,10 @@
     <DataTemplate DataType="vm:ItemshopViewModel"><views:ItemshopView /></DataTemplate>
     <DataTemplate DataType="vm:GoalsHostViewModel"><views:GoalsHostView /></DataTemplate>
     <DataTemplate DataType="vm:GoalsViewModel"><views:GoalsView /></DataTemplate>
+    <DataTemplate DataType="vm:CalcHostViewModel"><views:CalcHostView /></DataTemplate>
     <DataTemplate DataType="vm:GuildCalcViewModel"><views:GuildCalcView /></DataTemplate>
+    <DataTemplate DataType="vm:PetCalcViewModel"><views:PetCalcView /></DataTemplate>
+    <DataTemplate DataType="vm:BioCalcViewModel"><views:BioCalcView /></DataTemplate>
     <DataTemplate DataType="vm:DebtCalcViewModel"><views:DebtCalcView /></DataTemplate>
     <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>

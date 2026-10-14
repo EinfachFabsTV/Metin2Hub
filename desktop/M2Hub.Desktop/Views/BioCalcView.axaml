@@ -1,0 +1,221 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.BioCalcView"
+             x:DataType="vm:BioCalcViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <!-- Art: normal oder Champion (Champion noch ohne Daten, deshalb ausgegraut) -->
+      <WrapPanel Orientation="Horizontal">
+        <Button Classes="chip active" Margin="0,0,6,0" Content="{loc:T calc.bio.artNormal}" />
+        <Button Classes="chip" Margin="0,0,6,0" IsEnabled="{Binding ChampionAvailable}"
+                Content="{loc:T calc.bio.artChampionSoon}" />
+      </WrapPanel>
+
+      <Grid ColumnDefinitions="0.8*,1.2*" ColumnSpacing="14">
+
+        <!-- Eingaben -->
+        <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h1" Text="{loc:T calc.bio.title}" />
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T calc.bio.subtitle}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+              <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Classes="muted" Text="{loc:T calc.bio.start}" />
+                <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Sorted}"
+                          SelectedItem="{Binding Start}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="vm:BioOption">
+                      <TextBlock Text="{Binding Display}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Classes="muted" Text="{loc:T calc.bio.end}" />
+                <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Sorted}"
+                          SelectedItem="{Binding End}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="vm:BioOption">
+                      <TextBlock Text="{Binding Display}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="muted" Text="{loc:T calc.bio.cooldown}" />
+              <TextBox Watermark="1h30m"
+                       Text="{Binding CooldownText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+              <TextBlock Classes="muted" FontSize="11" Text="{loc:T calc.bio.cooldownHint}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+              <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Classes="muted" Text="{loc:T calc.bio.already}" />
+                <TextBox Text="{Binding AlreadyText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Classes="muted" Text="{loc:T calc.bio.perDay}" />
+                <TextBox Text="{Binding PerDayText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+              </StackPanel>
+            </Grid>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{Binding SelectionNote}" />
+          </StackPanel>
+        </Border>
+
+        <!-- Ergebnis -->
+        <StackPanel Grid.Column="1" Spacing="14">
+
+          <!-- Grundinformationen -->
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="h2" Foreground="{StaticResource SecondaryBrush}"
+                         Text="{loc:T calc.bio.basics}" />
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.totalSubs}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding TotalSubs}" />
+                </Grid>
+              </Border>
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.timeHours}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding TotalHours}" />
+                </Grid>
+              </Border>
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.days}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                             Foreground="{StaticResource SuccessBrush}" Text="{Binding TotalDays}" />
+                </Grid>
+              </Border>
+            </StackPanel>
+          </Border>
+
+          <!-- Akzeleratoren je Skip -->
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="h2" Foreground="{StaticResource SecondaryBrush}"
+                         Text="{loc:T calc.bio.perSkip}" />
+              <Grid ColumnDefinitions="1.2*,*,*,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                <TextBlock Grid.Row="0" Grid.Column="1" Classes="muted" FontSize="11" Text="10 %" />
+                <TextBlock Grid.Row="0" Grid.Column="2" Classes="muted" FontSize="11" Text="20 %" />
+                <TextBlock Grid.Row="0" Grid.Column="3" Classes="muted" FontSize="11" Text="30 %" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.rowNormal}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Classes="muted" FontSize="12" Text="{Binding PsN10}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Classes="muted" FontSize="12" Text="{Binding PsN20}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Classes="muted" FontSize="12" Text="{Binding PsN30}" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.rowSpecial}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Classes="muted" FontSize="12" Text="{Binding PsH10}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Classes="muted" FontSize="12" Text="{Binding PsH20}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Classes="muted" FontSize="12" Text="{Binding PsH30}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Gesamtbedarf -->
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="h2" Foreground="{StaticResource SecondaryBrush}"
+                         Text="{loc:T calc.bio.demand}" />
+              <Grid ColumnDefinitions="1.2*,*,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                <TextBlock Grid.Row="0" Grid.Column="1" Classes="muted" FontSize="11" Text="10 %" />
+                <TextBlock Grid.Row="0" Grid.Column="2" Classes="muted" FontSize="11" Text="20 %" />
+                <TextBlock Grid.Row="0" Grid.Column="3" Classes="muted" FontSize="11" Text="30 %" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.accelerators}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" FontSize="12" Text="{Binding Acc10}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" FontSize="12" Text="{Binding Acc20}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="SemiBold" FontSize="12" Text="{Binding Acc30}" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.dr}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr10}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr20}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AmberBrush}" Text="{Binding Dr30}" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.drSale}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs10}" />
+                <TextBlock Grid.Row="3" Grid.Column="2" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs20}" />
+                <TextBlock Grid.Row="3" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource SuccessBrush}" Text="{Binding Drs30}" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="SemiBold" FontSize="12" Text="{loc:T calc.bio.drFlash}" />
+                <TextBlock Grid.Row="4" Grid.Column="1" Classes="muted" FontSize="12" Text="–" />
+                <TextBlock Grid.Row="4" Grid.Column="2" Classes="muted" FontSize="12" Text="–" />
+                <TextBlock Grid.Row="4" Grid.Column="3" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Drf30}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Elixier-Kosten -->
+          <Border Classes="card" Padding="18">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="h2" Foreground="{StaticResource SecondaryBrush}"
+                         Text="{loc:T calc.bio.elixir}" />
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.bioPacks}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding Packs}" />
+                </Grid>
+              </Border>
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.dr}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                             Foreground="{StaticResource AmberBrush}" Text="{Binding PacksDr}" />
+                </Grid>
+              </Border>
+              <Border Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.bio.elixirFlash}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                             Foreground="{StaticResource PrimaryBrush}" Text="{Binding PacksFlash}" />
+                </Grid>
+              </Border>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+
+      <!-- Liste der einbezogenen Bios -->
+      <StackPanel Spacing="8">
+        <TextBlock Classes="h2" Text="{loc:T calc.bio.listTitle}" />
+        <ItemsControl ItemsSource="{Binding Cards}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:BioCardViewModel">
+              <Border Classes="panel" Padding="14" Margin="0,0,8,8" Width="320">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                  <Image Grid.Column="0" Width="40" Height="40" VerticalAlignment="Top"
+                         Source="{Binding Icon}" />
+                  <StackPanel Grid.Column="1" Spacing="2">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                      <TextBlock Classes="muted" FontSize="11" VerticalAlignment="Center" Text="{Binding LevelLabel}" />
+                    </StackPanel>
+                    <TextBlock Classes="muted" FontSize="11" Text="{Binding Submissions}" />
+                    <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{Binding Effects}" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

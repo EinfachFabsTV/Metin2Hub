@@ -1,0 +1,320 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.PetCalcView"
+             x:DataType="vm:PetCalcViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <!-- Bereichswahl: Fuetterbedarf oder Petwerte -->
+      <WrapPanel Orientation="Horizontal">
+        <Button Classes="chip" Classes.active="{Binding IsFeed}" Margin="0,0,6,0"
+                Content="{loc:T calc.pet.tabFeed}"
+                Command="{Binding ChooseTabCommand}" CommandParameter="futter" />
+        <Button Classes="chip" Classes.active="{Binding IsStats}" Margin="0,0,6,0"
+                Content="{loc:T calc.pet.tabStats}"
+                Command="{Binding ChooseTabCommand}" CommandParameter="werte" />
+      </WrapPanel>
+
+      <!-- ============ Fuetterbedarf ============ -->
+      <Grid IsVisible="{Binding IsFeed}" ColumnDefinitions="0.8*,1.2*" ColumnSpacing="14">
+
+        <!-- Eingaben -->
+        <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h1" Text="{loc:T calc.pet.feed.title}" />
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T calc.pet.feed.subtitle}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.feed.currentLevel}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding FromLabel}" />
+              </Grid>
+              <Slider Minimum="{Binding MinSlider}" Maximum="{Binding MaxSlider}"
+                      TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding From}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.feed.targetLevel}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding ToLabel}" />
+              </Grid>
+              <Slider Minimum="{Binding MinSlider}" Maximum="{Binding MaxSlider}"
+                      TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding To}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="muted" Text="{loc:T calc.pet.feed.pricesTitle}" />
+              <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
+                <TextBlock Grid.Row="0" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                           Text="{loc:T calc.pet.feed.priceWeapon}" />
+                <TextBox Grid.Row="0" Grid.Column="1" Watermark="—"
+                         Text="{Binding PriceWeaponText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                           Text="{loc:T calc.pet.feed.priceSnack}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Watermark="—"
+                         Text="{Binding PriceSnackText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
+                           Text="{loc:T calc.pet.feed.priceDelicious}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Watermark="—"
+                         Text="{Binding PriceDeliciousText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+              </Grid>
+            </StackPanel>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T calc.pet.feed.note}" />
+          </StackPanel>
+        </Border>
+
+        <!-- Ergebnis -->
+        <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
+                BorderBrush="{StaticResource PrimaryBrush}">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h2" Text="{loc:T calc.pet.feed.resultTitle}" />
+              <TextBlock Classes="muted" Text="{Binding FeedSubtitle}" />
+            </StackPanel>
+
+            <!-- Zwei Erfahrungsarten -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+              <Border Grid.Column="0" Classes="panel" Padding="14">
+                <StackPanel HorizontalAlignment="Center">
+                  <TextBlock Classes="statvalue" Foreground="{StaticResource AmberBrush}"
+                             HorizontalAlignment="Center" Text="{Binding ItemExpValue}" />
+                  <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center" TextAlignment="Center"
+                             Text="{loc:T calc.pet.feed.itemExpNeeded}" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="1" Classes="panel" Padding="14">
+                <StackPanel HorizontalAlignment="Center">
+                  <TextBlock Classes="statvalue" Foreground="{StaticResource PrimaryBrush}"
+                             HorizontalAlignment="Center" Text="{Binding NormalExpValue}" />
+                  <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center" TextAlignment="Center"
+                             Text="{loc:T calc.pet.feed.normalExpNeeded}" />
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <!-- Weg 1: Item-EXP -->
+            <TextBlock FontWeight="Bold" FontSize="13" Foreground="{StaticResource AmberBrush}"
+                       Text="{loc:T calc.pet.feed.viaItemExp}" />
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="1.4*,1.1*,1*">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{loc:T calc.pet.feed.colFood}" />
+                <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Text="{loc:T calc.pet.feed.colAmount}" />
+                <TextBlock Grid.Column="2" Classes="muted" FontSize="11" Text="{loc:T calc.pet.feed.colCost}" />
+              </Grid>
+              <ItemsControl ItemsSource="{Binding ItemRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:PetFoodRow">
+                    <Border Classes="statrow" Margin="0,0,0,4">
+                      <Grid ColumnDefinitions="1.4*,1.1*,1*">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                          <TextBlock FontWeight="Bold" FontSize="12" Text="{Binding Food}" />
+                          <TextBlock FontSize="10" VerticalAlignment="Center"
+                                     Foreground="{StaticResource PrimaryBrush}"
+                                     IsVisible="{Binding Best}" Text="{loc:T calc.pet.feed.cheaper}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold" Text="{Binding Amount}" />
+                        <TextBlock Grid.Column="2" FontSize="12" FontWeight="Bold"
+                                   Foreground="{StaticResource AmberBrush}" Text="{Binding Cost}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <!-- Weg 2: normale Pet-EXP -->
+            <TextBlock FontWeight="Bold" FontSize="13" Foreground="{StaticResource PrimaryBrush}"
+                       Text="{loc:T calc.pet.feed.viaNormalExp}" />
+            <StackPanel Spacing="4">
+              <ItemsControl ItemsSource="{Binding ExpRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:PetFoodRow">
+                    <Border Classes="statrow" Margin="0,0,0,4">
+                      <Grid ColumnDefinitions="1.4*,1.1*,1*">
+                        <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="12" Text="{Binding Food}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                          <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding Amount}" />
+                          <TextBlock FontSize="10" VerticalAlignment="Center"
+                                     Foreground="{StaticResource DangerBrush}"
+                                     IsVisible="{Binding Incomplete}" Text="{loc:T calc.pet.feed.incomplete}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" FontSize="12" FontWeight="Bold"
+                                   Foreground="{StaticResource AmberBrush}" Text="{Binding Cost}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                       IsVisible="{Binding !HasPrices}" Text="{loc:T calc.pet.feed.noPrices}" />
+
+            <Border Classes="statrow" IsVisible="{Binding HasBest}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.pet.feed.recommended}" />
+                <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                           Foreground="{StaticResource SuccessBrush}" Text="{Binding BestLabel}" />
+              </Grid>
+            </Border>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                       IsVisible="{Binding ShowClNote}" Text="{loc:T calc.pet.feed.clNote}" />
+            <TextBlock FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource DangerBrush}"
+                       IsVisible="{Binding ShowMissing}" Text="{Binding MissingText}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- ============ Petwerte ============ -->
+      <Grid IsVisible="{Binding IsStats}" ColumnDefinitions="0.8*,1.2*" ColumnSpacing="14">
+
+        <!-- Eingaben -->
+        <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h1" Text="{loc:T calc.pet.stats.title}" />
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T calc.pet.stats.subtitle}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="muted" Text="{loc:T calc.pet.stats.range}" />
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="chip" Classes.active="{Binding NotChampion}" Margin="0,0,6,0"
+                        Content="{loc:T calc.pet.stats.normalLevels}"
+                        Command="{Binding SetChampionCommand}" CommandParameter="normal" />
+                <Button Classes="chip" Classes.active="{Binding Champion}" Margin="0,0,6,0"
+                        Content="{loc:T calc.pet.stats.championLevels}"
+                        Command="{Binding SetChampionCommand}" CommandParameter="champion" />
+              </WrapPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.stats.petType}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding PetTypeLabel}" />
+              </Grid>
+              <Slider Minimum="1" Maximum="8" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding PetType}" />
+              <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T calc.pet.stats.typeNote}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.stats.currentLevel}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding StatFromLabel}" />
+              </Grid>
+              <Slider Minimum="1" Maximum="{Binding StatMax}" TickFrequency="1" IsSnapToTickEnabled="True"
+                      Value="{Binding StatFrom}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.stats.targetLevel}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding StatToLabel}" />
+              </Grid>
+              <Slider Minimum="1" Maximum="{Binding StatMax}" TickFrequency="1" IsSnapToTickEnabled="True"
+                      Value="{Binding StatTo}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T calc.pet.stats.age}" />
+                <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                           Text="{Binding AgeLabel}" />
+              </Grid>
+              <Slider Minimum="0" Maximum="{Binding AgeMax}" TickFrequency="1" IsSnapToTickEnabled="True"
+                      Value="{Binding Age}" />
+              <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{Binding AgeNote}" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="muted" Text="{loc:T calc.pet.stats.currentValues}" />
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="3">
+                  <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentALabel}" />
+                  <TextBox Text="{Binding CurrentAText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="3">
+                  <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentBLabel}" />
+                  <TextBox Text="{Binding CurrentBText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="3">
+                  <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentCLabel}" />
+                  <TextBox Text="{Binding CurrentCText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Ergebnis -->
+        <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
+                BorderBrush="{StaticResource PrimaryBrush}">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h2" Text="{loc:T calc.pet.stats.forecast}" />
+              <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding ForecastSub}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="1.4*,*,*,*,*">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{loc:T calc.pet.stats.colStat}" />
+                <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Text="{loc:T calc.pet.stats.colUpgrades}" />
+                <TextBlock Grid.Column="2" Classes="muted" FontSize="11" Text="{loc:T calc.pet.stats.colMin}" />
+                <TextBlock Grid.Column="3" Classes="muted" FontSize="11" Text="{loc:T calc.pet.stats.colAvg}" />
+                <TextBlock Grid.Column="4" Classes="muted" FontSize="11" Text="{loc:T calc.pet.stats.colMax}" />
+              </Grid>
+              <ItemsControl ItemsSource="{Binding StatRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:PetStatRow">
+                    <Border Classes="statrow" Margin="0,0,0,4">
+                      <Grid ColumnDefinitions="1.4*,*,*,*,*">
+                        <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="12" Text="{Binding Stat}" />
+                        <TextBlock Grid.Column="1" Classes="muted" FontSize="12" Text="{Binding Upgrades}" />
+                        <TextBlock Grid.Column="2" FontSize="12" FontWeight="SemiBold" Text="{Binding Min}" />
+                        <TextBlock Grid.Column="3" FontSize="12" FontWeight="Bold"
+                                   Foreground="{StaticResource PrimaryBrush}" Text="{Binding Avg}" />
+                        <TextBlock Grid.Column="4" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{StaticResource AmberBrush}" Text="{Binding Max}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+              <Border Grid.Column="0" Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.pet.stats.ageBonus}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12"
+                             Foreground="{StaticResource SuccessBrush}" Text="{Binding AgeBonusValue}" />
+                </Grid>
+              </Border>
+              <Border Grid.Column="1" Classes="statrow">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="muted" FontSize="12" Text="{loc:T calc.pet.stats.startBonus}" />
+                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="12" Text="{Binding StartBonusValue}" />
+                </Grid>
+              </Border>
+            </Grid>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T calc.pet.stats.spreadNote}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

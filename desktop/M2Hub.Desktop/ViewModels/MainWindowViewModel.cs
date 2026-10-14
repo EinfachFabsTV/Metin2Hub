@@ -41,7 +41,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
         Stream = new StreamOverlay(store);
-        GuildCalc = new GuildCalcViewModel();
+        Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
         Timers = new RunTimersViewModel(store, Stream, AfterTimerEntry);
         Goals = new GoalsHostViewModel(store, dialogs, Stream);
@@ -67,7 +67,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Loc.I.PropertyChanged += (_, _) =>
         {
             Accounts.RelabelAfterLanguageChange();
-            GuildCalc.RelabelAfterLanguageChange();
+            Calc.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Timers.RelabelAfterLanguageChange();
@@ -92,8 +92,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     public EventsViewModel Events { get; }
     public ItemshopViewModel Itemshop { get; }
 
-    /// Der Gilden-Rechner rechnet nur - er braucht weder Ablage noch Abruf.
-    public GuildCalcViewModel GuildCalc { get; }
+    /// Der Rechner-Bereich (Gilde, Pet, Biologen) rechnet nur - er braucht
+    /// weder Ablage noch Abruf.
+    public CalcHostViewModel Calc { get; }
 
     /// Schreibt die Zahlen fuer OBS - in Dateien, ohne Server.
     public StreamOverlay Stream { get; }
@@ -342,7 +343,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             "goals" => Goals,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
-            "calc" => GuildCalc,
+            "calc" => Calc,
             "settings" => Settings,
             _ => Events,
         };
