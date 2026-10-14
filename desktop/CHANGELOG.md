@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.62.0
+
+**Entfernt**
+
+- Der **Hilfe-Knopf beim Shop-Bestand**. Er zeigte einen Weg, den es so nicht
+  gibt: weder die Markt-Seite (sie schliesst) noch das Laden-Fenster im Spiel
+  nennen den Gesamtwert. Den rechnet man selbst zusammen - der Hinweis am Feld
+  sagt das jetzt.
+
 ## 1.61.0
 
 **Entfernt**

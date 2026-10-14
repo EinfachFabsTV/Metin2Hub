@@ -141,9 +141,8 @@ Ein Ziel steht in **Won** („1500w für X"), dahinter weitere als Warteschlange
 eingebracht haben, über alle Laufarten. Von Hand kommen nur Ausgaben
 (Standard-Push, Zusatz-Push, Zusatzausgabe), Zusatzeinnahmen und der
 **Shop-Bestand**: „150w im Shop" zählt mit, aber abzüglich der Truhen, die über
-die Läufe schon im Gewinn stehen – sonst zählte dieselbe Truhe zweimal. Wo der
-Gesamtwert des eigenen Ladens steht, zeigt ein Hilfe-Fenster in vier
-gezeichneten Schritten.
+die Läufe schon im Gewinn stehen – sonst zählte dieselbe Truhe zweimal. Den
+Gesamtwert rechnet man selbst zusammen; das Spiel zeigt ihn nirgends an.
 
 Der **Schulden-Rechner** sagt, wie viele Läufe bis zur Tilgung fehlen. Truhen je
 Lauf (aus den eigenen Einträgen oder von Hand) und Preis je Truhe (Spanne oder
