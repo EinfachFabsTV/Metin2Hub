@@ -3,9 +3,10 @@
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
              xmlns:loc="using:M2Hub.Desktop.Services"
              x:Class="M2Hub.Desktop.Views.PetCalcView"
-             x:DataType="vm:PetCalcViewModel">
+             x:DataType="vm:PetCalcViewModel"
+             PointerPressed="RootPointerPressed">
 
-  <ScrollViewer>
+  <ScrollViewer Background="Transparent">
     <StackPanel Margin="18" Spacing="14">
 
       <!-- Bereichswahl: Fuetterbedarf oder Petwerte -->
@@ -55,15 +56,15 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                            Text="{loc:T calc.pet.feed.priceWeapon}" />
                 <TextBox Grid.Row="0" Grid.Column="1" Watermark="—"
-                         Text="{Binding PriceWeaponText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                         Text="{Binding PriceWeaponText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
                 <TextBlock Grid.Row="1" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                            Text="{loc:T calc.pet.feed.priceSnack}" />
                 <TextBox Grid.Row="1" Grid.Column="1" Watermark="—"
-                         Text="{Binding PriceSnackText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                         Text="{Binding PriceSnackText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
                 <TextBlock Grid.Row="2" Grid.Column="0" Classes="muted" VerticalAlignment="Center"
                            Text="{loc:T calc.pet.feed.priceDelicious}" />
                 <TextBox Grid.Row="2" Grid.Column="1" Watermark="—"
-                         Text="{Binding PriceDeliciousText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                         Text="{Binding PriceDeliciousText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
               </Grid>
             </StackPanel>
 
@@ -130,9 +131,23 @@
               </ItemsControl>
             </StackPanel>
 
-            <!-- Weg 2: normale Pet-EXP -->
-            <TextBlock FontWeight="Bold" FontSize="13" Foreground="{StaticResource PrimaryBrush}"
-                       Text="{loc:T calc.pet.feed.viaNormalExp}" />
+            <!-- Umschlagpunkt Waffe +7 vs. Leckerli+ - die eigentliche Frage des Rechners -->
+            <Border Classes="panel" Padding="12">
+              <StackPanel Spacing="4">
+                <TextBlock FontWeight="Bold" FontSize="12" Text="{loc:T calc.pet.feed.crossTitle}" />
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding AmountCrossoverText}" />
+                <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource AmberBrush}"
+                           IsVisible="{Binding ShowPriceCrossover}" Text="{Binding PriceCrossoverText}" />
+              </StackPanel>
+            </Border>
+
+            <!-- Weg 2: normale Pet-EXP (optional) -->
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock FontWeight="Bold" FontSize="13" Foreground="{StaticResource PrimaryBrush}"
+                         Text="{loc:T calc.pet.feed.viaNormalExp}" />
+              <TextBlock Classes="muted" FontSize="10" VerticalAlignment="Center"
+                         Text="{loc:T calc.pet.feed.deliciousOptional}" />
+            </StackPanel>
             <StackPanel Spacing="4">
               <ItemsControl ItemsSource="{Binding ExpRows}">
                 <ItemsControl.ItemTemplate>
@@ -243,15 +258,15 @@
               <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
                 <StackPanel Grid.Column="0" Spacing="3">
                   <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentALabel}" />
-                  <TextBox Text="{Binding CurrentAText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                  <TextBox Text="{Binding CurrentAText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Spacing="3">
                   <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentBLabel}" />
-                  <TextBox Text="{Binding CurrentBText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                  <TextBox Text="{Binding CurrentBText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Spacing="3">
                   <TextBlock Classes="muted" FontSize="11" Text="{Binding CurrentCLabel}" />
-                  <TextBox Text="{Binding CurrentCText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                  <TextBox Text="{Binding CurrentCText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
                 </StackPanel>
               </Grid>
             </StackPanel>

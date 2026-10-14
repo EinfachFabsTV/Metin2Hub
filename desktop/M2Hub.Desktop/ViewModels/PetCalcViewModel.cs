@@ -129,6 +129,32 @@ public sealed class PetCalcViewModel : ViewModelBase
     public bool HasBest => Feed.Best is not null && HasPrices;
     public string BestLabel => Feed.Best is { } k ? FoodName(k) : "–";
 
+    // Ab welchem Level Waffe +7 bzw. Leckerli+ die bessere Wahl ist - nach
+    // Stueckzahl immer, nach Preis sobald beide Preise stehen.
+    public string AmountCrossoverText => CrossoverText(
+        PetCalc.AmountCrossover(_from, _to), "calc.pet.feed.crossAmountAt", "calc.pet.feed.crossAmountNever");
+
+    public bool ShowPriceCrossover =>
+        PetCalc.PriceCrossover(_from, _to, ParsePrice(_priceWeaponText), ParsePrice(_priceSnackText)) is not null;
+
+    public string PriceCrossoverText
+    {
+        get
+        {
+            var c = PetCalc.PriceCrossover(_from, _to, ParsePrice(_priceWeaponText), ParsePrice(_priceSnackText));
+            return c is null ? "" : CrossoverText(c, "calc.pet.feed.crossPriceAt", "calc.pet.feed.crossPriceNever");
+        }
+    }
+
+    private string CrossoverText(PetCalc.Crossover c, string atKey, string neverKey)
+    {
+        var first = FoodName(c.First);
+        if (c.SwitchLevel is not { } level)
+            return Loc.T(neverKey, first);
+        var other = FoodName(c.First == PetCalc.FoodKind.Weapon ? PetCalc.FoodKind.Snack : PetCalc.FoodKind.Weapon);
+        return Loc.T(atKey, first, LevelLabel(level), other);
+    }
+
     public bool ShowClNote => ExpNeeded().Cl;
     public bool ShowMissing => Feed.MissingDelicious.Count > 0;
     public string MissingText =>
@@ -164,6 +190,9 @@ public sealed class PetCalcViewModel : ViewModelBase
         Raise(nameof(ShowClNote));
         Raise(nameof(ShowMissing));
         Raise(nameof(MissingText));
+        Raise(nameof(AmountCrossoverText));
+        Raise(nameof(ShowPriceCrossover));
+        Raise(nameof(PriceCrossoverText));
     }
 
     /* ======================= Petwerte ======================= */

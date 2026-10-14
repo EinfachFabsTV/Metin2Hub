@@ -3,9 +3,10 @@
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
              xmlns:loc="using:M2Hub.Desktop.Services"
              x:Class="M2Hub.Desktop.Views.BioCalcView"
-             x:DataType="vm:BioCalcViewModel">
+             x:DataType="vm:BioCalcViewModel"
+             PointerPressed="RootPointerPressed">
 
-  <ScrollViewer>
+  <ScrollViewer Background="Transparent">
     <StackPanel Margin="18" Spacing="14">
 
       <!-- Art: normal oder Champion (Champion noch ohne Daten, deshalb ausgegraut) -->
@@ -53,18 +54,18 @@
             <StackPanel Spacing="4">
               <TextBlock Classes="muted" Text="{loc:T calc.bio.cooldown}" />
               <TextBox Watermark="1h30m"
-                       Text="{Binding CooldownText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                       Text="{Binding CooldownText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
               <TextBlock Classes="muted" FontSize="11" Text="{loc:T calc.bio.cooldownHint}" />
             </StackPanel>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
               <StackPanel Grid.Column="0" Spacing="4">
                 <TextBlock Classes="muted" Text="{loc:T calc.bio.already}" />
-                <TextBox Text="{Binding AlreadyText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                <TextBox Text="{Binding AlreadyText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
               </StackPanel>
               <StackPanel Grid.Column="1" Spacing="4">
                 <TextBlock Classes="muted" Text="{loc:T calc.bio.perDay}" />
-                <TextBox Text="{Binding PerDayText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                <TextBox Text="{Binding PerDayText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" KeyDown="CommitKeyDown" />
               </StackPanel>
             </Grid>
 

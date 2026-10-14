@@ -274,6 +274,12 @@ public sealed class Loc : INotifyPropertyChanged
         ["calc.pet.feed.recommended"] = ["Empfehlung", "Recommended", "Öneri", "Consigliato"],
         ["calc.pet.feed.clNote"] = ["Der Bereich reicht in die Championlevel – dort gelten eigene EXP-Tabellen.", "The range reaches into champion levels – they use their own EXP tables.", "Aralık şampiyon seviyelerine uzanıyor – oralar kendi TP tablolarını kullanır.", "L'intervallo arriva ai livelli campione – usano tabelle EXP proprie."],
         ["calc.pet.feed.missingDelicious"] = ["Für {0} fehlt der Wert fürs Köstliche Leckerli – die Stack-Angabe ist zu niedrig.", "The delicious-snack value is missing for {0} – the stack figure is too low.", "{0} için lezzetli ödül değeri eksik – yığın sayısı çok düşük.", "Manca il valore dello snack delizioso per {0} – il numero di stack è troppo basso."],
+        ["calc.pet.feed.crossTitle"] = ["Waffe +7 vs. Leckerli+", "Weapon +7 vs. Snack+", "Silah +7 vs. Ödül+", "Arma +7 vs. Snack+"],
+        ["calc.pet.feed.crossAmountAt"] = ["Menge: Umschlag bei {1} – davor {0}, ab da {2}", "By count: switch at {1} – {0} before, {2} after", "Adet: {1} noktasında – önce {0}, sonra {2}", "Quantità: cambio a {1} – prima {0}, poi {2}"],
+        ["calc.pet.feed.crossAmountNever"] = ["Menge: durchgehend {0} (weniger Stück)", "By count: {0} throughout (fewer pieces)", "Adet: baştan sona {0} (daha az adet)", "Quantità: sempre {0} (meno pezzi)"],
+        ["calc.pet.feed.crossPriceAt"] = ["Preis: Umschlag bei {1} – davor {0}, ab da {2}", "By price: switch at {1} – {0} before, {2} after", "Fiyat: {1} noktasında – önce {0}, sonra {2}", "Prezzo: cambio a {1} – prima {0}, poi {2}"],
+        ["calc.pet.feed.crossPriceNever"] = ["Preis: durchgehend {0} günstiger", "By price: {0} cheaper throughout", "Fiyat: baştan sona {0} daha ucuz", "Prezzo: sempre {0} più conveniente"],
+        ["calc.pet.feed.deliciousOptional"] = ["Optional · nur Pet-EXP", "Optional · pet EXP only", "İsteğe bağlı · yalnızca pet TP", "Facoltativo · solo EXP pet"],
 
         // ---- Pet: Petwerte ----
         ["calc.pet.stats.title"] = ["Petwerte", "Pet stats", "Pet değerleri", "Statistiche pet"],

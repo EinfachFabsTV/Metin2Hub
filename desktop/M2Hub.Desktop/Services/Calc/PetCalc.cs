@@ -168,6 +168,40 @@ public static class PetCalc
         return new FeedResult(weapons, snacks, delicious, options, best, missing);
     }
 
+    /* ---------- Umschlagpunkt Waffe +7 vs. Leckerli+ ---------- */
+
+    /// Ab welchem Level die jeweils andere Variante die bessere wird.
+    /// `First` ist die am unteren Ende des Bereichs guenstigere, `SwitchLevel`
+    /// das erste Level, ab dem die andere gewinnt (null = durchgehend `First`).
+    public sealed record Crossover(FoodKind First, int? SwitchLevel);
+
+    /// Umschlag nach Stueckzahl: Waffen je Level gegen die festen 20 Leckerli+.
+    public static Crossover AmountCrossover(int from, int to) =>
+        CrossoverBy(from, to, level => Weapons.GetValueOrDefault(level), SnacksPerLevel);
+
+    /// Umschlag nach Preis (kk). Null, solange nicht beide Preise stehen.
+    public static Crossover? PriceCrossover(int from, int to, double? priceWeapon, double? priceSnack) =>
+        priceWeapon is > 0 && priceSnack is > 0
+            ? CrossoverBy(from, to, level => Weapons.GetValueOrDefault(level) * priceWeapon.Value, SnacksPerLevel * priceSnack.Value)
+            : null;
+
+    // ponytail: findet den ERSTEN Umschlag. Die Waffen-Tabelle faellt an der
+    // Championgrenze (106) zurueck - ein zweiter Umschlag dort wird nicht
+    // gesondert ausgewiesen; fuer die ueblichen Bereiche reicht der erste.
+    private static Crossover CrossoverBy(int from, int to, Func<int, double> weapon, double snack)
+    {
+        var a = Math.Min(from, to);
+        var b = Math.Max(from, to);
+        if (a >= b) return new(FoodKind.Weapon, null);
+
+        var weaponFirst = weapon(a) <= snack;
+        for (var level = a; level < b; level++)
+            if (weapon(level) <= snack != weaponFirst)
+                return new(weaponFirst ? FoodKind.Weapon : FoodKind.Snack, level);
+
+        return new(weaponFirst ? FoodKind.Weapon : FoodKind.Snack, null);
+    }
+
     /* ======================= Petwerte ======================= */
 
     /// Alle 'Every' Level eine Verbesserung um 'Min' bis 'Max' Prozent.
