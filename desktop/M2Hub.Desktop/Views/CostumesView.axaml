@@ -26,6 +26,12 @@
       <Setter Property="Padding" Value="14" />
       <Setter Property="Width" Value="230" />
     </Style>
+    <Style Selector="Border.slotcard">
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12" />
+      <Setter Property="Width" Value="260" />
+    </Style>
     <Style Selector="TextBlock.exp">
       <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
       <Setter Property="FontWeight" Value="SemiBold" />
@@ -40,20 +46,22 @@
         <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T costumes.subtitle}" />
       </StackPanel>
 
-      <!-- Push-Ringe -->
+      <!-- "Alle" + Push-Ringe -->
       <StackPanel Spacing="10">
-        <ItemsControl ItemsSource="{Binding Rings}">
+        <ItemsControl ItemsSource="{Binding Filters}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="vm:RingItem">
+            <DataTemplate DataType="vm:RingFilter">
               <Button Classes="ringbtn" Classes.active="{Binding IsActive}" Margin="0,0,8,8"
                       ToolTip.Tip="{Binding Name}"
                       Command="{Binding $parent[UserControl].DataContext.ChooseRingCommand}"
                       CommandParameter="{Binding}">
                 <Panel>
-                  <Image Width="34" Height="34" Source="{Binding Icon}" />
+                  <Image Width="34" Height="34" Source="{Binding Icon}" IsVisible="{Binding HasIcon}" />
+                  <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="Bold" IsVisible="{Binding !HasIcon}"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
                   <Border IsVisible="{Binding HasSets}" Background="{StaticResource SecondaryBrush}"
                           CornerRadius="999" MinWidth="16" Height="16" Padding="3,0"
                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-4,-4">
@@ -94,8 +102,12 @@
                     <Image MaxWidth="84" MaxHeight="84" Source="{Binding Icon}" />
                   </Border>
                   <TextBlock FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Text="{Binding Name}" />
-                  <TextBlock Classes="muted" FontSize="10" Text="{loc:T costumes.fourPieces}" />
-                  <ItemsControl ItemsSource="{Binding Effect4}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="muted" FontSize="10" Foreground="{StaticResource SecondaryBrush}"
+                               IsVisible="{Binding ShowRing}" Text="{Binding RingName}" />
+                    <TextBlock Classes="muted" FontSize="10" IsVisible="{Binding HasTier}" Text="{Binding TierLabel}" />
+                  </StackPanel>
+                  <ItemsControl ItemsSource="{Binding TopEffect}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate DataType="vm:EffectLine">
                         <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
@@ -154,7 +166,7 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- Kostuem-Varianten -->
+        <!-- Kostuem-Varianten: Frisur m/w, dann Body m/w -->
         <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasCostumes}">
           <StackPanel Spacing="10">
             <TextBlock FontWeight="Bold" Text="{loc:T costumes.variants}" />
@@ -189,40 +201,69 @@
           </StackPanel>
         </Border>
 
-        <!-- 4. Slot: Reittier/Pet/Waffe mit eigenen Werten -->
+        <!-- 4. Slot: Waffen links, Pet + Reittier rechts -->
         <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasSlots}">
           <StackPanel Spacing="10">
             <TextBlock FontWeight="Bold" Text="{loc:T costumes.fourthSlot}" />
-            <ItemsControl ItemsSource="{Binding Selected.Slots}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:SlotViewModel">
-                  <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10" Padding="12"
-                          Margin="0,0,10,10" Width="260">
-                    <StackPanel Spacing="4">
-                      <TextBlock FontSize="10" Foreground="{StaticResource AmberBrush}"
-                                 Text="{Binding TypeLabel}" />
-                      <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Image Width="48" Height="48" VerticalAlignment="Top" Source="{Binding Icon}" />
-                        <StackPanel Spacing="3">
-                          <TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding Name}" />
-                          <ItemsControl ItemsSource="{Binding Stats}">
-                            <ItemsControl.ItemTemplate>
-                              <DataTemplate DataType="vm:EffectLine">
-                                <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
-                                           TextWrapping="Wrap" Text="{Binding Text}" />
-                              </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                          </ItemsControl>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+              <!-- Waffen (links, gestapelt) -->
+              <ItemsControl Grid.Column="0" IsVisible="{Binding Selected.HasWeapons}"
+                            ItemsSource="{Binding Selected.Weapons}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:SlotViewModel">
+                    <Border Classes="slotcard" Margin="0,0,0,10">
+                      <StackPanel Spacing="4">
+                        <TextBlock FontSize="10" Foreground="{StaticResource AmberBrush}" Text="{Binding TypeLabel}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                          <Image Width="48" Height="48" VerticalAlignment="Top" Source="{Binding Icon}" />
+                          <StackPanel Spacing="3">
+                            <TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding Name}" />
+                            <ItemsControl ItemsSource="{Binding Stats}">
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:EffectLine">
+                                  <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
+                                             TextWrapping="Wrap" Text="{Binding Text}" />
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                          </StackPanel>
                         </StackPanel>
                       </StackPanel>
-                    </StackPanel>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <!-- Pet + Reittier (rechts) -->
+              <ItemsControl Grid.Column="1" ItemsSource="{Binding Selected.RightSlots}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:SlotViewModel">
+                    <Border Classes="slotcard" Margin="0,0,10,10">
+                      <StackPanel Spacing="4">
+                        <TextBlock FontSize="10" Foreground="{StaticResource AmberBrush}" Text="{Binding TypeLabel}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                          <Image Width="48" Height="48" VerticalAlignment="Top" Source="{Binding Icon}" />
+                          <StackPanel Spacing="3">
+                            <TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding Name}" />
+                            <ItemsControl ItemsSource="{Binding Stats}">
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:EffectLine">
+                                  <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
+                                             TextWrapping="Wrap" Text="{Binding Text}" />
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                          </StackPanel>
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Grid>
           </StackPanel>
         </Border>
 

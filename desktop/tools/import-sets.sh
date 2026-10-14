@@ -79,9 +79,14 @@ while IFS= read -r -d '' ringDir; do
   sets_json=""; sfirst=1
   while IFS= read -r -d '' setDir; do
     setName="$(basename "$setDir")"; setK="$(slug "$setName")"
-    e2="$(lines_json "$setDir/Set-Effekt 2 Teile.txt")"
-    e3="$(lines_json "$setDir/Set-Effekt 3 Teile.txt")"
-    e4="$(lines_json "$setDir/Set-Effekt 4 Teile.txt")"
+    # Beliebige Stufen: jede "Set-Effekt N Teile.txt" wird erfasst (2..6 ...).
+    effects=""; efirst=1
+    while IFS= read -r -d '' ef; do
+      n="$(basename "$ef" | sed -n 's/^Set-Effekt \([0-9]\+\) Teile\.txt$/\1/p')"
+      [ -z "$n" ] && continue
+      if [ $efirst -eq 1 ]; then efirst=0; else effects+=","; fi
+      effects+="\"$n\":$(lines_json "$ef")"
+    done < <(find "$setDir" -maxdepth 1 -type f -iname 'Set-Effekt * Teile.txt' -print0 | sort -z)
 
     mounts="[]"; pets="[]"; weapons="[]"; costumes=""; cfirst=1
     while IFS= read -r -d '' sub; do
@@ -105,7 +110,7 @@ while IFS= read -r -d '' ringDir; do
     done < <(find "$setDir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
     if [ $sfirst -eq 1 ]; then sfirst=0; else sets_json+=","; fi
-    sets_json+="{\"key\":\"$(js "$setK")\",\"name\":\"$(js "$setName")\",\"effects\":{\"2\":$e2,\"3\":$e3,\"4\":$e4},\"costumes\":[$costumes],\"mounts\":$mounts,\"pets\":$pets,\"weapons\":$weapons}"
+    sets_json+="{\"key\":\"$(js "$setK")\",\"name\":\"$(js "$setName")\",\"effects\":{$effects},\"costumes\":[$costumes],\"mounts\":$mounts,\"pets\":$pets,\"weapons\":$weapons}"
   done < <(find "$ringDir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
   if [ $rfirst -eq 1 ]; then rfirst=0; else rings_json+=","; fi

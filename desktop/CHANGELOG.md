@@ -7,6 +7,21 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.67.0
+
+**Geändert**
+
+- Im Katalog gibt es jetzt **„Alle"** (standardmäßig aktiv): zeigt die Sets aller
+  Ringe auf einmal; die einzelnen Ringe filtern weiterhin.
+- Die **Suche** findet ein Set auch über seine **Teil-Namen** – tippe einen
+  Waffen-Skin-, Pet-, Reittier- oder Kostümteil-Namen, erscheint das Set.
+- Das **Vorschaubild** ist einheitlich das Body-Bild. In der Detailansicht stehen
+  die Kostüm-Varianten in fester Reihenfolge: **Frisur (m/w), dann Body (m/w)**.
+- Der 4. Slot zeigt **Waffen links, Pet und Reittier rechts**.
+- Die Effektstufe ist nicht mehr fest „4": die Karte zeigt die **höchste
+  vorhandene Stufe**, und der Importer liest beliebige „Set-Effekt N Teile"-Dateien
+  (auch 5/6 …), sobald sie vorliegen.
+
 ## 1.66.0
 
 **Neu**

@@ -94,7 +94,9 @@ public sealed class Loc : INotifyPropertyChanged
         // ---- Kostuem-Set-Katalog ----
         ["costumes.title"] = ["Kostüm-Sets", "Costume sets", "Kostüm setleri", "Set di costumi"],
         ["costumes.subtitle"] = ["Alle Push-Ringe und ihre Sets mit Effekten, Varianten und Werten. Ring wählen, Set suchen.", "All push rings and their sets with effects, variants and stats. Pick a ring, search a set.", "Tüm push yüzükleri ve setleri; efektler, varyantlar ve değerler. Yüzük seç, set ara.", "Tutti gli anelli push e i loro set con effetti, varianti e valori. Scegli un anello, cerca un set."],
-        ["costumes.search"] = ["Set suchen … (direkt tippen)", "Search set … (type to filter)", "Set ara … (yazmaya başla)", "Cerca set … (digita per filtrare)"],
+        ["costumes.all"] = ["Alle", "All", "Tümü", "Tutti"],
+        ["costumes.allRings"] = ["Alle Ringe", "All rings", "Tüm yüzükler", "Tutti gli anelli"],
+        ["costumes.search"] = ["Set oder Teil suchen … (direkt tippen)", "Search set or part … (type to filter)", "Set veya parça ara … (yazmaya başla)", "Cerca set o pezzo … (digita per filtrare)"],
         ["costumes.setOne"] = ["{0} Set", "{0} set", "{0} set", "{0} set"],
         ["costumes.setMany"] = ["{0} Sets", "{0} sets", "{0} set", "{0} set"],
         ["costumes.emptyRing"] = ["Für diesen Ring sind noch keine Sets hinterlegt.", "No sets for this ring yet.", "Bu yüzük için henüz set yok.", "Ancora nessun set per questo anello."],
