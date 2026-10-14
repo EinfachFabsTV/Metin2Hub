@@ -7,6 +7,19 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.61.0
+
+**Entfernt**
+
+- Die Knoepfe zu **Wiki und Handelsglas** in der Kopfzeile. Die Seite dahinter
+  schliesst, und ein toter Link ist schlechter als kein Link.
+
+**Geaendert**
+
+- Die **Hilfe zum Shop-Wert** fuehrt jetzt durch das Spiel statt ueber eine
+  Internetseite: eigenen Laden anklicken, unten steht die Summe. Zwei Bilder
+  statt vier, kein Link mehr.
+
 ## 1.60.1
 
 **Geaendert**

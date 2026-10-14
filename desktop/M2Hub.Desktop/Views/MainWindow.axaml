@@ -67,40 +67,8 @@
 
           <!-- Nachschlagewerk und Handelsglas bleiben in der Kopfzeile: sie
                fuehren aus der App heraus und gehoeren nicht zu den Bereichen. -->
-          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
-                      HorizontalAlignment="Center" VerticalAlignment="Center">
-
-            <!-- Nachschlagewerk und Handelsglas. Beide liegen ausserhalb der
-                 App und oeffnen im Standardbrowser - eine Browser-Engine hat
-                 das Programm bewusst nicht. Die Symbole sind selbst gezeichnet:
-                 so laedt die App nichts von fremden Servern nach. -->
-            <Button Classes="nav" Command="{Binding OpenLinkCommand}"
-                    CommandParameter="{x:Static vm:MainWindowViewModel.WikiUrl}"
-                    ToolTip.Tip="{loc:T nav.wiki}">
-              <Panel Width="17" Height="15">
-                <!-- aufgeschlagenes Buch -->
-                <Path Fill="#93C5FD"
-                      Data="M0,2 C3,0 6,0 8,1.6 L8,14 C6,12.4 3,12.4 0,14 Z" />
-                <Path Fill="#3B82F6"
-                      Data="M17,2 C14,0 11,0 9,1.6 L9,14 C11,12.4 14,12.4 17,14 Z" />
-              </Panel>
-            </Button>
-            <Button Classes="nav" Command="{Binding OpenLinkCommand}"
-                    CommandParameter="{x:Static vm:MainWindowViewModel.TradingGlassUrl}"
-                    ToolTip.Tip="{loc:T nav.tradingGlass}">
-              <Panel Width="16" Height="16">
-                <!-- Lupe ueber einer Muenze -->
-                <Ellipse Width="12" Height="12" Margin="0,0,4,4"
-                         Stroke="#FBBF24" StrokeThickness="2" />
-                <Rectangle Width="2" Height="7" Fill="#FBBF24" RadiusX="1" RadiusY="1"
-                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,1,0">
-                  <Rectangle.RenderTransform>
-                    <RotateTransform Angle="-45" />
-                  </Rectangle.RenderTransform>
-                </Rectangle>
-              </Panel>
-            </Button>
-          </StackPanel>
+          <!-- Hier standen Verweise auf eine Markt- und Wiki-Seite. Die Seite
+               schliesst, und ein toter Link ist schlechter als keiner. -->
 
           <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <TextBlock Classes="danger" VerticalAlignment="Center" FontSize="12"

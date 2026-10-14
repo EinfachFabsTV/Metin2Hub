@@ -52,91 +52,55 @@ def glow(x,y,w,h,r=10):
     return (f'<rect x="{x-4}" y="{y-4}" width="{w+8}" height="{h+8}" rx="{r+3}" fill="none" '
             f'stroke="{MARK}" stroke-width="2.4"/>')
 
-# ---- 1: Server waehlen ------------------------------------------------------
-s1 = head(1, "Markt-Seite öffnen und den eigenen Server wählen")
-s1 += box(30, 86, 250, 40)
-s1 += text(48, 111, "&#9679;  [SAPPHIRE] Safir", 14, MAIN, "600")
-s1 += text(258, 111, "&#9662;", 14, MUTED, anchor="end")
-s1 += glow(30, 86, 250, 40)
-s1 += arrow(150, 178, 150, 136, "Server wählen", 96, 198)
-s1 += box(30, 220, 700, 170, PANEL)
-s1 += text(52, 252, "Marktplatz", 20, MAIN, "700")
-s1 += text(52, 276, "Die Liste zeigt immer nur den gewählten Server –", 13, MUTED)
-s1 += text(52, 296, "steht dort der falsche, findest du deinen Laden nicht.", 13, MUTED)
-for i, (lbl, val) in enumerate([("Inserate", "53.950"), ("Gesamtwert", "868.616W"), ("Verkäufer", "1.831")]):
-    x = 52 + i*220
-    s1 += box(x, 316, 200, 56, CARD)
-    s1 += text(x+16, 338, lbl, 11, MUTED)
-    s1 += text(x+16, 360, val, 16, AMBER if i==1 else MAIN, "700")
+# ---- 1: Laden im Spiel oeffnen ---------------------------------------------
+s1 = head(1, "Im Spiel den eigenen Laden anklicken")
+s1 += box(60, 86, 300, 300, "#1a1410", "#4a3626", 6)
+s1 += box(60, 86, 300, 30, "#3a2a1c", "#4a3626", 6)
+s1 += text(78, 107, "Laden", 13, "#e8d5b5", "600")
+s1 += text(342, 108, "&#10005;", 13, "#e8d5b5", anchor="end")
+for r in range(5):
+    for c in range(5):
+        x = 78 + c*56; y = 128 + r*42
+        s1 += box(x, y, 50, 38, "#120e0a", "#2e241a", 4)
+for r, c in [(0,3),(0,4),(1,2),(1,3),(2,0),(2,1),(3,2),(3,3),(4,3)]:
+    x = 78 + c*56; y = 128 + r*42
+    s1 += f'<circle cx="{x+25}" cy="{y+19}" r="11" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>'
+    s1 += f'<circle cx="{x+25}" cy="{y+19}" r="4" fill="#93c5fd"/>'
+s1 += glow(60, 86, 300, 300, 8)
+s1 += arrow(470, 230, 374, 230, "Dein Laden, wie ihn jeder sieht", 484, 224)
+s1 += box(440, 280, 280, 110, PANEL)
+s1 += text(460, 308, "Kein Umweg über eine Internetseite", 12, MAIN, "600")
+s1 += text(460, 332, "Die Summe steht im Spiel selbst –", 11, MUTED)
+s1 += text(460, 350, "du brauchst nur dein eigenes", 11, MUTED)
+s1 += text(460, 368, "Laden-Fenster.", 11, MUTED)
 
-# ---- 2: Verkaeufersuche -----------------------------------------------------
-s2 = head(2, "Verkäufersuche öffnen und den Charakternamen eintragen")
-s2 += box(30, 86, 700, 46)
-for i, tab in enumerate(["Alle", "Mounts | Pets", "Waffen", "Ausrüstungen", "Schmuck"]):
-    s2 += text(52 + i*130, 115, tab, 13, MAIN if i == 0 else MUTED, "600" if i == 0 else "400")
-s2 += box(300, 150, 400, 150)
-s2 += text(322, 180, "Verkäufersuche", 14, MAIN, "600")
-s2 += box(322, 196, 300, 38, DEEP, PRIM)
-s2 += text(338, 221, "ShopName", 14, MAIN)
-s2 += box(630, 196, 48, 38, AMBER, AMBER)
-s2 += lens(654, 215)
-s2 += glow(322, 196, 300, 38)
-s2 += arrow(190, 240, 310, 218, "Name des Charakters,", 30, 232)
-s2 += text(30, 250, "dem der Laden gehört", 13, MARK, "600")
-s2 += arrow(660, 330, 660, 244, "Suchen", 628, 352)
-s2 += text(322, 268, "Nicht der Ladentitel – der Charaktername.", 12, MUTED)
-s2 += box(30, 330, 240, 70, PANEL)
-s2 += text(48, 358, "Tipp", 12, MUTED, "600")
-s2 += text(48, 380, "Gespeicherte Namen bleiben stehen.", 11, MUTED)
-
-# ---- 3: Laden-Symbol anklicken ---------------------------------------------
-s3 = head(3, "In der Trefferliste auf das Laden-Symbol klicken")
-s3 += box(30, 80, 700, 30, CARD)
-s3 += text(52, 100, "Name", 12, MUTED, "600")
-s3 += text(430, 100, "Anzahl", 12, MUTED, "600")
-s3 += text(520, 100, "Preis", 12, MUTED, "600")
-s3 += text(640, 100, "Verkäufer", 12, MUTED, "600")
-for i in range(4):
-    y = 118 + i*68
-    s3 += box(30, y, 700, 60, PANEL)
-    s3 += text(52, y+26, "Legendärer Drachensaphir", 13, "#c084fc", "700")
-    s3 += text(52, y+46, "Beweglichkeit +3", 11, MUTED)
-    s3 += text(170, y+46, "Erdwiderstand +3%", 11, MUTED)
-    s3 += text(438, y+36, "1", 13, MAIN, "700")
-    s3 += text(520, y+36, "40.000.000", 13, AMBER, "700")
-    s3 += box(636, y+20, 28, 24, CARD, LINE, 5)
-    s3 += shopicon(641, y+25)
-    s3 += text(676, y+37, "+", 14, MUTED)
-s3 += glow(636, 138, 28, 24, 7)
-s3 += arrow(560, 394, 646, 174, "Das Laden-Symbol anklicken", 452, 412)
-
-# ---- 4: Gesamtwert ablesen --------------------------------------------------
-s4 = head(4, "Der Laden öffnet sich – unten steht der Gesamtwert")
-s4 += box(230, 76, 300, 320, "#1a1410", "#4a3626", 6)
-s4 += box(230, 76, 300, 30, "#3a2a1c", "#4a3626", 6)
-s4 += text(248, 97, "Laden", 13, "#e8d5b5", "600")
-s4 += text(512, 98, "&#10005;", 13, "#e8d5b5", anchor="end")
+# ---- 2: Summe unten ablesen -------------------------------------------------
+s2 = head(2, "Unten steht der Gesamtwert - diese Zahl eintragen")
+s2 += box(230, 76, 300, 320, "#1a1410", "#4a3626", 6)
+s2 += box(230, 76, 300, 30, "#3a2a1c", "#4a3626", 6)
+s2 += text(248, 97, "Laden", 13, "#e8d5b5", "600")
+s2 += text(512, 98, "&#10005;", 13, "#e8d5b5", anchor="end")
 for r in range(6):
     for c in range(5):
         x = 248 + c*56; y = 118 + r*42
-        s4 += box(x, y, 50, 38, "#120e0a", "#2e241a", 4)
-import_items = [(1,3),(1,4),(2,2),(2,3),(2,4),(3,0),(3,1),(4,2),(4,3),(4,4),(5,3)]
-for r,c in import_items:
+        s2 += box(x, y, 50, 38, "#120e0a", "#2e241a", 4)
+for r, c in [(1,3),(1,4),(2,2),(2,3),(2,4),(3,0),(3,1),(4,2),(4,3),(4,4),(5,3)]:
     x = 248 + c*56; y = 118 + r*42
-    s4 += f'<circle cx="{x+25}" cy="{y+19}" r="11" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>'
-    s4 += f'<circle cx="{x+25}" cy="{y+19}" r="4" fill="#93c5fd"/>'
-s4 += text(380, 388, "156W", 18, "#22d3ee", "700", anchor="middle")
-s4 += glow(330, 372, 100, 22, 6)
-s4 += arrow(700, 384, 440, 384, "Das ist dein kompletter Shop-Wert", 712, 372, "end")
-s4 += box(30, 110, 180, 120, PANEL)
-s4 += text(48, 138, "Weiter in M2Hub", 12, MAIN, "600")
-s4 += text(48, 160, "Diesen Wert als", 11, MUTED)
-s4 += text(48, 178, "&#8222;Im Shop&#8220; eintragen", 11, MUTED)
-s4 += text(48, 196, "und die Truhen", 11, MUTED)
-s4 += text(48, 214, "darunter abziehen.", 11, MUTED)
+    s2 += f'<circle cx="{x+25}" cy="{y+19}" r="11" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>'
+    s2 += f'<circle cx="{x+25}" cy="{y+19}" r="4" fill="#93c5fd"/>'
+s2 += text(380, 388, "156W", 18, "#22d3ee", "700", anchor="middle")
+s2 += glow(330, 372, 100, 22, 6)
+s2 += arrow(700, 384, 440, 384, "Das ist dein kompletter Shop-Wert", 712, 372, "end")
+s2 += box(30, 110, 180, 150, PANEL)
+s2 += text(48, 138, "Weiter in M2Hub", 12, MAIN, "600")
+s2 += text(48, 160, "Diesen Wert bei Goals", 11, MUTED)
+s2 += text(48, 178, "als &#8222;Im Shop&#8220; eintragen", 11, MUTED)
+s2 += text(48, 196, "und darunter die Truhen", 11, MUTED)
+s2 += text(48, 214, "angeben, die schon über", 11, MUTED)
+s2 += text(48, 232, "die Runs gezaehlt sind.", 11, MUTED)
 
-for name, body in [("shop1", s1), ("shop2", s2), ("shop3", s3), ("shop4", s4)]:
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">{body}</svg>'
+for name, body_ in [("shop1", s1), ("shop2", s2)]:
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">{body_}</svg>'
     cairosvg.svg2png(bytestring=svg.encode("utf-8"),
                      write_to=os.path.join(OUT, name + ".png"),
                      output_width=W*2, output_height=H*2)

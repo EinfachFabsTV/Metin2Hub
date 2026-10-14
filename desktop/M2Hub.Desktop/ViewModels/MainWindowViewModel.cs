@@ -61,7 +61,6 @@ public sealed class MainWindowViewModel : ViewModelBase
         ToggleTimersCommand = new RelayCommand(_ => ToggleTimers());
         ShowSettingsCommand = new RelayCommand(_ => Show("settings"));
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(manual: true));
-        OpenLinkCommand = new RelayCommand(p => Platform.OpenUrl(p as string));
 
         // Nach einem Sprachwechsel muessen die Listen neu beschriftet werden -
         // sie tragen ihre Texte als feste Zeichenketten, nicht als Bindung.
@@ -190,11 +189,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     /// Oeffnet eine Adresse im Standardbrowser. Die App selbst zeigt keine
     /// fremden Seiten an - sie hat dafuer bewusst keine Browser-Engine.
-    public RelayCommand OpenLinkCommand { get; }
 
     /// Nachschlagewerk und Handelsglas, beide ausserhalb der App.
-    public const string WikiUrl = "https://metin2alerts.com/wiki";
-    public const string TradingGlassUrl = "https://metin2alerts.com/store/";
 
     /// Beim Start: gespeicherten Stand zeigen, dann laden.
     public async Task InitializeAsync()
