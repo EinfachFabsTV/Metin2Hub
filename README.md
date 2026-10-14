@@ -79,7 +79,8 @@ mit ihrer Beute.
 Truhen eintragen, und die App rechnet **Tag, Monat und Gesamtzeit** aus – samt
 Ertrag in Won. Tage, an denen schon etwas steht, sind im Kalender **grün**.
 
-Dazu eine **Abklingzeit** je Lauf, die auf Knopfdruck mitläuft.
+Dazu eine **Abklingzeit** je Lauf, die auf Knopfdruck mitläuft – und für
+mehrere Setups das Timer-Fenster über dem Spiel.
 
 </td>
 <td width="33%" valign="top">
@@ -104,9 +105,49 @@ Eintragen – zwischen denen ein Schalter wechselt.
 
 </td>
 </tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🎯 &nbsp;Goals
+
+Ein **Ziel in Won** – „1500w für X" –, dahinter weitere als Warteschlange.
+
+Der **Gewinn zählt sich selbst**: was die eingetragenen Läufe seit dem Start
+des Ziels gebracht haben. Von Hand kommen nur **Ausgaben** (Push, Kostüme,
+Sonstiges), Zusatzeinnahmen und **was noch im Shop liegt**.
+
+Daneben der **Schulden-Rechner**: wie viele Läufe bis zur Tilgung fehlen.
+
+</td>
+<td width="33%" valign="top">
+
+### ⏱️ &nbsp;Timer über dem Spiel
+
+Ein kleines Fenster über Metin2, **ein Knopf je Setup**: zwei Hydra-Chars,
+zwei Uhren. Klick startet, der nächste hält an, am Ende **klingt ein Ton**
+(vier zur Auswahl).
+
+Auf Wunsch stehen darunter die **Truhen-Knöpfe**: 0–5 bei der Hydra, 8–10 beim
+Razador. Ein Klick trägt den Lauf ein – ohne Tastatur.
+
+</td>
+<td width="33%" valign="top">
+
+### 📺 &nbsp;Für den Stream
+
+Schulden, Truhen, Runs, das aktive Ziel und die Abklingzeiten **als
+Einblendung für OBS** – fertige Karten im Aussehen der App, dazu jede Zahl
+einzeln als Textdatei.
+
+**Ohne Server und ohne Port**: M2Hub legt die Dateien im eigenen Profil ab, OBS
+liest sie von der Platte. Deckkraft und Größe stellst du in der App ein.
+
+</td>
+</tr>
 </table>
 
 Die Oberfläche gibt es auf **Deutsch, Englisch, Türkisch und Italienisch**.
+Nach jedem Update zeigt M2Hub einmal, **was sich geändert hat**.
 
 ## Erste Schritte
 
@@ -194,7 +235,7 @@ Abgelaufenes wird nach sieben Tagen verworfen. Dabei werden keinerlei
 persönliche Daten übermittelt.
 
 Wer seine Einträge sichern oder auf einen anderen Rechner mitnehmen möchte,
-kopiert die Dateien `accounts.json` und `runs.json` – zu finden über
+kopiert die Dateien `accounts.json`, `runs.json` und `goals.json` – zu finden über
 **Einstellungen → Ordner öffnen**. Die eingetragenen Läufe werden nie
 verworfen; es sind eigene Messungen, keine abgerufenen Daten.
 
