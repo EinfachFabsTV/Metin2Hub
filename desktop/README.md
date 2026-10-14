@@ -6,9 +6,13 @@ wird direkt über Skia. Es gibt kein HTML, kein Electron, kein Chromium und
 keinen System-WebView.
 
 Umfang: **Start** (eine Übersicht aus selbst gewählten Abschnitten),
-**Accounts**, **Runs** (der Run Tracker), **Events** (global und
-serverspezifisch), **Itemshop** und **Rechner** (bisher der Gilden-Rechner).
-Die Bereiche stehen in einer Seitenleiste links.
+**Accounts**, **Runs** (der Run Tracker), **Goals** (Ziele und Schulden),
+**Events** (global und serverspezifisch), **Itemshop** und **Rechner** (bisher
+der Gilden-Rechner). Die Bereiche stehen in einer Seitenleiste links.
+
+Fürs Streamen kommen dazu: ein **Knopffenster mit den Abklingzeiten** über dem
+Spiel und **Einblendungen für OBS**, die als Dateien im Profil liegen – kein
+Server, kein Port.
 
 Die Oberfläche gibt es auf **Deutsch, Englisch, Türkisch und Italienisch**;
 geladen wird trotzdem immer aus dem deutschen Forum, übersetzt wird erst beim
@@ -26,6 +30,8 @@ Registrierung. Alles liegt lokal im Nutzerprofil.
 | Events (global) | Forum-Board 1167 „News - Events“ | `cache.json` |
 | Eventkalender je Server | Forum-Thread 90381 „Eventkalender“ | `cache.json` |
 | Itemshop | Forum-Board 303 „News - Itemshop“ | `cache.json` |
+| Ziele und ihre Posten | nur lokal, von Hand gepflegt | `goals.json` |
+| Schulden, Timer, Einblendungen | nur lokal | `settings.json` |
 
 Von den geladenen Forum-Daten bleibt stehen, **was läuft oder erst ansteht** –
 erst abgelaufene Einträge werden nach sieben Tagen verworfen. Das Abrufdatum
@@ -125,6 +131,69 @@ Preis steht in **kk**; der Ertrag wird ab 100 kk in **w** geschrieben
 Export und Import gibt es bewusst nicht: `runs.json` ist selbst die Sicherung,
 und der Ordner steht in den Einstellungen.
 
+## Goals
+
+Zwei Seiten derselben Frage: **Ziele** (was man erreichen will) und **Schulden**
+(was man noch schuldet). Beide rechnen mit denselben Läufen.
+
+Ein Ziel steht in **Won** („1500w für X"), dahinter weitere als Warteschlange.
+**Der Gewinn kommt von selbst**: was die Läufe seit dem Start des Ziels
+eingebracht haben, über alle Laufarten. Von Hand kommen nur Ausgaben
+(Standard-Push, Zusatz-Push, Zusatzausgabe), Zusatzeinnahmen und der
+**Shop-Bestand**: „150w im Shop" zählt mit, aber abzüglich der Truhen, die über
+die Läufe schon im Gewinn stehen – sonst zählte dieselbe Truhe zweimal. Wo der
+Gesamtwert des eigenen Ladens steht, zeigt ein Hilfe-Fenster in vier
+gezeichneten Schritten.
+
+Der **Schulden-Rechner** sagt, wie viele Läufe bis zur Tilgung fehlen. Truhen je
+Lauf (aus den eigenen Einträgen oder von Hand) und Preis je Truhe (Spanne oder
+Durchschnitt) sind umschaltbar; das Ergebnis ist eine Spanne, weil beide Größen
+schwanken.
+
+## Abklingzeiten über dem Spiel
+
+Ein randloses Fenster, das über allen Fenstern liegt (Windows kennt kein „nur
+über diesem Programm"). **Je Setup ein Knopf, nicht je Laufart**: wer zwei
+Hydra-Chars spielt, trägt in den Einstellungen „2" ein und bekommt zwei Uhren;
+dazu lassen sich eigene Timer mit Namen und Zeit anlegen („5:30" sind fünf
+Minuten dreißig).
+
+Ein Klick startet, der nächste hält an, Rechtsklick stellt zurück. Gezogen wird
+an der ganzen Fläche; wo es stand, merkt sich die App.
+
+**Am Ende läuft ein Ton** – Weich (Standard), Glocke, Doppelton oder Gong, alle
+auf dieselbe Lautstärke gebracht und erzeugt von
+[`tools/timer-sound.py`](tools/timer-sound.py).
+
+**Schnelleingabe** (abschaltbar): unter den Timern steht je Lauf eine Reihe
+Knöpfe mit den Truhenzahlen, die er üblicherweise abwirft – Hydra 0–5, Razador
+8–10, Schlangenrun 64. Ein Klick trägt den Lauf sofort für heute ein, ohne
+Tastatur, und der Knopf blinkt kurz grün.
+
+## Stream-Einblendungen
+
+M2Hub schreibt die Zahlen für OBS nach `%AppData%\M2Hub\stream\` –
+**kein Server, kein Port, keine Firewall-Frage**:
+
+| Datei | Inhalt |
+|---|---|
+| `overlay.html` | Karte mit Schulden, Truhen und Runs, im Aussehen der App |
+| `goal.html` | flache Leiste mit dem aktiven Ziel |
+| `timer/timer.html` | die Abklingzeiten als Kacheln |
+| `*.txt` | jede Angabe daneben einzeln, für „Text (GDI+)" |
+
+Die HTML-Karten laden sich selbst neu (die Timer im Sekundentakt), weil eine
+Browser-Quelle von sich aus nicht merkt, dass die Datei sich geändert hat.
+Deckkraft und Schriftgröße stehen in den Einstellungen – in OBS skalierte man
+die Unschärfe mit.
+
+## Patchnotes
+
+`CHANGELOG.md` ist die Quelle; eine Kopie liegt der Exe bei. Die Punkte stehen
+an drei Stellen: in den Einstellungen unter „Was ist neu", in den
+Release-Notizen und **einmal je Version als Fenster beim Start** nach einem
+Update. Beim allerersten Start erscheint es nicht.
+
 ## Herunterladen
 
 Fertig gebaut, ohne selbst etwas zu installieren:
@@ -177,20 +246,26 @@ Das Ergebnis liegt unter
 ```
 accounts.json   Accounts, Charaktere, Gilden, Schnellwahl
 runs.json       eingetragene Läufe des Run Trackers
+goals.json      Ziele und ihre Posten
+settings.json   Einstellungen, Schulden, Timer, Stream-Einblendungen
 cache.json      Events, Eventkalender, Itemshop (Abgelaufenes nach 7 Tagen)
 images/         heruntergeladene Ankündigungsbilder
+stream/         die Dateien für OBS (timer/ darin für die Abklingzeiten)
+sound/          der Ton der Abklingzeit, einmal aus der Exe gelegt
 ```
 
-Zum Zurücksetzen genügt es, den Ordner zu löschen. `accounts.json` und
-`runs.json` sind die Dateien, die man sichern sollte – alles andere lädt sich
-neu.
+Zum Zurücksetzen genügt es, den Ordner zu löschen. `accounts.json`,
+`runs.json` und `goals.json` sind die Dateien, die man sichern sollte – alles
+andere lädt oder schreibt sich neu.
 
 ## Aufbau
 
 ```
 Services/       LocalStore (Ablage), ForumService (Abruf + Drosselung), ImageCache
 Services/Forum/ Portierte Parser: Html, EventCalendar, Board
-Services/Calc/  GuildCalc, RunCatalog, Money – reine Funktionen, ohne Framework
+Services/Calc/  GuildCalc, RunCatalog, Money, DebtCalc, GoalCalc – reine Funktionen
+Services/       StreamOverlay (Dateien für OBS), Sound (Ton der Abklingzeit),
+                Patchnotes, UpdateService, EventIcons
 Services/I18n/  Loc (Oberflächentexte), Glossary (Forum-Wörter → Anzeigesprache)
 Models/         Datenmodell der App
 ViewModels/     Zustand und Logik je Bereich (INotifyPropertyChanged, ohne Framework-Zusatz)
@@ -205,6 +280,12 @@ Regel für `main.css` in der alten Web-Version.
 Das Programmsymbol entsteht aus `fav.png` im Projektstamm und liegt als
 `Assets/m2hub.ico` (Fenster, Taskleiste, Exe) und `Assets/m2hub.png`
 (Kopfzeile) bei.
+
+## Einstellungen
+
+Drei Reiter: **Allgemein** (Sprache, Startseite, Itemshop-Team, Server,
+Kopfzeile), **Streaming** (Abklingzeiten und beide Einblendungen) und
+**Programm** (Patchnotes, Updates, Datenordner).
 
 ## Fensteraufnahme
 

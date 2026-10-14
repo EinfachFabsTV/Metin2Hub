@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.60.1
+
+**Geaendert**
+
+- Die Beschreibungen (README) nennen jetzt auch Goals, die Abklingzeiten ueber
+  dem Spiel, die Stream-Einblendungen und die Patchnotes - sie standen noch auf
+  dem Stand von vor einem Dutzend Versionen.
+
 ## 1.60.0
 
 **Neu**
