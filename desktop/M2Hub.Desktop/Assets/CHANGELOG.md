@@ -7,6 +7,19 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.66.0
+
+**Neu**
+
+- Neuer Bereich **Kostüme**: ein Katalog aller Push-Ringe und ihrer Sets. Oben
+  stehen die Ringe (wählbar), eine **Live-Suche** filtert die Sets beim Tippen.
+  Jedes Set zeigt die **Effektstufen** (2/3/4 Teile), die **Kostüm-Varianten**
+  (Body/Frisur, m/w, Tiers) und den **4. Teil** (Reittier/Pet/Waffe) mit eigenen
+  Werten.
+- Die Set-Daten pflegt ein Importer (`desktop/tools/import-sets.sh`), der einen
+  Ordnerbaum einliest; Bilder und Werte werden gebündelt mitgeliefert. Der
+  EXP-Simulator über die Sets folgt später.
+
 ## 1.65.0
 
 **Behoben**

@@ -1,0 +1,233 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.CostumesView"
+             x:DataType="vm:CostumesViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Button.ringbtn">
+      <Setter Property="Width" Value="52" />
+      <Setter Property="Height" Value="52" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="{StaticResource CardBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="Button.ringbtn.active">
+      <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+    </Style>
+    <Style Selector="Border.setcard">
+      <Setter Property="Background" Value="{StaticResource CardBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Padding" Value="14" />
+      <Setter Property="Width" Value="230" />
+    </Style>
+    <Style Selector="TextBlock.exp">
+      <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T costumes.title}" />
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T costumes.subtitle}" />
+      </StackPanel>
+
+      <!-- Push-Ringe -->
+      <StackPanel Spacing="10">
+        <ItemsControl ItemsSource="{Binding Rings}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:RingItem">
+              <Button Classes="ringbtn" Classes.active="{Binding IsActive}" Margin="0,0,8,8"
+                      ToolTip.Tip="{Binding Name}"
+                      Command="{Binding $parent[UserControl].DataContext.ChooseRingCommand}"
+                      CommandParameter="{Binding}">
+                <Panel>
+                  <Image Width="34" Height="34" Source="{Binding Icon}" />
+                  <Border IsVisible="{Binding HasSets}" Background="{StaticResource SecondaryBrush}"
+                          CornerRadius="999" MinWidth="16" Height="16" Padding="3,0"
+                          HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-4,-4">
+                    <TextBlock Text="{Binding Count}" FontSize="10" FontWeight="Bold"
+                               Foreground="#0b0614" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                </Panel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding RingHeader}" FontWeight="SemiBold" />
+      </StackPanel>
+
+      <!-- ===== Liste ===== -->
+      <StackPanel Spacing="14" IsVisible="{Binding ShowList}">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox Grid.Column="0" Watermark="{loc:T costumes.search}"
+                   Text="{Binding Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Center" Margin="10,0,0,0"
+                     Text="{Binding CountLabel}" />
+        </Grid>
+
+        <Border IsVisible="{Binding ShowEmpty}" Classes="panel" Padding="24">
+          <TextBlock Classes="muted" HorizontalAlignment="Center" TextAlignment="Center"
+                     Text="{Binding EmptyText}" />
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Sets}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:SetCardViewModel">
+              <Border Classes="setcard" Margin="0,0,10,10">
+                <StackPanel Spacing="10">
+                  <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10" Height="96">
+                    <Image MaxWidth="84" MaxHeight="84" Source="{Binding Icon}" />
+                  </Border>
+                  <TextBlock FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Text="{Binding Name}" />
+                  <TextBlock Classes="muted" FontSize="10" Text="{loc:T costumes.fourPieces}" />
+                  <ItemsControl ItemsSource="{Binding Effect4}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:EffectLine">
+                        <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
+                                   TextWrapping="Wrap" Text="{Binding Text}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Button Classes="nav" HorizontalAlignment="Stretch" Content="{loc:T costumes.open}"
+                          Command="{Binding $parent[UserControl].DataContext.OpenSetCommand}"
+                          CommandParameter="{Binding}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- ===== Detail ===== -->
+      <StackPanel Spacing="14" IsVisible="{Binding ShowDetail}">
+        <Button Classes="nav" HorizontalAlignment="Left" Content="{loc:T costumes.back}"
+                Command="{Binding BackCommand}" />
+
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+          <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="12"
+                  Width="84" Height="84">
+            <Image MaxWidth="72" MaxHeight="72" Source="{Binding Selected.Icon}" />
+          </Border>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+            <TextBlock Classes="muted" FontSize="11" Text="{Binding Selected.RingName}" />
+            <TextBlock Classes="h2" Text="{Binding Selected.Name}" />
+          </StackPanel>
+        </Grid>
+
+        <!-- Effektstufen -->
+        <ItemsControl ItemsSource="{Binding Selected.Tiers}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:EffectTier">
+              <Border Classes="card" Padding="14" Margin="0,0,10,10" Width="230" VerticalAlignment="Top">
+                <StackPanel Spacing="6">
+                  <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource SecondaryBrush}"
+                             Text="{Binding Title}" />
+                  <ItemsControl ItemsSource="{Binding Lines}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:EffectLine">
+                        <TextBlock FontSize="13" TextWrapping="Wrap" Classes.exp="{Binding IsExp}"
+                                   Text="{Binding Text}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Kostuem-Varianten -->
+        <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasCostumes}">
+          <StackPanel Spacing="10">
+            <TextBlock FontWeight="Bold" Text="{loc:T costumes.variants}" />
+            <ItemsControl ItemsSource="{Binding Selected.Costumes}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:CostumeGroupViewModel">
+                  <StackPanel Spacing="6" Margin="0,0,0,8">
+                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"
+                               Text="{Binding Name}" />
+                    <ItemsControl ItemsSource="{Binding Images}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:SetImageViewModel">
+                          <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10" Padding="8"
+                                  Margin="0,0,8,8" Width="104">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                              <Image MaxWidth="56" MaxHeight="56" Source="{Binding Icon}" />
+                              <TextBlock FontSize="10" TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Name}" />
+                              <TextBlock Classes="muted" FontSize="9" IsVisible="{Binding HasTag}"
+                                         TextAlignment="Center" Text="{Binding Tag}" />
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- 4. Slot: Reittier/Pet/Waffe mit eigenen Werten -->
+        <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasSlots}">
+          <StackPanel Spacing="10">
+            <TextBlock FontWeight="Bold" Text="{loc:T costumes.fourthSlot}" />
+            <ItemsControl ItemsSource="{Binding Selected.Slots}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:SlotViewModel">
+                  <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10" Padding="12"
+                          Margin="0,0,10,10" Width="260">
+                    <StackPanel Spacing="4">
+                      <TextBlock FontSize="10" Foreground="{StaticResource AmberBrush}"
+                                 Text="{Binding TypeLabel}" />
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Image Width="48" Height="48" VerticalAlignment="Top" Source="{Binding Icon}" />
+                        <StackPanel Spacing="3">
+                          <TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding Name}" />
+                          <ItemsControl ItemsSource="{Binding Stats}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate DataType="vm:EffectLine">
+                                <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
+                                           TextWrapping="Wrap" Text="{Binding Text}" />
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

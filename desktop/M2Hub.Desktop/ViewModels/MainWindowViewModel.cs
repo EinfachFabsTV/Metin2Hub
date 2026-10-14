@@ -40,6 +40,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts = new AccountsViewModel(store, dialogs);
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
+        Costumes = new CostumesViewModel();
         Stream = new StreamOverlay(store);
         Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
@@ -54,6 +55,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowAccountsCommand = new RelayCommand(_ => Show("accounts"));
         ShowEventsCommand = new RelayCommand(_ => Show("events"));
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
+        ShowCostumesCommand = new RelayCommand(_ => Show("costumes"));
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
@@ -68,6 +70,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Accounts.RelabelAfterLanguageChange();
             Calc.RelabelAfterLanguageChange();
+            Costumes.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Timers.RelabelAfterLanguageChange();
@@ -91,6 +94,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     public AccountsViewModel Accounts { get; }
     public EventsViewModel Events { get; }
     public ItemshopViewModel Itemshop { get; }
+
+    /// Kostuem-Set-Katalog - reines Nachschlagewerk, keine Ablage.
+    public CostumesViewModel Costumes { get; }
 
     /// Der Rechner-Bereich (Gilde, Pet, Biologen) rechnet nur - er braucht
     /// weder Ablage noch Abruf.
@@ -121,6 +127,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsAccounts));
             Raise(nameof(IsEvents));
             Raise(nameof(IsItemshop));
+            Raise(nameof(IsCostumes));
             Raise(nameof(IsRuns));
             Raise(nameof(IsCalc));
             Raise(nameof(IsGoals));
@@ -132,6 +139,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsAccounts => _currentKey == "accounts";
     public bool IsEvents => _currentKey == "events";
     public bool IsItemshop => _currentKey == "itemshop";
+    public bool IsCostumes => _currentKey == "costumes";
     public bool IsRuns => _currentKey == "runs";
     public bool IsCalc => _currentKey == "calc";
     public bool IsGoals => _currentKey == "goals";
@@ -185,6 +193,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand ShowAccountsCommand { get; }
     public RelayCommand ShowEventsCommand { get; }
     public RelayCommand ShowItemshopCommand { get; }
+    public RelayCommand ShowCostumesCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
     public AsyncRelayCommand RefreshCommand { get; }
 
@@ -283,7 +292,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "costumes", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -343,6 +352,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             "goals" => Goals,
             "accounts" => Accounts,
             "itemshop" => Itemshop,
+            "costumes" => Costumes,
             "calc" => Calc,
             "settings" => Settings,
             _ => Events,

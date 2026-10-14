@@ -131,6 +131,8 @@
                     Command="{Binding ShowEventsCommand}" Content="{loc:T nav.events}" />
             <Button Classes="side" Classes.active="{Binding IsItemshop}"
                     Command="{Binding ShowItemshopCommand}" Content="{loc:T nav.itemshop}" />
+            <Button Classes="side" Classes.active="{Binding IsCostumes}"
+                    Command="{Binding ShowCostumesCommand}" Content="{loc:T nav.costumes}" />
             <Button Classes="side" Classes.active="{Binding IsCalc}"
                     Command="{Binding ShowCalcCommand}" Content="{loc:T nav.calc}" />
           </StackPanel>
