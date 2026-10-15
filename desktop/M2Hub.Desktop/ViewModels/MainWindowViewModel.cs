@@ -40,7 +40,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Accounts = new AccountsViewModel(store, dialogs);
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
-        Costumes = new CostumesViewModel();
+        Costumes = new CostumesHostViewModel();
         Stream = new StreamOverlay(store);
         Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
@@ -95,8 +95,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public EventsViewModel Events { get; }
     public ItemshopViewModel Itemshop { get; }
 
-    /// Kostuem-Set-Katalog - reines Nachschlagewerk, keine Ablage.
-    public CostumesViewModel Costumes { get; }
+    /// Kostueme: Katalog + Simulator - reines Nachschlagewerk, keine Ablage.
+    public CostumesHostViewModel Costumes { get; }
 
     /// Der Rechner-Bereich (Gilde, Pet, Biologen) rechnet nur - er braucht
     /// weder Ablage noch Abruf.

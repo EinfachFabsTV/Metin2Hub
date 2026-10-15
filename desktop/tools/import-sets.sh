@@ -129,8 +129,11 @@ while IFS= read -r -d '' ringDir; do
     [ -z "$iconSrc" ] && [ ${#parts[@]} -le 1 ] && iconSrc="$(find "$ringDir" -maxdepth 1 -type f -iname '*.png' | head -1)"
     icon=""
     if [ -n "$iconSrc" ]; then mkdir -p "$DEST/$folderK"; cp "$iconSrc" "$DEST/$folderK/_ring-$rk.png"; icon="Sets/$folderK/_ring-$rk.png"; fi
+    # Ring-Werte: die .txt, deren Name zum Ring passt (wie das Icon).
+    txtSrc="$(find "$ringDir" -maxdepth 1 -type f -iname '*.txt' | while read -r p; do [ "$(slug "$(basename "${p%.*}")")" = "$rk" ] && { echo "$p"; break; }; done)"
+    stats="$(lines_json "$txtSrc")"
     if [ $rfirst -eq 1 ]; then rfirst=0; else rings_json+=","; fi
-    rings_json+="{\"key\":\"$(js "$rk")\",\"name\":\"$(js "$rn")\",\"icon\":\"$(js "$icon")\",\"sets\":[$sets_json]}"
+    rings_json+="{\"key\":\"$(js "$rk")\",\"name\":\"$(js "$rn")\",\"icon\":\"$(js "$icon")\",\"stats\":$stats,\"sets\":[$sets_json]}"
   done
 done < <(find "$SRC" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 

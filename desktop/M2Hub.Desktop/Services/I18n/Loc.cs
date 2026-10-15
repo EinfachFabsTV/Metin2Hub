@@ -111,6 +111,24 @@ public sealed class Loc : INotifyPropertyChanged
         ["costumes.slot.mount"] = ["Reittier", "Mount", "Binek", "Cavalcatura"],
         ["costumes.slot.pet"] = ["Pet", "Pet", "Pet", "Pet"],
         ["costumes.slot.weapon"] = ["Waffen-Skin", "Weapon skin", "Silah görünümü", "Skin arma"],
+        ["costumes.slot.ring"] = ["Push-Ring", "Push ring", "Push yüzük", "Anello push"],
+        ["costumes.slot.body"] = ["Body", "Body", "Body", "Body"],
+        ["costumes.slot.frisur"] = ["Frisur", "Hair", "Saç", "Capelli"],
+
+        // ---- Katalog/Simulator-Reiter ----
+        ["costumes.tabCatalog"] = ["Katalog", "Catalog", "Katalog", "Catalogo"],
+        ["costumes.tabSimulator"] = ["Simulator", "Simulator", "Simülatör", "Simulatore"],
+
+        // ---- Set-Simulator ----
+        ["costumes.sim.title"] = ["Set-Simulator", "Set simulator", "Set simülatörü", "Simulatore di set"],
+        ["costumes.sim.subtitle"] = ["Je Slot ein Teil wählen – die Gesamt-EXP rechnet sich live. \"Beste EXP\" sucht die stärkste Kombination.", "Pick one item per slot – total EXP updates live. “Best EXP” finds the strongest combination.", "Her slot için bir parça seç – toplam TP anında hesaplanır. „En iyi TP\" en güçlü kombinasyonu bulur.", "Scegli un pezzo per slot – gli EXP totali si aggiornano in tempo reale. «Migliori EXP» cerca la combinazione più forte."],
+        ["costumes.sim.none"] = ["— keins —", "— none —", "— yok —", "— nessuno —"],
+        ["costumes.sim.best"] = ["Beste EXP", "Best EXP", "En iyi TP", "Migliori EXP"],
+        ["costumes.sim.reset"] = ["Zurücksetzen", "Reset", "Sıfırla", "Azzera"],
+        ["costumes.sim.totalExp"] = ["EXP gesamt", "Total EXP", "Toplam TP", "EXP totali"],
+        ["costumes.sim.setBonuses"] = ["Set-Boni", "Set bonuses", "Set bonusları", "Bonus set"],
+        ["costumes.sim.ownExp"] = ["Eigen-EXP der Teile", "Items' own EXP", "Parçaların kendi TP'si", "EXP propri dei pezzi"],
+        ["costumes.sim.note"] = ["EXP = Eigen-EXP der Teile + Set-Boni (höchste erreichte Stufe je Set, Ring zählt mit). \"Beste EXP\" durchsucht Ring und bis zu zwei Fokus-Sets.", "EXP = items' own EXP + set bonuses (highest reached tier per set, the ring counts). “Best EXP” searches the ring and up to two focus sets.", "TP = parçaların kendi TP'si + set bonusları (set başına ulaşılan en yüksek kademe, yüzük dahil). „En iyi TP\" yüzüğü ve en fazla iki odak seti tarar.", "EXP = EXP propri dei pezzi + bonus set (il livello più alto raggiunto per set, l'anello conta). «Migliori EXP» esplora l'anello e fino a due set principali."],
         ["nav.settings"] = ["Einstellungen", "Settings", "Ayarlar", "Impostazioni"],
         ["header.refresh"] = ["Jetzt aktualisieren", "Refresh now", "Şimdi güncelle", "Aggiorna ora"],
         ["header.refresh.tip"] = ["Events und Itemshop sofort aus dem Forum laden", "Load events and item shop from the forum right away", "Etkinlikleri ve nesne marketi forumdan hemen yükle", "Carica subito eventi e item shop dal forum"],

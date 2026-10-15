@@ -66,6 +66,11 @@ public sealed class PushRing
     public string Key { get; set; } = "";
     public string Name { get; set; } = "";
     public string Icon { get; set; } = "";
+
+    /// Eigene Werte des Rings (z. B. „+50% Erfahrungspunkte"), aus der
+    /// gleichnamigen .txt. Zaehlt im Simulator als Eigen-EXP.
+    public List<string> Stats { get; set; } = [];
+
     public List<CostumeSet> Sets { get; set; } = [];
 }
 

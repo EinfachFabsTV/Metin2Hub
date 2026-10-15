@@ -7,6 +7,19 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.71.0
+
+**Neu**
+
+- **Set-Simulator** im Kostüme-Bereich (neuer Reiter neben dem Katalog). Für
+  jeden der sechs Slots – Ring, Body, Frisur, Waffe, Pet, Reittier – wählt man
+  ein Teil, und die **Gesamt-EXP rechnet sich live**: Eigen-EXP der Teile plus
+  Set-Boni (höchste erreichte Stufe je Set, der Ring zählt mit). Der Knopf
+  **„Beste EXP"** sucht die stärkste Kombination über Ring und bis zu zwei
+  Fokus-Sets.
+- Dafür liest der Importer jetzt auch die **Ring-Werte** (`<Ringname>.txt`, u. a.
+  die EXP des Rings) ein.
+
 ## 1.70.0
 
 **Neu**
