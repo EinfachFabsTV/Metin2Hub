@@ -71,35 +71,34 @@ variant_slot(){ local dir="$1" ringK="$2" setK="$3" slotK="$4" out="" first=1 pn
 # --- Durchlauf --------------------------------------------------------------
 rings_json=""; rfirst=1
 while IFS= read -r -d '' ringDir; do
-  ringName="$(basename "$ringDir")"; ringK="$(slug "$ringName")"
-  # Ring-Icon: erste PNG direkt im Ring-Ordner
-  icon=""; iconSrc="$(find "$ringDir" -maxdepth 1 -type f -iname '*.png' | head -1)"
-  if [ -n "$iconSrc" ]; then mkdir -p "$DEST/$ringK"; cp "$iconSrc" "$DEST/$ringK/_ring.png"; icon="Sets/$ringK/_ring.png"; fi
+  folderName="$(basename "$ringDir")"; folderK="$(slug "$folderName")"
+  # Bilder liegen unter dem Ordner-Key; teilen sich zwei Ringe (Name "A & B")
+  # einen Ordner, verweisen beide auf dieselben Dateien.
 
   sets_json=""; sfirst=1
   while IFS= read -r -d '' setDir; do
     setName="$(basename "$setDir")"; setK="$(slug "$setName")"
-    # Beliebige Stufen: jede "Set-Effekt N Teile.txt" wird erfasst (2..6 ...).
+    # Beliebige Stufen: jede "Set[-/ ]Effekt N Teile.txt" wird erfasst (2..6 ...).
     effects=""; efirst=1
     while IFS= read -r -d '' ef; do
-      n="$(basename "$ef" | sed -n 's/^Set-Effekt \([0-9]\+\) Teile\.txt$/\1/p')"
+      n="$(basename "$ef" | sed -n 's/^Set.Effekt \([0-9]\+\) Teile\.txt$/\1/p')"
       [ -z "$n" ] && continue
       if [ $efirst -eq 1 ]; then efirst=0; else effects+=","; fi
       effects+="\"$n\":$(lines_json "$ef")"
-    done < <(find "$setDir" -maxdepth 1 -type f -iname 'Set-Effekt * Teile.txt' -print0 | sort -z)
+    done < <(find "$setDir" -maxdepth 1 -type f -iname 'Set*Effekt * Teile.txt' -print0 | sort -z)
 
     mounts="[]"; pets="[]"; weapons="[]"; costumes=""; cfirst=1
     while IFS= read -r -d '' sub; do
       subName="$(basename "$sub")"
       case "$subName" in
-        Reittier) mounts="$(variant_slot "$sub" "$ringK" "$setK" "reittier")";;
-        Pet)      pets="$(variant_slot "$sub" "$ringK" "$setK" "pet")";;
-        Waffe|Waffen|Waffen-Skin) weapons="$(variant_slot "$sub" "$ringK" "$setK" "waffe")";;
+        Reittier) mounts="$(variant_slot "$sub" "$folderK" "$setK" "reittier")";;
+        Pet)      pets="$(variant_slot "$sub" "$folderK" "$setK" "pet")";;
+        Waffe|Waffen|Waffen-Skin) weapons="$(variant_slot "$sub" "$folderK" "$setK" "waffe")";;
         *) # Kostuem-Tier: Bilder mit Label
            imgs=""; ifirst=1
            while IFS= read -r -d '' png; do
              base="$(basename "${png%.*}")"
-             rel="$(copy_img "$png" "$ringK" "$setK" "$(slug "$subName")")"
+             rel="$(copy_img "$png" "$folderK" "$setK" "$(slug "$subName")")"
              part="$(guess_part "$base")"; gen="$(guess_gender "$base")"
              if [ $ifirst -eq 1 ]; then ifirst=0; else imgs+=","; fi
              imgs+="{\"name\":\"$(js "$base")\",\"part\":\"$part\",\"gender\":\"$gen\",\"file\":\"$(js "$rel")\"}"
@@ -113,10 +112,22 @@ while IFS= read -r -d '' ringDir; do
     sets_json+="{\"key\":\"$(js "$setK")\",\"name\":\"$(js "$setName")\",\"effects\":{$effects},\"costumes\":[$costumes],\"mounts\":$mounts,\"pets\":$pets,\"weapons\":$weapons}"
   done < <(find "$ringDir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
-  if [ $rfirst -eq 1 ]; then rfirst=0; else rings_json+=","; fi
-  rings_json+="{\"key\":\"$(js "$ringK")\",\"name\":\"$(js "$ringName")\",\"icon\":\"$(js "$icon")\",\"sets\":[$sets_json]}"
+  # Ordnername "A & B" -> ein Ring je Name, dieselben Sets. Icon je Ring: die
+  # PNG, deren Name zum Ring passt; sonst (Einzelring) die erste PNG.
+  oldIFS="$IFS"; IFS='&'; read -ra parts <<< "$folderName"; IFS="$oldIFS"
+  for part in "${parts[@]}"; do
+    rn="$(printf '%s' "$part" | sed -e 's/^ *//' -e 's/ *$//')"
+    [ -z "$rn" ] && continue
+    rk="$(slug "$rn")"
+    iconSrc="$(find "$ringDir" -maxdepth 1 -type f -iname '*.png' | while read -r p; do [ "$(slug "$(basename "${p%.*}")")" = "$rk" ] && { echo "$p"; break; }; done)"
+    [ -z "$iconSrc" ] && [ ${#parts[@]} -le 1 ] && iconSrc="$(find "$ringDir" -maxdepth 1 -type f -iname '*.png' | head -1)"
+    icon=""
+    if [ -n "$iconSrc" ]; then mkdir -p "$DEST/$folderK"; cp "$iconSrc" "$DEST/$folderK/_ring-$rk.png"; icon="Sets/$folderK/_ring-$rk.png"; fi
+    if [ $rfirst -eq 1 ]; then rfirst=0; else rings_json+=","; fi
+    rings_json+="{\"key\":\"$(js "$rk")\",\"name\":\"$(js "$rn")\",\"icon\":\"$(js "$icon")\",\"sets\":[$sets_json]}"
+  done
 done < <(find "$SRC" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
 printf '{"rings":[%s]}' "$rings_json" > "$JSON"
 echo "geschrieben: $JSON"
-echo "Ringe: $(find "$SRC" -mindepth 1 -maxdepth 1 -type d | wc -l), Bilder: $(find "$DEST" -type f -iname '*.png' | wc -l)"
+echo "Ordner: $(find "$SRC" -mindepth 1 -maxdepth 1 -type d | wc -l), Ringe: $(grep -o '"icon":' "$JSON" | wc -l), Bilder: $(find "$DEST" -type f -iname '*.png' | wc -l)"

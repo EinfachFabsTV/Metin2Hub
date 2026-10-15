@@ -7,6 +7,20 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.68.0
+
+**Neu**
+
+- Zwei weitere Push-Ringe im Katalog: **Lolli der Stärke** und **Lolli der
+  Magie**. Beide teilen sich dieselben Sets (18), erscheinen aber als eigene
+  Ringe mit eigenem Icon.
+
+**Geändert**
+
+- Der Importer liest jetzt auch einen Ordner, den sich **zwei Ringe teilen**
+  (Ordnername „A & B" → zwei Ringe, gemeinsame Sets), und erkennt die
+  Effekt-Dateien mit und ohne Bindestrich („Set-Effekt" / „Set Effekt").
+
 ## 1.67.0
 
 **Geändert**
