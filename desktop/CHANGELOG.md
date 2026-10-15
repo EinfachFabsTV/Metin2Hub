@@ -7,6 +7,16 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.73.0
+
+**Behoben**
+
+- **Nazar-Amulett** hat jetzt Ring-Werte (u. a. +50 % EXP) und zählt damit im
+  Simulator mit.
+- **Weibliche Kostümteile** werden besser erkannt: Namensformen auf „-in"
+  (Kriegerin, Königin, Fürstin …) gelten jetzt als weiblich und erscheinen nicht
+  mehr unter „Männlich".
+
 ## 1.72.0
 
 **Geändert**

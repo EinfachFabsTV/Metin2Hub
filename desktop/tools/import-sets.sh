@@ -51,10 +51,18 @@ guess_part(){ local low="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
   case "$low" in *turban*|*tiara*|*shemagh*|*frisur*|*haar*|*krone*|*hut*|*kappe*|*helm*) echo "Frisur";; *) echo "Body";; esac; }
 guess_gender(){ local b="$1" low="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
   case "$b" in *"(m)"*) echo "m"; return;; *"(w)"*) echo "w"; return;; esac
+  # Weibliche Formen zuerst (fangen "…krieger" vs "…kriegerin" richtig ab).
   case "$low" in
-    *lady*|*prinzessin*|*koenigin*|*königin*|*dame*|*tiara*) echo "w";;
-    *lord*|*prinz*|*koenig*|*könig*|*herr*|*turban*) echo "m";;
-    *) echo "";; esac; }
+    *lady*|*prinzessin*|*koenigin*|*königin*|*kaiserin*|*fuerstin*|*fürstin*|*kriegerin*|*jaegerin*|*jägerin*|*priesterin*|*zauberin*|*meisterin*|*herrin*|*dame*|*tiara*|*walkuere*|*walküre*) echo "w"; return;;
+    *lord*|*prinz*|*koenig*|*könig*|*kaiser*|*fuerst*|*fürst*|*krieger*|*herr*|*turban*) echo "m"; return;;
+  esac
+  # Generische weibliche Endung "-in" (Kernwort ohne +/Klammern), mit Ausnahmen.
+  local core="$(printf '%s' "$low" | sed 's/[+() ].*$//')"
+  case "$core" in
+    *paladin|*mandarin|*hermelin|*delphin|*pinguin|*rubin) echo ""; return;;
+    *in) echo "w"; return;;
+  esac
+  echo ""; }
 
 # Reittier/Pet/Waffe-Slot als JSON-Array von {name,file,stats}
 variant_slot(){ local dir="$1" ringK="$2" setK="$3" slotK="$4" out="" first=1 png base rel stats
