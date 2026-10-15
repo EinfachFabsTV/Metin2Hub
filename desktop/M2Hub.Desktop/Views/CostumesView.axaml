@@ -24,7 +24,24 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="14" />
       <Setter Property="Padding" Value="14" />
-      <Setter Property="Width" Value="230" />
+      <Setter Property="Width" Value="400" />
+    </Style>
+    <Style Selector="Button.tierbadge">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.tierbadge.active">
+      <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+      <Setter Property="Foreground" Value="#0b0614" />
+      <Setter Property="FontWeight" Value="Bold" />
     </Style>
     <Style Selector="Border.slotcard">
       <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
@@ -110,16 +127,50 @@
             <DataTemplate DataType="vm:SetCardViewModel">
               <Border Classes="setcard" Margin="0,0,10,10">
                 <StackPanel Spacing="10">
-                  <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10" Height="96">
-                    <Image MaxWidth="84" MaxHeight="84" Source="{Binding Icon}" />
-                  </Border>
-                  <TextBlock FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Text="{Binding Name}" />
                   <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Classes="muted" FontSize="10" Foreground="{StaticResource SecondaryBrush}"
+                    <TextBlock FontWeight="Bold" FontSize="15" TextWrapping="Wrap" Text="{Binding Name}" />
+                    <TextBlock Classes="muted" FontSize="10" VerticalAlignment="Center"
+                               Foreground="{StaticResource SecondaryBrush}"
                                IsVisible="{Binding ShowRing}" Text="{Binding RingName}" />
-                    <TextBlock Classes="muted" FontSize="10" IsVisible="{Binding HasTier}" Text="{Binding TierLabel}" />
                   </StackPanel>
-                  <ItemsControl ItemsSource="{Binding TopEffect}">
+
+                  <!-- Teile des Sets als Slot-Reihe (Varianten wechseln sich ab) -->
+                  <ItemsControl ItemsSource="{Binding Slots}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:CardSlot">
+                        <StackPanel Spacing="3" Margin="0,0,8,0" HorizontalAlignment="Center">
+                          <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8"
+                                  Width="46" Height="54">
+                            <Image MaxWidth="40" MaxHeight="48" Source="{Binding Icon}" />
+                          </Border>
+                          <TextBlock Classes="muted" FontSize="9" HorizontalAlignment="Center" Text="{Binding Label}" />
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <!-- Teile-Stufen -->
+                  <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasTiers}">
+                    <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center" Text="{loc:T costumes.card.tiles}" />
+                    <ItemsControl ItemsSource="{Binding Tiers}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="4" /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:TierBadge">
+                          <Button Classes="tierbadge" Classes.active="{Binding Active}" Content="{Binding Label}"
+                                  Command="{Binding $parent[ItemsControl].DataContext.SelectTierCommand}"
+                                  CommandParameter="{Binding}" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+
+                  <!-- Effekte der gewaehlten Stufe -->
+                  <ItemsControl ItemsSource="{Binding Effects}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate DataType="vm:EffectLine">
                         <TextBlock Classes="muted" Classes.exp="{Binding IsExp}" FontSize="12"
@@ -127,6 +178,7 @@
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+
                   <Button Classes="nav" HorizontalAlignment="Stretch" Content="{loc:T costumes.open}"
                           Command="{Binding $parent[UserControl].DataContext.OpenSetCommand}"
                           CommandParameter="{Binding}" />

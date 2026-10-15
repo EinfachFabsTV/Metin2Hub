@@ -16,7 +16,8 @@ public sealed class CostumesHostViewModel : ViewModelBase
         Simulator = new SimulatorViewModel();
 
         Pages.Add(new RunChip("katalog", Loc.T("costumes.tabCatalog")));
-        Pages.Add(new RunChip("simulator", Loc.T("costumes.tabSimulator")));
+        // Simulator ist vorerst deaktiviert (noch Fehler) - sichtbar, aber ausgegraut.
+        Pages.Add(new RunChip("simulator", Loc.T("costumes.tabSimulatorSoon")) { Enabled = false });
         _chosen = Pages[0];
         _chosen.IsActive = true;
 
@@ -33,7 +34,7 @@ public sealed class CostumesHostViewModel : ViewModelBase
         get => _chosen;
         set
         {
-            if (value is null || !Set(ref _chosen, value)) return;
+            if (value is null || !value.Enabled || !Set(ref _chosen, value)) return;
             foreach (var chip in Pages) chip.IsActive = chip.Key == _chosen.Key;
             Raise(nameof(Current));
         }
@@ -48,6 +49,6 @@ public sealed class CostumesHostViewModel : ViewModelBase
         Catalog.RelabelAfterLanguageChange();
         Simulator.RelabelAfterLanguageChange();
         Pages[0].Label = Loc.T("costumes.tabCatalog");
-        Pages[1].Label = Loc.T("costumes.tabSimulator");
+        Pages[1].Label = Loc.T("costumes.tabSimulatorSoon");
     }
 }

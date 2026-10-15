@@ -7,6 +7,23 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.74.0
+
+**Geändert**
+
+- Die **Katalog-Karten** zeigen jetzt die Teile eines Sets als Reihe – Waffe,
+  Rüstung, Frisur, Haustier, Reittier, Ring. Hat ein Slot mehrere Varianten
+  (z. B. Atlantisfürst und Atlantiskrieger), **wechseln sie sich in der Vorschau
+  ab**. Darunter die Teile-Stufen (2–6) zum Umschalten und die Effekte der
+  gewählten Stufe.
+- Der **Simulator**-Reiter ist vorerst deaktiviert („bald") – er wird noch
+  überarbeitet.
+
+**Intern**
+
+- Im Release-Repo bleibt nur noch die **aktuellste Version** stehen; ältere
+  Releases werden beim Veröffentlichen automatisch entfernt.
+
 ## 1.73.0
 
 **Behoben**

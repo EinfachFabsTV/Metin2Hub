@@ -108,6 +108,13 @@ public sealed class Loc : INotifyPropertyChanged
         ["costumes.teile"] = ["{0} Teile", "{0} pieces", "{0} parça", "{0} pezzi"],
         ["costumes.variants"] = ["Kostüm-Varianten", "Costume variants", "Kostüm varyantları", "Varianti del costume"],
         ["costumes.fourthSlot"] = ["Reittier / Pet / Waffe", "Mount / pet / weapon", "Binek / pet / silah", "Cavalcatura / pet / arma"],
+        ["costumes.card.weapon"] = ["Waffe", "Weapon", "Silah", "Arma"],
+        ["costumes.card.armor"] = ["Rüstung", "Armor", "Zırh", "Armatura"],
+        ["costumes.card.hair"] = ["Frisur", "Hair", "Saç", "Capelli"],
+        ["costumes.card.pet"] = ["Haustier", "Pet", "Evcil", "Pet"],
+        ["costumes.card.mount"] = ["Reittier", "Mount", "Binek", "Cavalcatura"],
+        ["costumes.card.ring"] = ["Ring", "Ring", "Yüzük", "Anello"],
+        ["costumes.card.tiles"] = ["Teile", "Pieces", "Parça", "Pezzi"],
         ["costumes.slot.mount"] = ["Reittier", "Mount", "Binek", "Cavalcatura"],
         ["costumes.slot.pet"] = ["Pet", "Pet", "Pet", "Pet"],
         ["costumes.slot.weapon"] = ["Waffen-Skin", "Weapon skin", "Silah görünümü", "Skin arma"],
@@ -118,6 +125,7 @@ public sealed class Loc : INotifyPropertyChanged
         // ---- Katalog/Simulator-Reiter ----
         ["costumes.tabCatalog"] = ["Katalog", "Catalog", "Katalog", "Catalogo"],
         ["costumes.tabSimulator"] = ["Simulator", "Simulator", "Simülatör", "Simulatore"],
+        ["costumes.tabSimulatorSoon"] = ["Simulator (bald)", "Simulator (soon)", "Simülatör (yakında)", "Simulatore (presto)"],
 
         // ---- Set-Simulator ----
         ["costumes.sim.title"] = ["Set-Simulator", "Set simulator", "Set simülatörü", "Simulatore di set"],

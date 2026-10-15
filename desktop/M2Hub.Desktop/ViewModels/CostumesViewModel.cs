@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using M2Hub.Desktop.Services;
 using M2Hub.Desktop.Services.Costumes;
 
@@ -37,7 +38,15 @@ public sealed class CostumesViewModel : ViewModelBase
         _filter = Filters[0];
         _filter.IsActive = true;
         RebuildSets();
+
+        // Dreht die Varianten-Bilder der sichtbaren Karten weiter (Atlantisfuerst
+        // / Atlantiskrieger wechseln sich ab).
+        _anim = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1800) };
+        _anim.Tick += (_, _) => { foreach (var c in Sets) c.Advance(); };
+        _anim.Start();
     }
+
+    private readonly DispatcherTimer _anim;
 
     public ObservableCollection<RingFilter> Filters { get; } = new();
     public ObservableCollection<SetCardViewModel> Sets { get; } = new();
@@ -187,21 +196,102 @@ public sealed class RingFilter(string name, Bitmap? icon, int count, bool isAll,
     public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
 }
 
-/// Eine Set-Kachel im Raster.
-public sealed class SetCardViewModel(PushRing ring, CostumeSet set, bool showRing)
+/// Eine Set-Kachel im Raster: Name, die Teile des Sets als Slot-Reihe (Varianten
+/// wechseln sich ab), die Teile-Stufen als Badges und die Effekte der gewaehlten
+/// Stufe.
+public sealed class SetCardViewModel : ViewModelBase
 {
-    public PushRing Ring { get; } = ring;
-    public CostumeSet Set { get; } = set;
+    private int _tier;
+
+    public SetCardViewModel(PushRing ring, CostumeSet set, bool showRing)
+    {
+        Ring = ring;
+        Set = set;
+        ShowRing = showRing;
+
+        // Slot-Reihe in fester Reihenfolge; nur Slots, die das Set hat.
+        AddSlot("costumes.card.weapon", set.Weapons.Select(w => w.File));
+        AddSlot("costumes.card.armor", set.Costumes.SelectMany(c => c.Images).Where(i => i.Part == "Body").Select(i => i.File));
+        AddSlot("costumes.card.hair", set.Costumes.SelectMany(c => c.Images).Where(i => i.Part == "Frisur").Select(i => i.File));
+        AddSlot("costumes.card.pet", set.Pets.Select(p => p.File));
+        AddSlot("costumes.card.mount", set.Mounts.Select(m => m.File));
+        AddSlot("costumes.card.ring", [ring.Icon]);
+
+        _tier = SetFmt.MaxTier(set.Effects.Keys);
+        foreach (var n in set.Effects.Keys.Select(k => int.TryParse(k, out var x) ? x : 0)
+                     .Where(x => x > 0).OrderBy(x => x))
+            Tiers.Add(new TierBadge(n, n == _tier));
+
+        SelectTierCommand = new RelayCommand(p => { if (p is TierBadge b) SelectTier(b.N); });
+    }
+
+    public PushRing Ring { get; }
+    public CostumeSet Set { get; }
+    public bool ShowRing { get; }
     public string Name => Set.Name;
     public string RingName => Ring.Name;
-    public bool ShowRing { get; } = showRing;
-    public Bitmap? Icon => CostumeCatalog.Image(SetFmt.Preview(Set));
 
-    private int Tier => SetFmt.MaxTier(Set.Effects.Keys);
-    public bool HasTier => Tier > 0;
-    public string TierLabel => Tier > 0 ? Loc.T("costumes.teile", Tier) : "";
-    public IReadOnlyList<EffectLine> TopEffect =>
-        SetFmt.Lines(Set.Effects.TryGetValue(Tier.ToString(), out var l) ? l : null);
+    public ObservableCollection<CardSlot> Slots { get; } = new();
+    public ObservableCollection<TierBadge> Tiers { get; } = new();
+    public bool HasTiers => Tiers.Count > 0;
+
+    public RelayCommand SelectTierCommand { get; }
+
+    public IReadOnlyList<EffectLine> Effects =>
+        SetFmt.Lines(Set.Effects.TryGetValue(_tier.ToString(), out var l) ? l : null);
+
+    /// Bilder der Slots mit mehreren Varianten eins weiterdrehen.
+    public void Advance()
+    {
+        foreach (var s in Slots) s.Advance();
+    }
+
+    private void AddSlot(string labelKey, IEnumerable<string> files)
+    {
+        var f = files.Where(x => !string.IsNullOrEmpty(x)).ToList();
+        if (f.Count > 0) Slots.Add(new CardSlot(Loc.T(labelKey), f));
+    }
+
+    private void SelectTier(int n)
+    {
+        if (n == _tier) return;
+        _tier = n;
+        foreach (var b in Tiers) b.Active = b.N == n;
+        Raise(nameof(Effects));
+    }
+}
+
+/// Ein Slot in der Karten-Reihe; wechselt zwischen seinen Varianten.
+public sealed class CardSlot : ViewModelBase
+{
+    private readonly List<string> _files;
+    private int _i;
+
+    public CardSlot(string label, List<string> files)
+    {
+        Label = label;
+        _files = files;
+    }
+
+    public string Label { get; }
+    public Bitmap? Icon => CostumeCatalog.Image(_files[_i % _files.Count]);
+
+    public void Advance()
+    {
+        if (_files.Count <= 1) return;
+        _i = (_i + 1) % _files.Count;
+        Raise(nameof(Icon));
+    }
+}
+
+/// Eine Teile-Stufe als Badge (anklickbar, die gewaehlte ist hervorgehoben).
+public sealed class TierBadge(int n, bool active) : ViewModelBase
+{
+    private bool _active = active;
+
+    public int N { get; } = n;
+    public string Label => N.ToString();
+    public bool Active { get => _active; set => Set(ref _active, value); }
 }
 
 /// Die Detailansicht eines Sets.

@@ -698,6 +698,9 @@ public sealed class RunChip(string key, string label) : ViewModelBase
     public string Label { get => _label; set => Set(ref _label, value); }
 
     public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
+
+    /// Ausgegraute Reiter (noch nicht verfuegbar) - Standard aktiv.
+    public bool Enabled { get; init; } = true;
 }
 
 /// Eine Beutezeile beim Eintragen: Name und Zaehler mit − und +.
