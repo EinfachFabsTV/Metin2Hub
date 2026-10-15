@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.70.0
+
+**Neu**
+
+- In den **Kostümen** springt ein runder Knopf unten rechts wieder ganz nach
+  oben. Er erscheint erst, wenn man ein Stück gescrollt hat – praktisch in der
+  langen „Alle"-Liste.
+
 ## 1.69.0
 
 **Neu**

@@ -104,6 +104,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["costumes.fourPieces"] = ["4 Teile", "4 pieces", "4 parça", "4 pezzi"],
         ["costumes.open"] = ["Set ansehen", "View set", "Seti gör", "Vedi set"],
         ["costumes.back"] = ["← Zurück", "← Back", "← Geri", "← Indietro"],
+        ["costumes.toTop"] = ["Nach oben", "Back to top", "Yukarı çık", "Torna su"],
         ["costumes.teile"] = ["{0} Teile", "{0} pieces", "{0} parça", "{0} pezzi"],
         ["costumes.variants"] = ["Kostüm-Varianten", "Costume variants", "Kostüm varyantları", "Varianti del costume"],
         ["costumes.fourthSlot"] = ["Reittier / Pet / Waffe", "Mount / pet / weapon", "Binek / pet / silah", "Cavalcatura / pet / arma"],
