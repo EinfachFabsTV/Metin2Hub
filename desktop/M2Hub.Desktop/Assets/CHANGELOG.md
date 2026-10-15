@@ -7,6 +7,17 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.72.0
+
+**Geändert**
+
+- Der **Set-Simulator** wählt die Teile jetzt über **Kachel-Raster** statt
+  Dropdowns: je Slot (Ring, Body, Frisur, Waffe, Pet, Reittier) ein Raster zum
+  Anklicken, mit **Männlich/Weiblich-Umschalter** (für Body/Frisur) und Suche.
+  Rechts bleibt das Ergebnis-Panel mit Gesamt-EXP und den aktiven Boni.
+- **„Beste EXP"** optimiert jetzt für den **gewählten Push-Ring**; ist keiner
+  gewählt, sucht es weiter über alle Ringe.
+
 ## 1.71.0
 
 **Neu**

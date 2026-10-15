@@ -5,97 +5,133 @@
              x:Class="M2Hub.Desktop.Views.SimulatorView"
              x:DataType="vm:SimulatorViewModel">
 
-  <ScrollViewer>
-    <Grid Margin="18" ColumnDefinitions="0.9*,1.1*" ColumnSpacing="14">
+  <UserControl.Styles>
+    <Style Selector="Button.tile">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="Padding" Value="4" />
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="Button.tile.selected">
+      <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+  </UserControl.Styles>
 
-      <!-- ===== Auswahl ===== -->
-      <Border Grid.Column="0" Classes="card" Padding="18" VerticalAlignment="Top">
-        <StackPanel Spacing="14">
-          <StackPanel Spacing="2">
-            <TextBlock Classes="h1" Text="{loc:T costumes.sim.title}" />
-            <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T costumes.sim.subtitle}" />
+  <Grid ColumnDefinitions="1.35*,0.65*" ColumnSpacing="14" Margin="18">
+
+    <!-- ===== Auswahl ===== -->
+    <ScrollViewer Grid.Column="0">
+      <StackPanel Spacing="14">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="h1" Text="{loc:T costumes.sim.title}" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T costumes.sim.subtitle}" />
+        </StackPanel>
+
+        <!-- Werkzeugleiste: Geschlecht, Suche, Reset -->
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+            <Button Classes="chip" Classes.active="{Binding Male}" Content="{loc:T costumes.sim.male}"
+                    Command="{Binding GenderCommand}" CommandParameter="m" />
+            <Button Classes="chip" Classes.active="{Binding Female}" Content="{loc:T costumes.sim.female}"
+                    Command="{Binding GenderCommand}" CommandParameter="w" />
           </StackPanel>
+          <TextBox Grid.Column="1" Watermark="{loc:T costumes.sim.search}"
+                   Text="{Binding Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+          <Button Grid.Column="2" Classes="nav" Content="{loc:T costumes.sim.reset}" Command="{Binding ResetCommand}" />
+        </Grid>
 
-          <ItemsControl ItemsSource="{Binding SlotPickers}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:SimSlot">
-                <StackPanel Spacing="4" Margin="0,0,0,10">
-                  <TextBlock Classes="muted" Text="{Binding Title}" />
-                  <ComboBox HorizontalAlignment="Stretch" MaxDropDownHeight="360"
-                            ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}">
-                    <ComboBox.ItemTemplate>
-                      <DataTemplate DataType="vm:SimOption">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                          <Image Width="24" Height="24" Source="{Binding Icon}" IsVisible="{Binding HasIcon}" />
-                          <TextBlock Text="{Binding Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
+        <!-- Slots untereinander, je ein Kachel-Raster -->
+        <ItemsControl ItemsSource="{Binding SlotGrids}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:SimSlotGrid">
+              <StackPanel Spacing="6" Margin="0,0,0,10">
+                <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+                <Border Classes="card" Padding="10">
+                  <ItemsControl ItemsSource="{Binding Tiles}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:SimTile">
+                        <Button Classes="tile" Classes.selected="{Binding IsSelected}" Margin="0,0,6,6"
+                                ToolTip.Tip="{Binding Label}"
+                                Command="{Binding $parent[ItemsControl].DataContext.SelectCommand}"
+                                CommandParameter="{Binding}">
+                          <Image Width="44" Height="44" Source="{Binding Icon}" />
+                        </Button>
                       </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                  </ComboBox>
-                </StackPanel>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Border>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===== Ergebnis ===== -->
+    <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
+            BorderBrush="{StaticResource PrimaryBrush}">
+      <StackPanel Spacing="14">
+        <Button Classes="primary" HorizontalAlignment="Stretch"
+                Content="{loc:T costumes.sim.best}" Command="{Binding BestCommand}" />
+        <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T costumes.sim.bestNote}" />
+
+        <Border Classes="panel" Padding="16">
+          <StackPanel HorizontalAlignment="Center" Spacing="2">
+            <TextBlock Classes="statvalue" Foreground="{StaticResource SuccessBrush}"
+                       HorizontalAlignment="Center" Text="{Binding TotalLabel}" />
+            <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center"
+                       Text="{loc:T costumes.sim.totalExp}" />
+          </StackPanel>
+        </Border>
+
+        <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding !HasAny}"
+                   Text="{loc:T costumes.sim.empty}" />
+
+        <StackPanel Spacing="6" IsVisible="{Binding HasSets}">
+          <TextBlock FontWeight="Bold" Foreground="{StaticResource SecondaryBrush}"
+                     Text="{loc:T costumes.sim.setBonuses}" />
+          <ItemsControl ItemsSource="{Binding SetBonuses}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:BonusRow">
+                <Border Classes="statrow" Margin="0,0,0,4">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Label}" />
+                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
+                               Foreground="{StaticResource SuccessBrush}" Text="{Binding Value}" />
+                  </Grid>
+                </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Classes="primary" Content="{loc:T costumes.sim.best}" Command="{Binding BestCommand}" />
-            <Button Classes="nav" Content="{loc:T costumes.sim.reset}" Command="{Binding ResetCommand}" />
-          </StackPanel>
         </StackPanel>
-      </Border>
 
-      <!-- ===== Ergebnis ===== -->
-      <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
-              BorderBrush="{StaticResource PrimaryBrush}">
-        <StackPanel Spacing="14">
-          <Border Classes="panel" Padding="16">
-            <StackPanel HorizontalAlignment="Center" Spacing="2">
-              <TextBlock Classes="statvalue" Foreground="{StaticResource SuccessBrush}"
-                         HorizontalAlignment="Center" Text="{Binding TotalLabel}" />
-              <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center"
-                         Text="{loc:T costumes.sim.totalExp}" />
-            </StackPanel>
-          </Border>
-
-          <StackPanel Spacing="6" IsVisible="{Binding HasSets}">
-            <TextBlock FontWeight="Bold" Foreground="{StaticResource SecondaryBrush}"
-                       Text="{loc:T costumes.sim.setBonuses}" />
-            <ItemsControl ItemsSource="{Binding SetBonuses}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:BonusRow">
-                  <Border Classes="statrow" Margin="0,0,0,4">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Label}" />
-                      <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
-                                 Foreground="{StaticResource SuccessBrush}" Text="{Binding Value}" />
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-
-          <StackPanel Spacing="6" IsVisible="{Binding HasOwn}">
-            <TextBlock FontWeight="Bold" Foreground="{StaticResource SecondaryBrush}"
-                       Text="{loc:T costumes.sim.ownExp}" />
-            <ItemsControl ItemsSource="{Binding OwnBonuses}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:BonusRow">
-                  <Border Classes="statrow" Margin="0,0,0,4">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Label}" />
-                      <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
-                                 Foreground="{StaticResource SuccessBrush}" Text="{Binding Value}" />
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-
-          <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T costumes.sim.note}" />
+        <StackPanel Spacing="6" IsVisible="{Binding HasOwn}">
+          <TextBlock FontWeight="Bold" Foreground="{StaticResource SecondaryBrush}"
+                     Text="{loc:T costumes.sim.ownExp}" />
+          <ItemsControl ItemsSource="{Binding OwnBonuses}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:BonusRow">
+                <Border Classes="statrow" Margin="0,0,0,4">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" FontSize="12" Text="{Binding Label}" />
+                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold"
+                               Foreground="{StaticResource SuccessBrush}" Text="{Binding Value}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
-      </Border>
-    </Grid>
-  </ScrollViewer>
+
+        <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{loc:T costumes.sim.note}" />
+      </StackPanel>
+    </Border>
+  </Grid>
 </UserControl>

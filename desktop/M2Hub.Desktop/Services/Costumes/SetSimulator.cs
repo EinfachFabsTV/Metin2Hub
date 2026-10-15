@@ -20,7 +20,7 @@ public static class SetSimulator
 
     /// Ein waehlbares Teil fuer einen Slot.
     public sealed record SimItem(Slot Slot, string SetName, string Label, string? File,
-        double OwnExp, string? SetKey, string RingKey);
+        double OwnExp, string? SetKey, string RingKey, string Gender = "");
 
     private sealed record SetInfo(string Key, string Name, string RingKey, (int Count, double Exp)[] Tiers)
     {
@@ -85,7 +85,7 @@ public static class SetSimulator
                     {
                         var slot = img.Part == "Frisur" ? Slot.Frisur : Slot.Body;
                         pools[slot].Add(new SimItem(slot, set.Name, $"{set.Name} · {img.Name}",
-                            img.File, 0, set.Key, ring.Key));
+                            img.File, 0, set.Key, ring.Key, img.Gender));
                     }
 
                 AddVariants(pools[Slot.Weapon], set.Weapons, Slot.Weapon, set, ring.Key);
@@ -149,7 +149,9 @@ public static class SetSimulator
     /// zwei Fokus-Sets und fuellt die restlichen Slots mit dem EXP-staerksten
     /// Einzelteil. Deckt die ueblichen Muster (ein grosses Set + starke
     /// Pet/Reittier, oder 2+2) ab; kein Beweis auf das globale Optimum.
-    public static Dictionary<Slot, SimItem?> Best()
+    /// Beste gefundene Kombination. Ist `fixedRing` gesetzt, bleibt dieser Ring
+    /// stehen und es werden nur die uebrigen Slots optimiert.
+    public static Dictionary<Slot, SimItem?> Best(SimItem? fixedRing = null)
     {
         var cosmetic = new[] { Slot.Body, Slot.Frisur, Slot.Weapon, Slot.Pet, Slot.Mount };
 
@@ -164,9 +166,12 @@ public static class SetSimulator
                 bySetSlot[(g.Key, slot)] = g.OrderByDescending(i => i.OwnExp).First();
 
         var setKeys = SetsByKey.Keys.Append<string?>(null).ToList(); // null = kein Fokus-Set
-        var rings = Pools[Slot.Ring].Append(null).ToList();
+        var rings = fixedRing is not null
+            ? new List<SimItem?> { fixedRing }
+            : Pools[Slot.Ring].Append(null).ToList();
 
-        Dictionary<Slot, SimItem?> best = Slots.ToDictionary(s => s, s => (SimItem?)bestOwn[s]);
+        Dictionary<Slot, SimItem?> best = Slots.ToDictionary(s => s,
+            s => s == Slot.Ring && fixedRing is not null ? fixedRing : (SimItem?)bestOwn[s]);
         var bestTotal = Evaluate(best).TotalExp;
 
         foreach (var ring in rings)

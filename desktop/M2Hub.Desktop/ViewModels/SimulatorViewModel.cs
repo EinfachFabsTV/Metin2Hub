@@ -7,36 +7,65 @@ using static M2Hub.Desktop.Services.Costumes.SetSimulator;
 
 namespace M2Hub.Desktop.ViewModels;
 
-/// Set-Simulator: je Slot (Ring, Body, Frisur, Waffe, Pet, Reittier) ein Teil
-/// waehlen und die Gesamt-EXP live sehen; „Beste EXP" sucht die st-aerkste
-/// Kombination. Rechenweg in Services/Costumes/SetSimulator.
+/// Set-Simulator als Kachel-Auswahl: je Slot (Ring, Body, Frisur, Waffe, Pet,
+/// Reittier) ein Teil anklicken, rechts die Gesamt-EXP und die aktiven Boni.
+/// „Beste EXP" sucht die stärkste Kombination – zum gewählten Ring, wenn einer
+/// gewählt ist. Rechenweg in Services/Costumes/SetSimulator.
 public sealed class SimulatorViewModel : ViewModelBase
 {
+    private bool _male = true;
+    private string _query = "";
+
     public SimulatorViewModel()
     {
         BestCommand = new RelayCommand(_ => ApplyBest());
         ResetCommand = new RelayCommand(_ => Reset());
+        GenderCommand = new RelayCommand(p => Male = (p as string) != "w");
 
         foreach (var slot in Slots)
-            SlotPickers.Add(new SimSlot(slot, Loc.T(SlotKey(slot)), Recompute));
+            SlotGrids.Add(new SimSlotGrid(slot, Loc.T(SlotKey(slot)), Recompute));
 
+        Refilter();
         Recompute();
     }
 
-    public ObservableCollection<SimSlot> SlotPickers { get; } = new();
+    public ObservableCollection<SimSlotGrid> SlotGrids { get; } = new();
 
     public RelayCommand BestCommand { get; }
     public RelayCommand ResetCommand { get; }
+    public RelayCommand GenderCommand { get; }
+
+    /// Geschlechtsfilter fuer Body/Frisur. Standard maennlich.
+    public bool Male
+    {
+        get => _male;
+        set { if (Set(ref _male, value)) { Raise(nameof(Female)); Refilter(); } }
+    }
+
+    public bool Female => !_male;
+
+    public string Query
+    {
+        get => _query;
+        set { if (Set(ref _query, value ?? "")) Refilter(); }
+    }
 
     public string TotalLabel { get; private set; } = "";
     public ObservableCollection<BonusRow> OwnBonuses { get; } = new();
     public ObservableCollection<BonusRow> SetBonuses { get; } = new();
     public bool HasOwn { get; private set; }
     public bool HasSets { get; private set; }
+    public bool HasAny { get; private set; }
+
+    private void Refilter()
+    {
+        var q = _query.Trim();
+        foreach (var g in SlotGrids) g.Refilter(_male, q);
+    }
 
     private void Recompute()
     {
-        var sel = SlotPickers.ToDictionary(p => p.Slot, p => p.Selected?.Item);
+        var sel = SlotGrids.ToDictionary(g => g.Slot, g => g.Selected);
         var r = Evaluate(sel);
 
         TotalLabel = $"+{r.TotalExp.ToString("0.#", CultureInfo.CurrentCulture)} %";
@@ -48,29 +77,31 @@ public sealed class SimulatorViewModel : ViewModelBase
 
         HasOwn = r.Own.Count > 0;
         HasSets = r.SetBonuses.Count > 0;
+        HasAny = sel.Values.Any(i => i is not null);
 
         Raise(nameof(TotalLabel));
         Raise(nameof(HasOwn));
         Raise(nameof(HasSets));
+        Raise(nameof(HasAny));
     }
 
     private void ApplyBest()
     {
-        var best = Best();
-        foreach (var p in SlotPickers)
-            p.Select(best.GetValueOrDefault(p.Slot));
+        var ring = SlotGrids.First(g => g.Slot == Slot.Ring).Selected;
+        var best = Best(ring);
+        foreach (var g in SlotGrids) g.Select(best.GetValueOrDefault(g.Slot));
         Recompute();
     }
 
     private void Reset()
     {
-        foreach (var p in SlotPickers) p.Select(null);
+        foreach (var g in SlotGrids) g.Select(null);
         Recompute();
     }
 
     public void RelabelAfterLanguageChange()
     {
-        foreach (var p in SlotPickers) p.Relabel(Loc.T(SlotKey(p.Slot)));
+        foreach (var g in SlotGrids) g.Relabel(Loc.T(SlotKey(g.Slot)));
         Recompute();
     }
 
@@ -89,64 +120,87 @@ public sealed class SimulatorViewModel : ViewModelBase
 
 public sealed record BonusRow(string Label, string Value);
 
-/// Eine Slot-Auswahl mit ihren Optionen.
-public sealed class SimSlot : ViewModelBase
+/// Ein Slot als Kachel-Raster.
+public sealed class SimSlotGrid : ViewModelBase
 {
     private readonly Action _onChange;
-    private readonly Dictionary<SimItem, SimOption> _byItem = new();
-    private SimOption _selected;
+    private readonly List<SimTile> _all = new();
+    private SimItem? _selected;
     private string _title;
 
-    public SimSlot(Slot slot, string title, Action onChange)
+    public SimSlotGrid(Slot slot, string title, Action onChange)
     {
         Slot = slot;
         _title = title;
         _onChange = onChange;
+        HasGender = slot is Slot.Body or Slot.Frisur;
+        SelectCommand = new RelayCommand(p => { if (p is SimTile t) Toggle(t); });
 
-        var none = new SimOption(null, Loc.T("costumes.sim.none"));
-        Options.Add(none);
-        foreach (var item in SetSimulator.Pools[slot])
-        {
-            var opt = new SimOption(item, "");
-            _byItem[item] = opt;
-            Options.Add(opt);
-        }
-        _selected = none;
+        foreach (var item in SetSimulator.Pools[slot]) _all.Add(new SimTile(item));
     }
 
     public Slot Slot { get; }
     public string Title { get => _title; private set => Set(ref _title, value); }
-    public ObservableCollection<SimOption> Options { get; } = new();
+    public bool HasGender { get; }
+    public SimItem? Selected => _selected;
 
-    public SimOption Selected
+    /// Sichtbare Kacheln nach Geschlecht + Suche.
+    public ObservableCollection<SimTile> Tiles { get; } = new();
+
+    public RelayCommand SelectCommand { get; }
+
+    public void Refilter(bool male, string query)
     {
-        get => _selected;
-        set { if (value is not null && Set(ref _selected, value)) _onChange(); }
+        Tiles.Clear();
+        foreach (var t in _all)
+        {
+            if (HasGender && t.Gender.Length > 0 && t.Gender != (male ? "m" : "w")) continue;
+            if (query.Length > 0 && !t.Label.Contains(query, StringComparison.OrdinalIgnoreCase)) continue;
+            Tiles.Add(t);
+        }
     }
 
-    /// Von „Beste EXP"/Reset gesetzt, ohne mehrfach zu rechnen.
+    private void Toggle(SimTile tile)
+    {
+        if (_selected == tile.Item)
+        {
+            _selected = null;
+            tile.IsSelected = false;
+        }
+        else
+        {
+            foreach (var t in _all) t.IsSelected = t == tile;
+            _selected = tile.Item;
+        }
+        _onChange();
+    }
+
+    /// Von „Beste EXP"/Reset gesetzt, ohne das Raster neu zu bauen.
     public void Select(SimItem? item)
     {
-        var opt = item is not null && _byItem.TryGetValue(item, out var o) ? o : Options[0];
-        Set(ref _selected, opt, nameof(Selected));
+        _selected = item;
+        foreach (var t in _all) t.IsSelected = item is not null && t.Item == item;
     }
 
     public void Relabel(string title) => Title = title;
 }
 
-/// Eine Option in der Slot-Liste (Teil oder „keins").
-public sealed class SimOption
+/// Eine Kachel im Slot-Raster.
+public sealed class SimTile : ViewModelBase
 {
-    public SimOption(SimItem? item, string noneLabel)
+    private bool _selected;
+
+    public SimTile(SimItem item)
     {
         Item = item;
-        Label = item?.Label ?? noneLabel;
-        Icon = item?.File is { } f ? CostumeCatalog.Image(f) : null;
-        HasIcon = Icon is not null;
+        Label = item.Label;
+        Gender = item.Gender;
+        Icon = item.File is { } f ? CostumeCatalog.Image(f) : null;
     }
 
-    public SimItem? Item { get; }
+    public SimItem Item { get; }
     public string Label { get; }
+    public string Gender { get; }
     public Bitmap? Icon { get; }
-    public bool HasIcon { get; }
+    public bool IsSelected { get => _selected; set => Set(ref _selected, value); }
 }

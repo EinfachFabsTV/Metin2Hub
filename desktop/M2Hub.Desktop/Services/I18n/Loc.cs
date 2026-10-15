@@ -121,10 +121,15 @@ public sealed class Loc : INotifyPropertyChanged
 
         // ---- Set-Simulator ----
         ["costumes.sim.title"] = ["Set-Simulator", "Set simulator", "Set simülatörü", "Simulatore di set"],
-        ["costumes.sim.subtitle"] = ["Je Slot ein Teil wählen – die Gesamt-EXP rechnet sich live. \"Beste EXP\" sucht die stärkste Kombination.", "Pick one item per slot – total EXP updates live. “Best EXP” finds the strongest combination.", "Her slot için bir parça seç – toplam TP anında hesaplanır. „En iyi TP\" en güçlü kombinasyonu bulur.", "Scegli un pezzo per slot – gli EXP totali si aggiornano in tempo reale. «Migliori EXP» cerca la combinazione più forte."],
+        ["costumes.sim.subtitle"] = ["Kostümteile wählen und sofort jeden aktiven Set-Bonus und die Gesamt-EXP sehen.", "Pick costume items and instantly see every active set bonus and the total EXP.", "Kostüm parçalarını seç ve her aktif set bonusunu ve toplam TP'yi anında gör.", "Scegli i pezzi del costume e vedi subito ogni bonus set attivo e gli EXP totali."],
         ["costumes.sim.none"] = ["— keins —", "— none —", "— yok —", "— nessuno —"],
         ["costumes.sim.best"] = ["Beste EXP", "Best EXP", "En iyi TP", "Migliori EXP"],
         ["costumes.sim.reset"] = ["Zurücksetzen", "Reset", "Sıfırla", "Azzera"],
+        ["costumes.sim.male"] = ["Männlich", "Male", "Erkek", "Maschile"],
+        ["costumes.sim.female"] = ["Weiblich", "Female", "Kadın", "Femminile"],
+        ["costumes.sim.search"] = ["Teil suchen …", "Search item …", "Parça ara …", "Cerca pezzo …"],
+        ["costumes.sim.bestNote"] = ["Optimiert für den gewählten Ring; ist keiner gewählt, über alle Ringe.", "Optimizes for the chosen ring; with none chosen, across all rings.", "Seçili yüzük için optimize eder; seçilmezse tüm yüzüklerde.", "Ottimizza per l'anello scelto; senza scelta, su tutti gli anelli."],
+        ["costumes.sim.empty"] = ["Wähle oben Teile – die aktiven Boni sammeln sich hier.", "Pick items above – the active bonuses gather here.", "Yukarıdan parça seç – aktif bonuslar burada toplanır.", "Scegli i pezzi sopra – i bonus attivi si raccolgono qui."],
         ["costumes.sim.totalExp"] = ["EXP gesamt", "Total EXP", "Toplam TP", "EXP totali"],
         ["costumes.sim.setBonuses"] = ["Set-Boni", "Set bonuses", "Set bonusları", "Bonus set"],
         ["costumes.sim.ownExp"] = ["Eigen-EXP der Teile", "Items' own EXP", "Parçaların kendi TP'si", "EXP propri dei pezzi"],
