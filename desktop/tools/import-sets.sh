@@ -94,15 +94,21 @@ while IFS= read -r -d '' ringDir; do
         Reittier) mounts="$(variant_slot "$sub" "$folderK" "$setK" "reittier")";;
         Pet)      pets="$(variant_slot "$sub" "$folderK" "$setK" "pet")";;
         Waffe|Waffen|Waffen-Skin) weapons="$(variant_slot "$sub" "$folderK" "$setK" "waffe")";;
-        *) # Kostuem-Tier: Bilder mit Label
+        *) # Kostuem-Tier: Bilder in Frisur/ bzw. Body/ (neue Struktur), sonst
+           # direkt im Tier-Ordner (alte Struktur, Teil per Dateiname geraten).
            imgs=""; ifirst=1
-           while IFS= read -r -d '' png; do
-             base="$(basename "${png%.*}")"
-             rel="$(copy_img "$png" "$folderK" "$setK" "$(slug "$subName")")"
-             part="$(guess_part "$base")"; gen="$(guess_gender "$base")"
-             if [ $ifirst -eq 1 ]; then ifirst=0; else imgs+=","; fi
-             imgs+="{\"name\":\"$(js "$base")\",\"part\":\"$part\",\"gender\":\"$gen\",\"file\":\"$(js "$rel")\"}"
-           done < <(find "$sub" -maxdepth 1 -type f -iname '*.png' -print0 | sort -z)
+           for spec in "Frisur:Frisur" "Body:Body" ".:"; do
+             sdir="${spec%%:*}"; forced="${spec#*:}"
+             [ "$sdir" = "." ] && d="$sub" || d="$sub/$sdir"
+             [ -d "$d" ] || continue
+             while IFS= read -r -d '' png; do
+               base="$(basename "${png%.*}")"
+               rel="$(copy_img "$png" "$folderK" "$setK" "$(slug "$subName")")"
+               part="${forced:-$(guess_part "$base")}"; gen="$(guess_gender "$base")"
+               if [ $ifirst -eq 1 ]; then ifirst=0; else imgs+=","; fi
+               imgs+="{\"name\":\"$(js "$base")\",\"part\":\"$part\",\"gender\":\"$gen\",\"file\":\"$(js "$rel")\"}"
+             done < <(find "$d" -maxdepth 1 -type f -iname '*.png' -print0 | sort -z)
+           done
            if [ $cfirst -eq 1 ]; then cfirst=0; else costumes+=","; fi
            costumes+="{\"name\":\"$(js "$subName")\",\"images\":[$imgs]}";;
       esac

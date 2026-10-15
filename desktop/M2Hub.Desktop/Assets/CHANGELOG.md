@@ -7,6 +7,18 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.69.0
+
+**Neu**
+
+- Push-Ring **Ring der Freude** im Katalog.
+
+**Geändert**
+
+- Der Importer übernimmt die neue Quellstruktur: Kostümteile liegen jetzt in
+  getrennten **`Body/`- und `Frisur/`-Unterordnern**. Die Zuordnung Body/Frisur
+  ist damit zuverlässig, statt sie über den Dateinamen zu raten.
+
 ## 1.68.0
 
 **Neu**
