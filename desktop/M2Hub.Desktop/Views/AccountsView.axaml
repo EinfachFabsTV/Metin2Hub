@@ -302,179 +302,168 @@
         </StackPanel>
       </ScrollViewer>
     </Border>
-    <!-- ===== Kachelraster ===== -->
-    <ScrollViewer>
-      <ItemsControl ItemsSource="{Binding Accounts}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <!-- Die Spaltenzahl ergibt sich aus der Fensterbreite, die Breite
-                 der Kacheln aus der Spaltenzahl - so bleibt rechts nichts uebrig. -->
-            <UniformGrid Columns="{Binding $parent[ItemsControl].Bounds.Width,
-                                   Converter={x:Static views:TileColumns.Instance}}" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
+    <!-- ===== Master-Detail: links die Accounts, rechts der gewaehlte ===== -->
+    <Grid ColumnDefinitions="300,*" ColumnSpacing="14">
 
-        <ItemsControl.ItemTemplate>
-          <DataTemplate DataType="vm:AccountItemViewModel">
-            <!-- Ziehen ordnet die Kacheln um; die Pfeile bleiben daneben. -->
-            <Border Classes="card" Margin="0,0,10,10" Padding="12"
-                    DragDrop.AllowDrop="True"
-                    PointerPressed="TilePressed" PointerMoved="TileMoved"
-                    PointerReleased="TileReleased"
-                    DragDrop.DragOver="TileDragOver" DragDrop.Drop="TileDrop">
-              <StackPanel Spacing="8">
-
-                <!-- Kopf: Name in der Farbe der Client-Sprache -->
-                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                  <StackPanel Grid.Column="0" Spacing="1">
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold"
-                               Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Classes="muted" Text="{Binding Summary}" />
+      <!-- Links: Account-Liste -->
+      <Border Grid.Column="0" Classes="card" Padding="6">
+        <ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount, Mode=TwoWay}"
+                 Background="Transparent" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:AccountItemViewModel">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="1">
+                  <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{Binding NameBrush}"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted" FontSize="11" Text="{Binding Summary}"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Medals}" FontWeight="Bold" FontSize="13" HorizontalAlignment="Right" />
+                  <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right"
+                              IsVisible="{Binding HasCoins}">
+                    <Panel Width="10" Height="10" VerticalAlignment="Center">
+                      <Ellipse Fill="#B45309" /><Ellipse Margin="1" Fill="#F59E0B" /><Ellipse Margin="3" Fill="#FBBF24" />
+                    </Panel>
+                    <TextBlock FontSize="11" Foreground="{StaticResource AmberBrush}" Text="{Binding CoinLabel}" />
                   </StackPanel>
-                  <Button Grid.Column="1" Classes="icon" Content="↑" ToolTip.Tip="{loc:T accounts.moveUp}"
-                          IsVisible="{Binding $parent[UserControl].DataContext.CanReorder}"
-                          Command="{Binding $parent[UserControl].DataContext.MoveUpCommand}"
-                          CommandParameter="{Binding}" />
-                  <Button Grid.Column="2" Classes="icon" Content="↓" ToolTip.Tip="{loc:T accounts.moveDown}"
-                          IsVisible="{Binding $parent[UserControl].DataContext.CanReorder}"
-                          Command="{Binding $parent[UserControl].DataContext.MoveDownCommand}"
-                          CommandParameter="{Binding}" />
-                  <Button Grid.Column="3" Classes="icon" Content="⚙" ToolTip.Tip="{loc:T accounts.edit}"
-                          Command="{Binding $parent[UserControl].DataContext.EditAccountCommand}"
-                          CommandParameter="{Binding}" />
-                </Grid>
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
 
-                <!-- Kennzeichen: Sprache, Drachenmuenzen, Bio -->
-                <WrapPanel>
-                  <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasLanguage}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                      <Ellipse Width="7" Height="7" Fill="{Binding NameBrush}" VerticalAlignment="Center" />
-                      <TextBlock FontSize="11" Text="{Binding LanguageName}" />
-                    </StackPanel>
-                  </Border>
-                  <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasServer}">
-                    <TextBlock FontSize="11" Text="{Binding ServerLabel}" />
-                  </Border>
-                  <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasCoins}"
-                          ToolTip.Tip="{loc:T accounts.coins}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                      <Panel Width="11" Height="11" VerticalAlignment="Center">
-                        <Ellipse Fill="#B45309" />
-                        <Ellipse Margin="1" Fill="#F59E0B" />
-                        <Ellipse Margin="3.5" Fill="#FBBF24" />
-                      </Panel>
-                      <TextBlock FontSize="11" Text="{Binding CoinLabel}" />
-                    </StackPanel>
-                  </Border>
-                  <Border Classes="badge bio" Margin="0,0,5,0" Classes.done="{Binding BioDone}"
-                          IsVisible="{Binding BioPending}">
-                    <TextBlock FontSize="11" Foreground="#EF4444" Text="{loc:T accounts.bio.pending}" />
-                  </Border>
-                  <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding BioDone}">
-                    <TextBlock FontSize="11" Foreground="#10B981" Text="{loc:T accounts.bio.done}" />
-                  </Border>
-                </WrapPanel>
+      <!-- Rechts: Detail des gewaehlten Accounts -->
+      <Border Grid.Column="1" Classes="card" Padding="18" VerticalAlignment="Top"
+              IsVisible="{Binding HasSelection}">
+        <StackPanel Spacing="12" DataContext="{Binding SelectedAccount}">
 
-                <!-- Charaktertabelle: Name, Schnellwahl, Medaillen, Level -->
-                <Grid ColumnDefinitions="*,Auto,64,44,26" ColumnSpacing="6" Margin="0,2,0,0">
-                  <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{loc:T accounts.col.char}" />
-                  <TextBlock Grid.Column="2" Classes="muted" FontSize="11" Text="{loc:T common.medals}"
-                             HorizontalAlignment="Right" />
-                  <TextBlock Grid.Column="3" Classes="muted" FontSize="11" Text="{loc:T common.level}"
-                             HorizontalAlignment="Center" />
-                </Grid>
-
-                <ItemsControl ItemsSource="{Binding Characters}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="vm:CharacterItemViewModel">
-                      <Grid ColumnDefinitions="*,Auto,64,44,26" ColumnSpacing="6" Margin="0,0,0,4">
-
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5"
-                                    VerticalAlignment="Center">
-                          <Button Classes="rowlink" HorizontalAlignment="Left"
-                                  VerticalAlignment="Center"
-                                  Command="{Binding $parent[UserControl].DataContext.EditCharacterCommand}"
-                                  CommandParameter="{Binding}"
-                                  ToolTip.Tip="{loc:T common.edit}">
-                            <TextBlock Text="{Binding Display}" Foreground="{Binding NameBrush}"
-                                       FontSize="12" TextTrimming="CharacterEllipsis" />
-                          </Button>
-
-                          <!-- Balathor und Serpent als Kuerzel; Meley faerbt
-                               stattdessen das Level. -->
-                          <Border Classes="badge" IsVisible="{Binding HasRunMark}"
-                                  ToolTip.Tip="{loc:T accounts.role.runs}">
-                            <TextBlock FontSize="10" Foreground="#A855F7" Text="{Binding RunMark}" />
-                          </Border>
-                        </StackPanel>
-
-                        <!-- Schnellwahl steht direkt neben dem Charakter -->
-                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Presets}"
-                                      VerticalAlignment="Center">
-                          <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                              <StackPanel Orientation="Horizontal" Spacing="3" />
-                            </ItemsPanelTemplate>
-                          </ItemsControl.ItemsPanel>
-                          <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="vm:MedalPresetViewModel">
-                              <Button Classes="chip" Content="{Binding Label}" Command="{Binding ApplyCommand}" />
-                            </DataTemplate>
-                          </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- Doppelklick macht aus der Zahl ein Eingabefeld -->
-                        <Panel Grid.Column="2">
-                          <TextBlock Text="{Binding Medals}" FontSize="12" IsVisible="{Binding ShowingMedals}"
-                                     HorizontalAlignment="Right" VerticalAlignment="Center"
-                                     ToolTip.Tip="{loc:T accounts.medals.edit}"
-                                     DoubleTapped="MedalsDoubleTapped" />
-                          <NumericUpDown Value="{Binding Medals, Mode=TwoWay}" IsVisible="{Binding EditingMedals}"
-                                         Minimum="0" Maximum="999999" ShowButtonSpinner="False"
-                                         FontSize="12" Padding="4,1" VerticalAlignment="Center"
-                                         LostFocus="MedalsCommitted" KeyDown="MedalsKeyDown" />
-                        </Panel>
-
-                        <Panel Grid.Column="3">
-                          <Border Classes="level" Classes.meley="{Binding LevelHighlight}"
-                                  IsVisible="{Binding ShowingLevel}" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Level}" FontSize="12" HorizontalAlignment="Center"
-                                       ToolTip.Tip="{loc:T accounts.level.edit}"
-                                       DoubleTapped="LevelDoubleTapped" />
-                          </Border>
-                          <NumericUpDown Value="{Binding Level, Mode=TwoWay}" IsVisible="{Binding EditingLevel}"
-                                         Minimum="1" Maximum="120" ShowButtonSpinner="False"
-                                         FontSize="12" Padding="4,1" VerticalAlignment="Center"
-                                         LostFocus="LevelCommitted" KeyDown="LevelKeyDown" />
-                        </Panel>
-
-                        <Button Grid.Column="4" Classes="icon danger" Content="✕"
-                                VerticalAlignment="Center" ToolTip.Tip="{loc:T accounts.deleteChar}"
-                                Command="{Binding $parent[UserControl].DataContext.DeleteCharacterCommand}"
-                                CommandParameter="{Binding}" />
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!-- Fuss: Kurzkennung und Aktionen -->
-                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4,0,0">
-                  <TextBlock Grid.Column="0" Classes="shortlabel" Text="{Binding ShortLabel}"
-                             VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                  <Button Grid.Column="1" Content="{loc:T accounts.addChar}" Margin="0,0,5,0"
-                          Command="{Binding $parent[UserControl].DataContext.AddCharacterCommand}"
-                          CommandParameter="{Binding}" />
-                  <Button Grid.Column="2" Classes="icon danger" Content="✕" ToolTip.Tip="{loc:T accounts.delete}"
-                          Command="{Binding $parent[UserControl].DataContext.DeleteAccountCommand}"
-                          CommandParameter="{Binding}" />
-                </Grid>
-
-                <TextBlock Classes="muted" Text="{Binding Note}" IsVisible="{Binding HasNote}" FontSize="11" />
+          <!-- Kopf -->
+          <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+            <StackPanel Grid.Column="0" Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="h2" Text="{Binding Name}" Foreground="{Binding NameBrush}" />
+                <Border Classes="badge" VerticalAlignment="Center" IsVisible="{Binding BioDone}">
+                  <TextBlock FontSize="11" Foreground="#10B981" Text="{loc:T accounts.bio.done}" />
+                </Border>
+                <Border Classes="badge" VerticalAlignment="Center" IsVisible="{Binding BioPending}">
+                  <TextBlock FontSize="11" Foreground="#EF4444" Text="{loc:T accounts.bio.pending}" />
+                </Border>
               </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+              <WrapPanel>
+                <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasLanguage}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="7" Height="7" Fill="{Binding NameBrush}" VerticalAlignment="Center" />
+                    <TextBlock FontSize="11" Text="{Binding LanguageName}" />
+                  </StackPanel>
+                </Border>
+                <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasServer}">
+                  <TextBlock FontSize="11" Text="{Binding ServerLabel}" />
+                </Border>
+                <Border Classes="badge" Margin="0,0,5,0" IsVisible="{Binding HasCoins}"
+                        ToolTip.Tip="{loc:T accounts.coins}">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <Panel Width="11" Height="11" VerticalAlignment="Center">
+                      <Ellipse Fill="#B45309" /><Ellipse Margin="1" Fill="#F59E0B" /><Ellipse Margin="3.5" Fill="#FBBF24" />
+                    </Panel>
+                    <TextBlock FontSize="11" Text="{Binding CoinLabel}" />
+                  </StackPanel>
+                </Border>
+              </WrapPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0">
+              <TextBlock Classes="muted" FontSize="10" Text="{loc:T common.medals}" HorizontalAlignment="Right" />
+              <TextBlock FontWeight="Bold" FontSize="18" Text="{Binding Medals}" HorizontalAlignment="Right" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4,0,12,0">
+              <TextBlock Classes="muted" FontSize="10" Text="{loc:T accounts.stats.chars}" HorizontalAlignment="Right" />
+              <TextBlock FontWeight="Bold" FontSize="18" Text="{Binding CharacterCount}" HorizontalAlignment="Right" />
+            </StackPanel>
+            <Button Grid.Column="3" Classes="icon" Content="↑" ToolTip.Tip="{loc:T accounts.moveUp}" VerticalAlignment="Center"
+                    IsVisible="{Binding $parent[UserControl].DataContext.CanReorder}"
+                    Command="{Binding $parent[UserControl].DataContext.MoveUpCommand}" CommandParameter="{Binding}" />
+            <Button Grid.Column="4" Classes="icon" Content="⚙" ToolTip.Tip="{loc:T accounts.edit}" VerticalAlignment="Center"
+                    Command="{Binding $parent[UserControl].DataContext.EditAccountCommand}" CommandParameter="{Binding}" />
+          </Grid>
+
+          <TextBlock Classes="muted" Text="{Binding Note}" IsVisible="{Binding HasNote}" FontSize="11" />
+
+          <!-- Charaktertabelle -->
+          <Grid ColumnDefinitions="*,Auto,64,44,26" ColumnSpacing="6" Margin="0,2,0,0">
+            <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{loc:T accounts.col.char}" />
+            <TextBlock Grid.Column="2" Classes="muted" FontSize="11" Text="{loc:T common.medals}" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="3" Classes="muted" FontSize="11" Text="{loc:T common.level}" HorizontalAlignment="Center" />
+          </Grid>
+
+          <ItemsControl ItemsSource="{Binding Characters}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:CharacterItemViewModel">
+                <Grid ColumnDefinitions="*,Auto,64,44,26" ColumnSpacing="6" Margin="0,0,0,4">
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                    <Button Classes="rowlink" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Command="{Binding $parent[UserControl].DataContext.EditCharacterCommand}"
+                            CommandParameter="{Binding}" ToolTip.Tip="{loc:T common.edit}">
+                      <TextBlock Text="{Binding Display}" Foreground="{Binding NameBrush}"
+                                 FontSize="12" TextTrimming="CharacterEllipsis" />
+                    </Button>
+                    <Border Classes="badge" IsVisible="{Binding HasRunMark}" ToolTip.Tip="{loc:T accounts.role.runs}">
+                      <TextBlock FontSize="10" Foreground="#A855F7" Text="{Binding RunMark}" />
+                    </Border>
+                  </StackPanel>
+                  <ItemsControl Grid.Column="1" ItemsSource="{Binding Presets}" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:MedalPresetViewModel">
+                        <Button Classes="chip" Content="{Binding Label}" Command="{Binding ApplyCommand}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Panel Grid.Column="2">
+                    <TextBlock Text="{Binding Medals}" FontSize="12" IsVisible="{Binding ShowingMedals}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               ToolTip.Tip="{loc:T accounts.medals.edit}" DoubleTapped="MedalsDoubleTapped" />
+                    <NumericUpDown Value="{Binding Medals, Mode=TwoWay}" IsVisible="{Binding EditingMedals}"
+                                   Minimum="0" Maximum="999999" ShowButtonSpinner="False"
+                                   FontSize="12" Padding="4,1" VerticalAlignment="Center"
+                                   LostFocus="MedalsCommitted" KeyDown="MedalsKeyDown" />
+                  </Panel>
+                  <Panel Grid.Column="3">
+                    <Border Classes="level" Classes.meley="{Binding LevelHighlight}"
+                            IsVisible="{Binding ShowingLevel}" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Level}" FontSize="12" HorizontalAlignment="Center"
+                                 ToolTip.Tip="{loc:T accounts.level.edit}" DoubleTapped="LevelDoubleTapped" />
+                    </Border>
+                    <NumericUpDown Value="{Binding Level, Mode=TwoWay}" IsVisible="{Binding EditingLevel}"
+                                   Minimum="1" Maximum="120" ShowButtonSpinner="False"
+                                   FontSize="12" Padding="4,1" VerticalAlignment="Center"
+                                   LostFocus="LevelCommitted" KeyDown="LevelKeyDown" />
+                  </Panel>
+                  <Button Grid.Column="4" Classes="icon danger" Content="✕" VerticalAlignment="Center"
+                          ToolTip.Tip="{loc:T accounts.deleteChar}"
+                          Command="{Binding $parent[UserControl].DataContext.DeleteCharacterCommand}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <!-- Fuss -->
+          <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4,0,0">
+            <Button Grid.Column="0" Content="{loc:T accounts.addChar}"
+                    Command="{Binding $parent[UserControl].DataContext.AddCharacterCommand}" CommandParameter="{Binding}" />
+            <Button Grid.Column="2" Classes="danger" Content="{loc:T accounts.delete}"
+                    Command="{Binding $parent[UserControl].DataContext.DeleteAccountCommand}" CommandParameter="{Binding}" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Kein Account gewaehlt -->
+      <Border Grid.Column="1" Classes="panel" Padding="24" VerticalAlignment="Top" IsVisible="{Binding !HasSelection}">
+        <TextBlock Classes="muted" HorizontalAlignment="Center" Text="{loc:T accounts.none}" />
+      </Border>
+    </Grid>
   </DockPanel>
 </UserControl>

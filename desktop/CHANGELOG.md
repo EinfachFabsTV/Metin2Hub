@@ -7,6 +7,22 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.75.0
+
+**Geändert**
+
+- **Accounts-Bereich als Master-Detail:** links die Account-Liste (durchsuchbar,
+  mit Filtern wie gehabt), rechts der gewählte Account mit seinen Charakteren
+  (Level, Medaillen, Schnellwahl) – übersichtlicher als das bisherige
+  Kachelraster.
+
+**Neu**
+
+- **Startseite überarbeitet:** oben ein Hero mit dem aktiven **Ziel als
+  Fortschrittsring** (Erreicht / Offen / Ziel / noch X Läufe) und Kacheln für
+  **Truhen & Läufe der Woche und des Monats**. Darunter die bisherigen,
+  umschaltbaren Abschnitte. Der Ziel-Abschnitt ist ab-/anwählbar.
+
 ## 1.74.0
 
 **Geändert**

@@ -2,8 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:M2Hub.Desktop.ViewModels"
              xmlns:loc="using:M2Hub.Desktop.Services"
+             xmlns:conv="using:M2Hub.Desktop.Services"
              x:Class="M2Hub.Desktop.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
+
+  <UserControl.Resources>
+    <conv:ArcConverter x:Key="Arc" />
+  </UserControl.Resources>
 
   <ScrollViewer>
     <StackPanel Margin="18" Spacing="14">
@@ -29,6 +34,78 @@
       <!-- Nichts gewaehlt oder zu allem nichts da -->
       <Border Classes="panel" Padding="18" IsVisible="{Binding Empty}">
         <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T start.empty}" />
+      </Border>
+
+      <!-- ===== Hero: aktives Ziel + Woche/Monat ===== -->
+      <Border Classes="card" Padding="18" IsVisible="{Binding ShowGoal}"
+              BorderBrush="{StaticResource PrimaryBrush}">
+        <StackPanel Spacing="16">
+
+          <!-- Aktives Ziel mit Fortschrittsring -->
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="20" IsVisible="{Binding Goal.HasActive}">
+            <Panel Grid.Column="0" Width="120" Height="120">
+              <Ellipse Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Stroke="{StaticResource SubtleBrush}" StrokeThickness="10" />
+              <Path Stroke="{StaticResource SuccessBrush}" StrokeThickness="10" StrokeLineCap="Round"
+                    Data="{Binding Goal.Progress, Converter={StaticResource Arc}}" />
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock FontSize="22" FontWeight="Bold" HorizontalAlignment="Center"
+                           Foreground="{StaticResource SuccessBrush}" Text="{Binding Goal.ProgressLabel}" />
+                <TextBlock Classes="muted" FontSize="10" HorizontalAlignment="Center" Text="{loc:T start.section.goal}" />
+              </StackPanel>
+            </Panel>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="muted" FontSize="11" Text="{loc:T start.goal.active}" />
+                <Button Grid.Column="1" Classes="rowlink" Content="{loc:T start.more}"
+                        Command="{Binding GoCommand}" CommandParameter="goals" />
+              </Grid>
+              <TextBlock Classes="h2" Text="{Binding Goal.Title}" TextWrapping="Wrap" />
+              <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="4" Margin="0,4,0,0">
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T start.goal.net}" />
+                  <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Text="{Binding Goal.NetLabel}" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T start.goal.rest}" />
+                  <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource AmberBrush}" Text="{Binding Goal.RestLabel}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T start.goal.target}" />
+                  <TextBlock FontSize="12" FontWeight="Bold" Text="{Binding Goal.TargetLabel}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T start.goal.runsLeft}" />
+                  <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Goal.RunsLeftLabel}" />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                     IsVisible="{Binding !Goal.HasActive}" Text="{loc:T start.goal.none}" />
+
+          <!-- Woche / Monat -->
+          <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+            <Border Grid.Column="0" Classes="panel" Padding="12">
+              <StackPanel><TextBlock Classes="muted" FontSize="10" Text="{loc:T start.week.chests}" />
+                <TextBlock Classes="statvalue" Text="{Binding WeekChests}" /></StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="panel" Padding="12">
+              <StackPanel><TextBlock Classes="muted" FontSize="10" Text="{loc:T start.week.runs}" />
+                <TextBlock Classes="statvalue" Text="{Binding WeekRuns}" /></StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="panel" Padding="12">
+              <StackPanel><TextBlock Classes="muted" FontSize="10" Text="{loc:T start.month.chests}" />
+                <TextBlock Classes="statvalue" Text="{Binding MonthChests}" /></StackPanel>
+            </Border>
+            <Border Grid.Column="3" Classes="panel" Padding="12">
+              <StackPanel><TextBlock Classes="muted" FontSize="10" Text="{loc:T start.month.runs}" />
+                <TextBlock Classes="statvalue" Text="{Binding MonthRuns}" /></StackPanel>
+            </Border>
+          </Grid>
+        </StackPanel>
       </Border>
 
       <!-- ===== Kennzahlen ===== -->

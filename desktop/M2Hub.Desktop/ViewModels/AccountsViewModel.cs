@@ -77,6 +77,17 @@ public sealed class AccountsViewModel : ViewModelBase
     /// Die Kacheln in der aktuellen Sortierung und Filterung.
     public ObservableCollection<AccountItemViewModel> Accounts { get; } = new();
 
+    private AccountItemViewModel? _selectedAccount;
+
+    /// Der in der Liste gewaehlte Account - rechts steht sein Detail.
+    public AccountItemViewModel? SelectedAccount
+    {
+        get => _selectedAccount;
+        set { if (Set(ref _selectedAccount, value)) Raise(nameof(HasSelection)); }
+    }
+
+    public bool HasSelection => _selectedAccount is not null;
+
     /// Alle Accounts, ungefiltert - die Startseite rechnet ueber den ganzen
     /// Bestand, nicht ueber das, was gerade eingeblendet ist.
     public IReadOnlyList<AccountItemViewModel> AllAccounts => _allAccounts;
@@ -542,6 +553,11 @@ public sealed class AccountsViewModel : ViewModelBase
 
         Accounts.Clear();
         foreach (var a in query) Accounts.Add(a);
+
+        // Auswahl halten: bleibt der gewaehlte Account sichtbar, bleibt er
+        // gewaehlt; sonst den ersten nehmen (oder nichts, wenn leer).
+        if (_selectedAccount is null || !Accounts.Contains(_selectedAccount))
+            SelectedAccount = Accounts.FirstOrDefault();
 
         RaiseTotals();
     }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Avalonia.Media.Imaging;
 using M2Hub.Desktop.Models;
 using M2Hub.Desktop.Services;
@@ -23,11 +24,13 @@ public sealed class DashboardViewModel : ViewModelBase
         LocalStore store,
         AccountsViewModel accounts,
         ObservableCollection<ActiveBadgeViewModel> activeNow,
-        Action<string> go)
+        Action<string> go,
+        GoalsViewModel goal)
     {
         _store = store;
         _accounts = accounts;
         ActiveNow = activeNow;
+        Goal = goal;
 
         GoCommand = new RelayCommand(p => { if (p is string key) go(key); });
         OverviewCommand = new RelayCommand(_ => Mode = DashboardSections.Overview);
@@ -85,6 +88,41 @@ public sealed class DashboardViewModel : ViewModelBase
 
     private bool Shows(string key) => Chosen.Contains(key);
 
+    /// Das aktive Ziel (Fortschrittsring) - die Rechnung liegt im GoalsViewModel.
+    public GoalsViewModel Goal { get; }
+
+    /// Hero oben: der Ziel-Abschnitt. Der Ring darin haengt an Goal.HasActive,
+    /// die Wochen-/Monatszahlen stehen immer.
+    public bool ShowGoal => Shows(DashboardSections.Goal);
+
+    /* ---------- Wochen-/Monatsstatistik ---------- */
+
+    public string WeekRuns { get; private set; } = "0";
+    public string WeekChests { get; private set; } = "0";
+    public string MonthRuns { get; private set; } = "0";
+    public string MonthChests { get; private set; } = "0";
+
+    private void BuildStats()
+    {
+        var today = DateTime.Today;
+        var monthPrefix = today.ToString("yyyy-MM");
+        var diff = ((int)today.DayOfWeek + 6) % 7;           // Montag = 0
+        var weekStart = today.AddDays(-diff);
+        var weekEnd = weekStart.AddDays(6);
+
+        int wR = 0, wC = 0, mR = 0, mC = 0;
+        foreach (var e in _store.Runs.Entries)
+        {
+            if (e.Day.StartsWith(monthPrefix, StringComparison.Ordinal)) { mR++; mC += e.Chests; }
+            if (DateTime.TryParseExact(e.Day, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var d) && d.Date >= weekStart && d.Date <= weekEnd)
+            { wR++; wC += e.Chests; }
+        }
+
+        WeekRuns = wR.ToString("N0"); WeekChests = wC.ToString("N0");
+        MonthRuns = mR.ToString("N0"); MonthChests = mC.ToString("N0");
+    }
+
     public bool ShowStats => Shows(DashboardSections.Stats);
     public bool ShowActive => Shows(DashboardSections.Active) && ActiveNow.Count > 0;
     public bool ShowCalendar => Shows(DashboardSections.Calendar) && HasCalendar;
@@ -95,7 +133,7 @@ public sealed class DashboardViewModel : ViewModelBase
 
     /// Ist nichts gewaehlt oder liegt zu allem nichts vor, sagt die Seite das -
     /// statt leer dazustehen.
-    public bool Empty => !ShowStats && !ShowActive && !ShowCalendar && !ShowRuns
+    public bool Empty => !ShowGoal && !ShowStats && !ShowActive && !ShowCalendar && !ShowRuns
                          && !ShowItemshop && !ShowMedals && !ShowBio;
 
     /* ---------- Kennzahlen ---------- */
@@ -145,10 +183,17 @@ public sealed class DashboardViewModel : ViewModelBase
 
     public void Reload()
     {
+        Goal.Reload();
+        BuildStats();
         BuildRuns();
         BuildCalendar();
         BuildEnding();
         BuildWork();
+
+        Raise(nameof(WeekRuns));
+        Raise(nameof(WeekChests));
+        Raise(nameof(MonthRuns));
+        Raise(nameof(MonthChests));
 
         Raise(nameof(TotalMedals));
         Raise(nameof(AverageMedals));
@@ -171,6 +216,7 @@ public sealed class DashboardViewModel : ViewModelBase
     /// melden, die Daten stehen schon.
     public void RaiseSections()
     {
+        Raise(nameof(ShowGoal));
         Raise(nameof(ShowStats));
         Raise(nameof(ShowActive));
         Raise(nameof(ShowCalendar));

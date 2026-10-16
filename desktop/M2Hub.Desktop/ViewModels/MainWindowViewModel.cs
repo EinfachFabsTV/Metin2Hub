@@ -46,7 +46,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RunTracker = new RunsViewModel(store, dialogs, Stream);
         Timers = new RunTimersViewModel(store, Stream, AfterTimerEntry);
         Goals = new GoalsHostViewModel(store, dialogs, Stream);
-        Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show);
+        Dashboard = new DashboardViewModel(store, Accounts, ActiveNow, Show, Goals.Goals);
         Settings = new SettingsViewModel(
             store, dialogs, _updates, Stream, RefreshActiveNow, ReloadPages, ReloadTimers,
             info => dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart)));

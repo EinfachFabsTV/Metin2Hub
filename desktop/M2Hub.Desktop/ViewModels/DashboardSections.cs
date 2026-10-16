@@ -8,6 +8,7 @@ namespace M2Hub.Desktop.ViewModels;
 /// zerlegen.
 public static class DashboardSections
 {
+    public const string Goal = "goal";
     public const string Stats = "stats";
     public const string Active = "active";
     public const string Calendar = "calendar";
@@ -23,13 +24,13 @@ public static class DashboardSections
     /// Alle Abschnitte in ihrer natuerlichen Reihenfolge - danach richtet sich
     /// die Liste in den Einstellungen.
     public static readonly string[] All =
-        [Stats, Active, Runs, Calendar, Itemshop, Medals, Bio];
+        [Goal, Stats, Active, Runs, Calendar, Itemshop, Medals, Bio];
 
     /// „Uebersicht" fasst nur zusammen, „Arbeitsflaeche" nimmt die Abschnitte
     /// dazu, in die man etwas eintraegt.
     public static string[] Default(string mode) => mode == Work
-        ? [Medals, Bio, Runs, Stats, Active, Calendar, Itemshop]
-        : [Stats, Active, Runs, Calendar, Itemshop];
+        ? [Goal, Medals, Bio, Runs, Stats, Active, Calendar, Itemshop]
+        : [Goal, Stats, Active, Runs, Calendar, Itemshop];
 
     /// Abschnitte, in denen etwas eingetragen wird. In der Uebersicht sind sie
     /// nicht voreingestellt, abwaehlbar bleiben sie ueberall.
