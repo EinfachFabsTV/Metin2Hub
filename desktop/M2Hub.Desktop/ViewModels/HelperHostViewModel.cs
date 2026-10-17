@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media.Imaging;
 using M2Hub.Desktop.Services;
+using M2Hub.Desktop.Services.Okey;
 
 namespace M2Hub.Desktop.ViewModels;
 
@@ -17,7 +19,10 @@ public sealed class HelperHostViewModel : ViewModelBase
         OpenCommand = new RelayCommand(p => Open(p as string));
         GoHomeCommand = new RelayCommand(_ => GoHome());
 
-        Tiles.Add(new HelperTile("okey", Loc.T("helper.okey.title"), Loc.T("helper.okey.desc")));
+        Tiles.Add(new HelperTile("okey", Loc.T("helper.okey.title"), Loc.T("helper.okey.desc"))
+        {
+            Icon = OkeyLoot.Icon,
+        });
     }
 
     public OkeyHelperViewModel Okey { get; }
@@ -64,4 +69,9 @@ public sealed class HelperTile(string key, string title, string desc) : ViewMode
     public string Key { get; } = key;
     public string Title { get => _title; set => Set(ref _title, value); }
     public string Desc { get => _desc; set => Set(ref _desc, value); }
+
+    /// Symbol der Kachel (z. B. das Okey-Buch); kann fehlen.
+    public Bitmap? Icon { get; init; }
+
+    public bool HasIcon => Icon is not null;
 }

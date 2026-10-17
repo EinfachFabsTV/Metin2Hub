@@ -37,7 +37,9 @@
                       Command="{Binding $parent[ItemsControl].DataContext.OpenCommand}"
                       CommandParameter="{Binding Key}">
                 <Border Classes="card">
-                  <StackPanel Spacing="6">
+                  <StackPanel Spacing="8">
+                    <Image Source="{Binding Icon}" IsVisible="{Binding HasIcon}"
+                           Width="44" Height="44" HorizontalAlignment="Left" />
                     <TextBlock Classes="h2" Text="{Binding Title}" />
                     <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding Desc}" />
                   </StackPanel>

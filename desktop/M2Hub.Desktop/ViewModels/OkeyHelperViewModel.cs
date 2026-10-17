@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using M2Hub.Desktop.Services;
 using M2Hub.Desktop.Services.Calc;
+using M2Hub.Desktop.Services.Okey;
 
 namespace M2Hub.Desktop.ViewModels;
 
@@ -34,7 +37,57 @@ public sealed class OkeyHelperViewModel : ViewModelBase
         _helpTimer.Tick += (_, _) => AdvanceExamples();
         AdvanceExamples();
 
+        ToggleLootCommand = new RelayCommand(_ => IsLootOpen = !IsLootOpen);
+        SelectSeasonCommand = new RelayCommand(p => { if (p is LootSeasonVM s) SelectSeason(s); });
+        SelectChestCommand = new RelayCommand(p => { if (p is LootChestVM c) SelectedChest = c; });
+        BuildLoot();
+
         Recompute();
+    }
+
+    /* ---------- Loot der Truhen ---------- */
+
+    public ObservableCollection<LootSeasonVM> LootSeasons { get; } = new();
+    public ObservableCollection<LootChestVM> SelectedChests { get; } = new();
+    public bool HasLoot => LootSeasons.Count > 0;
+
+    private bool _isLootOpen;
+    public bool IsLootOpen { get => _isLootOpen; set => Set(ref _isLootOpen, value); }
+
+    public RelayCommand ToggleLootCommand { get; }
+    public RelayCommand SelectSeasonCommand { get; }
+    public RelayCommand SelectChestCommand { get; }
+
+    private LootChestVM? _selectedChest;
+    /// Die aufgeklappte Truhe - ihre Items stehen in der rechten Sidebar.
+    public LootChestVM? SelectedChest
+    {
+        get => _selectedChest;
+        private set
+        {
+            if (!Set(ref _selectedChest, value)) return;
+            foreach (var season in LootSeasons)
+                foreach (var chest in season.Chests)
+                    chest.IsOpen = ReferenceEquals(chest, value);
+            Raise(nameof(HasSelectedChest));
+        }
+    }
+
+    public bool HasSelectedChest => _selectedChest is not null;
+
+    private void BuildLoot()
+    {
+        foreach (var s in OkeyLoot.Data.Seasons) LootSeasons.Add(new LootSeasonVM(s));
+        Raise(nameof(HasLoot));
+        if (LootSeasons.Count > 0) SelectSeason(LootSeasons[0]);
+    }
+
+    private void SelectSeason(LootSeasonVM season)
+    {
+        foreach (var s in LootSeasons) s.IsActive = ReferenceEquals(s, season);
+        SelectedChests.Clear();
+        foreach (var c in season.Chests) SelectedChests.Add(c);
+        SelectedChest = null;   // Sidebar leeren, bis eine Truhe gewaehlt wird
     }
 
     public ObservableCollection<OkeyCardVM> Palette { get; } = new();
@@ -93,7 +146,11 @@ public sealed class OkeyHelperViewModel : ViewModelBase
     /* ---------- Punkte / Truhe ---------- */
 
     private int _points;
-    public int Points { get => _points; private set { if (Set(ref _points, value)) { Raise(nameof(PointsText)); Raise(nameof(ChestText)); Raise(nameof(ChestBrush)); } } }
+    public int Points { get => _points; private set { if (Set(ref _points, value)) { Raise(nameof(PointsText)); Raise(nameof(ChestText)); Raise(nameof(ChestBrush)); Raise(nameof(ChestImage)); } } }
+
+    /// Truhen-Icon zum aktuellen Punktestand (Bronze/Silber/Gold).
+    public Bitmap? ChestImage =>
+        OkeyLoot.ChestIconForTier(_points >= OkeyCalc.Gold ? 2 : _points >= OkeyCalc.Silver ? 1 : 0);
 
     public string PointsText => Loc.T("okey.points", _points);
 
@@ -361,4 +418,73 @@ public sealed class OkeyExample : ViewModelBase
         Cards[1].Number = n2; Cards[1].Color = c2;
         Cards[2].Number = n3; Cards[2].Color = c3;
     }
+}
+
+/// Eine Saison (Sommer/Winter) in der Loot-Ansicht.
+public sealed class LootSeasonVM : ViewModelBase
+{
+    private bool _active;
+
+    public LootSeasonVM(LootSeason data)
+    {
+        Key = data.Key;
+        Name = data.Name;
+        Chests = data.Chests.OrderBy(c => c.Tier).Select(c => new LootChestVM(c)).ToList();
+    }
+
+    public string Key { get; }
+    public string Name { get; }
+    public IReadOnlyList<LootChestVM> Chests { get; }
+
+    public bool IsActive { get => _active; set => Set(ref _active, value); }
+}
+
+/// Eine Truhe mit ihrem Loot.
+public sealed class LootChestVM : ViewModelBase
+{
+    private static readonly IBrush[] TierBrushes =
+    [
+        new SolidColorBrush(Avalonia.Media.Color.Parse("#b06a3a")), // Bronze
+        new SolidColorBrush(Avalonia.Media.Color.Parse("#c7ccd6")), // Silber
+        new SolidColorBrush(Avalonia.Media.Color.Parse("#e0a92e")), // Gold
+    ];
+
+    private bool _open;
+
+    public LootChestVM(LootChest data)
+    {
+        Name = data.Name;
+        Tier = data.Tier;
+        Icon = OkeyLoot.ChestIcon(data.Key);
+        // Nach Seltenheit: kleinste Wahrscheinlichkeit zuerst (bestes/rarstes Item oben).
+        Items = data.Items.Select(i => new LootItemVM(i)).OrderBy(i => i.ChanceValue).ToList();
+    }
+
+    public string Name { get; }
+    public int Tier { get; }
+    public Bitmap? Icon { get; }
+    public IBrush TierBrush => TierBrushes[Math.Clamp(Tier, 0, 2)];
+    public IReadOnlyList<LootItemVM> Items { get; }
+
+    /// Ob diese Truhe gerade aufgeklappt ist (Sidebar zeigt ihre Items).
+    public bool IsOpen { get => _open; set => Set(ref _open, value); }
+}
+
+/// Ein Loot-Item mit Bild und Wahrscheinlichkeit.
+public sealed class LootItemVM
+{
+    public LootItemVM(LootItemData data)
+    {
+        Name = data.Name;
+        Chance = data.Chance;
+        Image = OkeyLoot.Image(data.File);
+
+        var t = (data.Chance ?? "").Replace("%", "").Replace(",", ".").Trim();
+        ChanceValue = double.TryParse(t, NumberStyles.Any, CultureInfo.InvariantCulture, out var v) ? v : 999;
+    }
+
+    public string Name { get; }
+    public string Chance { get; }
+    public double ChanceValue { get; }
+    public Bitmap? Image { get; }
 }

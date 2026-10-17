@@ -64,6 +64,18 @@
       <Setter Property="FontSize" Value="22" />
       <Setter Property="FontWeight" Value="Bold" />
     </Style>
+    <Style Selector="Button.chestrow">
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.chestrow.open">
+      <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+      <Setter Property="Background" Value="#16233c" />
+    </Style>
   </UserControl.Styles>
 
   <ScrollViewer>
@@ -79,10 +91,14 @@
           <StackPanel Spacing="6">
             <TextBlock Classes="muted" FontSize="12" HorizontalAlignment="Right" Text="{loc:T okey.pointsLabel}" />
             <TextBlock Classes="stat" HorizontalAlignment="Right" Text="{Binding PointsText}" />
-            <Border CornerRadius="7" Padding="10,3" HorizontalAlignment="Right" Background="{Binding ChestBrush}">
-              <TextBlock FontWeight="Bold" Foreground="#0b0614" Text="{Binding ChestText}" />
-            </Border>
             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+              <Image Source="{Binding ChestImage}" Width="26" Height="26" VerticalAlignment="Center" />
+              <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                         Foreground="{Binding ChestBrush}" Text="{Binding ChestText}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+              <Button Classes="chip" Background="#e0a92e" Foreground="#0b0614" FontWeight="Bold"
+                      IsVisible="{Binding HasLoot}" Content="{loc:T okey.loot}" Command="{Binding ToggleLootCommand}" />
               <Button Classes="chip" Content="{loc:T okey.help}" Command="{Binding ToggleHelpCommand}" />
               <Button Classes="chip" Content="{loc:T okey.newSet}" Command="{Binding NewSetCommand}" />
             </StackPanel>
@@ -150,6 +166,75 @@
                          Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowMixed.PointsText}" />
             </Grid>
           </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- Loot der Truhen -->
+      <Border Classes="card" IsVisible="{Binding IsLootOpen}">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Text="{loc:T okey.lootTitle}" />
+          <ItemsControl ItemsSource="{Binding LootSeasons}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:LootSeasonVM">
+                <Button Classes="chip" Classes.active="{Binding IsActive}" Margin="0,0,6,0"
+                        Content="{Binding Name}"
+                        Command="{Binding $parent[ItemsControl].DataContext.SelectSeasonCommand}"
+                        CommandParameter="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Grid ColumnDefinitions="*,300">
+            <!-- Truhen waehlen -->
+            <ItemsControl Grid.Column="0" ItemsSource="{Binding SelectedChests}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:LootChestVM">
+                  <Button Classes="chestrow" Classes.open="{Binding IsOpen}"
+                          Command="{Binding $parent[ItemsControl].DataContext.SelectChestCommand}"
+                          CommandParameter="{Binding}">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <Image Grid.Column="0" Source="{Binding Icon}" Width="34" Height="34" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" Margin="10,0" VerticalAlignment="Center" FontWeight="Bold"
+                                 Foreground="{Binding TierBrush}" Text="{Binding Name}" />
+                      <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="16"
+                                 Foreground="{StaticResource MutedBrush}" Text="▸" />
+                    </Grid>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Sidebar: Loot der gewaehlten Truhe -->
+            <Border Grid.Column="1" Classes="card" Margin="12,0,0,0" VerticalAlignment="Top"
+                    IsVisible="{Binding HasSelectedChest}">
+              <StackPanel Spacing="8" DataContext="{Binding SelectedChest}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Image Source="{Binding Icon}" Width="28" Height="28" />
+                  <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontSize="15"
+                             Foreground="{Binding TierBrush}" Text="{Binding Name}" />
+                </StackPanel>
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{loc:T okey.lootRare}" />
+                <ItemsControl ItemsSource="{Binding Items}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:LootItemVM">
+                      <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3">
+                        <Image Grid.Column="0" Source="{Binding Image}" Width="28" Height="28" />
+                        <TextBlock Grid.Column="1" Margin="8,0" VerticalAlignment="Center" FontSize="12.5"
+                                   TextWrapping="Wrap" Text="{Binding Name}" />
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
+                                   Foreground="{StaticResource AmberBrush}" Text="{Binding Chance}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+            <TextBlock Grid.Column="1" Classes="muted" Margin="12,8,0,0" VerticalAlignment="Top"
+                       TextWrapping="Wrap" IsVisible="{Binding !HasSelectedChest}" Text="{loc:T okey.lootPick}" />
+          </Grid>
         </StackPanel>
       </Border>
 

@@ -7,6 +7,17 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.78.0
+
+**Neu**
+
+- **Okey-Helfer: Truhen-Loot:** Ein neuer goldener Knopf **„Loot"** listet die
+  Truhen (Bronze/Silber/Gold, Sommer- und Winter-Version). Klickst du eine
+  Truhe an, erscheint rechts eine Sidebar mit ihren Items und der
+  **Drop-Wahrscheinlichkeit**, sortiert nach Seltenheit (kleinste % oben).
+- **Truhen-Icons**: oben rechts zeigt der Helfer die zum Punktestand passende
+  Truhe als Bild; das **Okey-Symbol** ziert die Helper-Kachel.
+
 ## 1.77.0
 
 **Neu**
