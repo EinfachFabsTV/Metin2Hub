@@ -135,6 +135,8 @@
                     Command="{Binding ShowCostumesCommand}" Content="{loc:T nav.costumes}" />
             <Button Classes="side" Classes.active="{Binding IsLootFilter}"
                     Command="{Binding ShowLootFilterCommand}" Content="{loc:T nav.lootfilter}" />
+            <Button Classes="side" Classes.active="{Binding IsHelper}"
+                    Command="{Binding ShowHelperCommand}" Content="{loc:T nav.helper}" />
             <Button Classes="side" Classes.active="{Binding IsCalc}"
                     Command="{Binding ShowCalcCommand}" Content="{loc:T nav.calc}" />
           </StackPanel>

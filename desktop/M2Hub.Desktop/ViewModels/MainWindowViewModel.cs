@@ -42,6 +42,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Itemshop = new ItemshopViewModel(store, forum, images);
         Costumes = new CostumesHostViewModel();
         LootFilter = new LootFilterHostViewModel(store);
+        Helper = new HelperHostViewModel();
         Stream = new StreamOverlay(store);
         Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
@@ -58,6 +59,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
         ShowCostumesCommand = new RelayCommand(_ => Show("costumes"));
         ShowLootFilterCommand = new RelayCommand(_ => Show("lootfilter"));
+        ShowHelperCommand = new RelayCommand(_ => Show("helper"));
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
@@ -74,6 +76,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Calc.RelabelAfterLanguageChange();
             Costumes.RelabelAfterLanguageChange();
             LootFilter.RelabelAfterLanguageChange();
+            Helper.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Timers.RelabelAfterLanguageChange();
@@ -103,6 +106,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     /// Loot-Filter: Nachschlagen (Item -> Kategorie) + interaktiver Editor.
     public LootFilterHostViewModel LootFilter { get; }
+
+    /// Helper-Bereich: Startseite mit Helfer-Kacheln (aktuell der Okey-Helfer).
+    public HelperHostViewModel Helper { get; }
 
     /// Der Rechner-Bereich (Gilde, Pet, Biologen) rechnet nur - er braucht
     /// weder Ablage noch Abruf.
@@ -135,6 +141,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsItemshop));
             Raise(nameof(IsCostumes));
             Raise(nameof(IsLootFilter));
+            Raise(nameof(IsHelper));
             Raise(nameof(IsRuns));
             Raise(nameof(IsCalc));
             Raise(nameof(IsGoals));
@@ -148,6 +155,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsItemshop => _currentKey == "itemshop";
     public bool IsCostumes => _currentKey == "costumes";
     public bool IsLootFilter => _currentKey == "lootfilter";
+    public bool IsHelper => _currentKey == "helper";
     public bool IsRuns => _currentKey == "runs";
     public bool IsCalc => _currentKey == "calc";
     public bool IsGoals => _currentKey == "goals";
@@ -203,6 +211,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand ShowItemshopCommand { get; }
     public RelayCommand ShowCostumesCommand { get; }
     public RelayCommand ShowLootFilterCommand { get; }
+    public RelayCommand ShowHelperCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
     public AsyncRelayCommand RefreshCommand { get; }
 
@@ -306,7 +315,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "costumes", "lootfilter", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "costumes", "lootfilter", "helper", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -368,6 +377,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             "itemshop" => Itemshop,
             "costumes" => Costumes,
             "lootfilter" => LootFilter,
+            "helper" => Helper,
             "calc" => Calc,
             "settings" => Settings,
             _ => Events,

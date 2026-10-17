@@ -1,0 +1,241 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.OkeyHelperView"
+             x:DataType="vm:OkeyHelperViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Button.cardbtn">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Margin" Value="3" />
+    </Style>
+    <Style Selector="Border.cardtile">
+      <Setter Property="Width" Value="42" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="BorderBrush" Value="#20000000" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.cardtile.big">
+      <Setter Property="Width" Value="50" />
+      <Setter Property="Height" Value="66" />
+    </Style>
+    <!-- Marker als kontrastierender Aussenrahmen (sichtbar auf jeder Kartenfarbe). -->
+    <Style Selector="Border.ring">
+      <Setter Property="Padding" Value="3" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.ring.take">
+      <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+    </Style>
+    <Style Selector="Border.ring.toss">
+      <Setter Property="Background" Value="{StaticResource DangerBrush}" />
+    </Style>
+    <Style Selector="Border.ring.inhand">
+      <Setter Property="Background" Value="White" />
+    </Style>
+    <Style Selector="Border.ring.used">
+      <Setter Property="Opacity" Value="0.16" />
+    </Style>
+    <Style Selector="Border.cardtile TextBlock">
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.excard">
+      <Setter Property="Width" Value="34" />
+      <Setter Property="Height" Value="46" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+      <Setter Property="BorderBrush" Value="#20000000" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.excard TextBlock">
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.stat">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <!-- Kopf: Titel links, Punkte/Truhe rechts -->
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="h1" Text="{loc:T okey.title}" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T okey.subtitle}" />
+        </StackPanel>
+        <Border Grid.Column="1" Classes="card" Padding="14,10" VerticalAlignment="Top">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" FontSize="12" HorizontalAlignment="Right" Text="{loc:T okey.pointsLabel}" />
+            <TextBlock Classes="stat" HorizontalAlignment="Right" Text="{Binding PointsText}" />
+            <Border CornerRadius="7" Padding="10,3" HorizontalAlignment="Right" Background="{Binding ChestBrush}">
+              <TextBlock FontWeight="Bold" Foreground="#0b0614" Text="{Binding ChestText}" />
+            </Border>
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+              <Button Classes="chip" Content="{loc:T okey.help}" Command="{Binding ToggleHelpCommand}" />
+              <Button Classes="chip" Content="{loc:T okey.newSet}" Command="{Binding NewSetCommand}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- Hilfe: Event-Erklaerung + animierte Beispielkombos -->
+      <Border Classes="card" IsVisible="{Binding IsHelpOpen}">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Text="{loc:T okey.helpTitle}" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.helpIntro}" />
+          <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.helpExamples}" />
+
+          <Border Classes="combo">
+            <Grid ColumnDefinitions="190,*,Auto">
+              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindSet}" />
+              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleSet.Cards}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:OkeyExampleCard">
+                    <Border Classes="excard" Background="{Binding Fill}">
+                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
+                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleSet.PointsText}" />
+            </Grid>
+          </Border>
+
+          <Border Classes="combo">
+            <Grid ColumnDefinitions="190,*,Auto">
+              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowSame}" />
+              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowSame.Cards}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:OkeyExampleCard">
+                    <Border Classes="excard" Background="{Binding Fill}">
+                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
+                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowSame.PointsText}" />
+            </Grid>
+          </Border>
+
+          <Border Classes="combo">
+            <Grid ColumnDefinitions="190,*,Auto">
+              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowMixed}" />
+              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowMixed.Cards}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:OkeyExampleCard">
+                    <Border Classes="excard" Background="{Binding Fill}">
+                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
+                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowMixed.PointsText}" />
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- Hand + Rat -->
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding HandCountText}" />
+          <ItemsControl ItemsSource="{Binding Hand}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:OkeyCardVM">
+                <Button Classes="cardbtn" Command="{Binding $parent[ItemsControl].DataContext.ClickHandCommand}"
+                        CommandParameter="{Binding}">
+                  <Border Classes="ring" Classes.take="{Binding IsTake}" Classes.toss="{Binding IsToss}">
+                    <Border Classes="cardtile big" Background="{Binding Fill}">
+                      <TextBlock FontSize="26" Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                    </Border>
+                  </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding AdviceText}" />
+
+          <Border IsVisible="{Binding OnlyBronze}" CornerRadius="8" Padding="12,8"
+                  Background="#241a0e" BorderBrush="{StaticResource AmberBrush}" BorderThickness="1">
+            <TextBlock Foreground="{StaticResource AmberBrush}" FontWeight="SemiBold"
+                       TextWrapping="Wrap" Text="{Binding EndHintText}" />
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- Live-Planer -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T okey.planTitle}" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.planHint}" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding OrientationText}" />
+          <Grid ColumnDefinitions="*,*,*,*" Margin="0,4,0,0">
+            <StackPanel Grid.Column="0" Spacing="2">
+              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.gold}" />
+              <TextBlock Classes="stat" Foreground="{StaticResource AmberBrush}" Text="{Binding GoldText}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="2">
+              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.silver}" />
+              <TextBlock Classes="stat" Text="{Binding SilverText}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="2">
+              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.bronze}" />
+              <TextBlock Classes="stat" Foreground="{StaticResource MutedBrush}" Text="{Binding BronzeText}" />
+            </StackPanel>
+            <StackPanel Grid.Column="3" Spacing="2">
+              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.mean}" />
+              <TextBlock Classes="stat" Foreground="{StaticResource PrimaryBrush}" Text="{Binding MeanText}" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Palette -->
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.palette}" />
+          <ItemsControl ItemsSource="{Binding Palette}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><UniformGrid Columns="8" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:OkeyCardVM">
+                <Button Classes="cardbtn" IsEnabled="{Binding !Used}"
+                        Command="{Binding $parent[ItemsControl].DataContext.ClickPaletteCommand}"
+                        CommandParameter="{Binding}">
+                  <Border Classes="ring" Classes.inhand="{Binding InHand}" Classes.used="{Binding Used}">
+                    <Border Classes="cardtile" Background="{Binding Fill}">
+                      <TextBlock FontSize="22" Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                    </Border>
+                  </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -7,6 +7,30 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.77.0
+
+**Neu**
+
+- **Helper-Bereich mit Okey-Helfer:** Neuer Sidebar-Eintrag „Helper" mit einer
+  Startseite für kleine Event-Helfer. Erster Helfer ist der **Okey-Helfer**: Du
+  setzt deine 5 offenen Karten wie im Spiel, der Helfer **markiert die beste
+  Kombo grün** (werten) bzw. die wegzuwerfende Karte **rot** – berechnet aus den
+  noch möglichen Punkten mit dem Restdeck, du musst nicht selbst entscheiden. Ein
+  Klick wertet die Kombo oder wirft die Karte weg, **Punkte und Truhe** laufen
+  oben rechts mit, und die **Chance auf Gold/Silber** rechnet sich **live** ab
+  deinem aktuellen Stand. Ein **Hilfe-Knopf** erklärt das Event kompakt und zeigt
+  die Punkte je Kombo an durchwechselnden Beispielkarten. Ist Silber/Gold nicht
+  mehr erreichbar, weist der Helfer darauf hin, dass man beenden kann.
+- **Neue Kostüm-Sets:** Der Katalog wurde um weitere Sets ergänzt (u. a. der
+  Push-Ring „Nezeraths Kopf").
+
+**Geändert**
+
+- **Loot-Filter aufgeräumt:** Das **Filter-Fenster** ist vorerst als „bald"
+  gekennzeichnet (wird noch gebaut). Außerdem zeigt der Loot-Filter zunächst
+  alle Bereiche außer **Waffe, Rüstung, Helm und Sonstige Ausrüstung** – die
+  kommen später dazu.
+
 ## 1.76.1
 
 **Behoben**

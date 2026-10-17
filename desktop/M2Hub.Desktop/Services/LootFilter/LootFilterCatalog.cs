@@ -29,6 +29,9 @@ public static class LootFilterCatalog
         {
             using var stream = AssetLoader.Open(new Uri("avares://M2Hub/Assets/LootFilter/lootfilter.json"));
             var cats = JsonSerializer.Deserialize<LootFile>(stream, Opts)?.Categories ?? [];
+            // Vorerst ausgeblendet (noch nicht bereit): Waffe, Ruestung, Helm,
+            // Sonstige Ausruestung. Zum Freischalten einfach aus Hidden nehmen.
+            cats = cats.Where(c => !Hidden.Contains(c.Key)).ToList();
             return Order(cats);
         }
         catch
@@ -40,6 +43,12 @@ public static class LootFilterCatalog
     // Reihenfolge wie im Beuteoptionen-Fenster des Spiels (die Ordner kommen
     // alphabetisch, im Spiel stehen sie anders). Unbekannte - z. B. spaeter
     // ergaenzte - haengen hinten an, damit nichts verschwindet.
+    /// Vorerst nicht angezeigte Oberkategorien.
+    private static readonly HashSet<string> Hidden = new(StringComparer.Ordinal)
+    {
+        "waffen", "ruestungen", "helm", "sonstige-ausruestung",
+    };
+
     private static readonly string[] TopOrder =
     [
         "waffen", "ruestungen", "helm", "sonstige-ausruestung", "kostuem",

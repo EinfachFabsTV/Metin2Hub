@@ -18,7 +18,8 @@ public sealed class LootFilterHostViewModel : ViewModelBase
         Lookup = new LootFilterLookupViewModel(store, Editor.Rebuild);
 
         Pages.Add(new RunChip("lookup", Loc.T("lootfilter.tabLookup")));
-        Pages.Add(new RunChip("editor", Loc.T("lootfilter.tabEditor")));
+        // Das Filter-Fenster ist noch in Arbeit - sichtbar, aber ausgegraut.
+        Pages.Add(new RunChip("editor", Loc.T("lootfilter.tabEditorSoon")) { Enabled = false });
         _chosen = Pages[0];
         _chosen.IsActive = true;
 
@@ -48,7 +49,7 @@ public sealed class LootFilterHostViewModel : ViewModelBase
     public void RelabelAfterLanguageChange()
     {
         Pages[0].Label = Loc.T("lootfilter.tabLookup");
-        Pages[1].Label = Loc.T("lootfilter.tabEditor");
+        Pages[1].Label = Loc.T("lootfilter.tabEditorSoon");
         Lookup.RelabelAfterLanguageChange();
         Editor.RelabelAfterLanguageChange();
     }

@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.HelperHostView"
+             x:DataType="vm:HelperHostViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Button.tile">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Margin" Value="0,0,12,12" />
+    </Style>
+    <Style Selector="Button.tile:pointerover Border.card">
+      <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid>
+    <!-- Startseite -->
+    <ScrollViewer IsVisible="{Binding ShowStart}">
+      <StackPanel Margin="18" Spacing="14">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="h1" Text="{loc:T helper.title}" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T helper.subtitle}" />
+        </StackPanel>
+
+        <ItemsControl ItemsSource="{Binding Tiles}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:HelperTile">
+              <Button Classes="tile" Width="260"
+                      Command="{Binding $parent[ItemsControl].DataContext.OpenCommand}"
+                      CommandParameter="{Binding Key}">
+                <Border Classes="card">
+                  <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="{Binding Title}" />
+                    <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding Desc}" />
+                  </StackPanel>
+                </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Offener Helfer -->
+    <Grid IsVisible="{Binding !ShowStart}" RowDefinitions="Auto,*">
+      <Button Grid.Row="0" Classes="chip" Margin="18,14,0,0" HorizontalAlignment="Left"
+              Content="{loc:T helper.back}" Command="{Binding GoHomeCommand}" />
+      <ContentControl Grid.Row="1" Content="{Binding Current}" />
+    </Grid>
+  </Grid>
+</UserControl>
