@@ -7,6 +7,24 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.0
+
+**Neu**
+
+- **Auto-Res (neuer Helfer):** Setzt die Auflösung (`WIDTH`/`HEIGHT`) in der
+  `metin2.cfg` deines Clients per **Preset** (z. B. „Meley Res", „Hydra Res",
+  „Single Client"). Du wählst die Ziel-`metin2.cfg` einmal aus; beim Anlegen
+  eines Presets wird die komplette Config als Vorlage gespeichert, und „Setzen"
+  schreibt sie – nur mit geänderter Auflösung – zurück. Den Client startest du
+  selbst; er übernimmt die Auflösung beim nächsten Start.
+
+**Geändert**
+
+- **Okey-Helfer aufgeräumt:** Der Truhen-Loot sitzt jetzt als schmale Spalte
+  **rechts**, der Helfer selbst links. Der **Hilfe-Knopf** öffnet ein **Popup**
+  (schließt beim Klick daneben) statt eines festen Abschnitts. Truhen-Icons
+  oben rechts.
+
 ## 1.78.1
 
 **Behoben**

@@ -25,6 +25,7 @@
     <DataTemplate DataType="vm:BioCalcViewModel"><views:BioCalcView /></DataTemplate>
     <DataTemplate DataType="vm:HelperHostViewModel"><views:HelperHostView /></DataTemplate>
     <DataTemplate DataType="vm:OkeyHelperViewModel"><views:OkeyHelperView /></DataTemplate>
+    <DataTemplate DataType="vm:AutoResViewModel"><views:AutoResView /></DataTemplate>
     <DataTemplate DataType="vm:DebtCalcViewModel"><views:DebtCalcView /></DataTemplate>
     <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>

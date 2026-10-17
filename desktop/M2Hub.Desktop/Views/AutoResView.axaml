@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.AutoResView"
+             x:DataType="vm:AutoResViewModel">
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14" MaxWidth="760" HorizontalAlignment="Left">
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T autores.title}" />
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T autores.subtitle}" />
+      </StackPanel>
+
+      <!-- Ziel-Config -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T autores.configTitle}" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T autores.configHint}" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox Grid.Column="0" Watermark="…/metin2/tr-TR/metin2.cfg" Text="{Binding ConfigPath}" />
+            <Button Grid.Column="1" Classes="primary" Margin="8,0,0,0" Content="{loc:T autores.browse}" Click="OnBrowse" />
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Classes="muted" Text="{loc:T autores.current}" />
+            <TextBlock FontWeight="SemiBold" Text="{Binding CurrentResText}" />
+          </StackPanel>
+          <TextBlock Classes="muted" FontSize="12" IsVisible="{Binding HasStatus}" Text="{Binding Status}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Neues Preset -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{loc:T autores.newTitle}" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T autores.newHint}" />
+          <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+            <TextBox Grid.Column="0" Watermark="{loc:T autores.namePlaceholder}" Text="{Binding NewName}" />
+            <NumericUpDown Grid.Column="1" Width="110" Minimum="100" Maximum="10000" Increment="1"
+                           FormatString="0" Value="{Binding NewWidth}" />
+            <NumericUpDown Grid.Column="2" Width="110" Minimum="100" Maximum="10000" Increment="1"
+                           FormatString="0" Value="{Binding NewHeight}" />
+            <Button Grid.Column="3" Classes="primary" Content="{loc:T autores.add}"
+                    Command="{Binding AddCommand}" IsEnabled="{Binding HasConfig}" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Presets -->
+      <ItemsControl ItemsSource="{Binding Presets}">
+        <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:ResPresetVM">
+            <Border Classes="card" Padding="14,10">
+              <Grid ColumnDefinitions="*,Auto,Auto">
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                  <TextBlock FontWeight="Bold" Text="{Binding Name}" />
+                  <TextBlock Classes="muted" FontSize="12" Text="{Binding ResText}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="primary" Margin="0,0,8,0" Content="{loc:T autores.play}"
+                        Command="{Binding PlayCommand}" />
+                <Button Grid.Column="2" Classes="danger" Content="{loc:T autores.delete}"
+                        Command="{Binding DeleteCommand}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

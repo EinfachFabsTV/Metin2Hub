@@ -23,24 +23,15 @@
       <Setter Property="Width" Value="50" />
       <Setter Property="Height" Value="66" />
     </Style>
-    <!-- Marker als kontrastierender Aussenrahmen (sichtbar auf jeder Kartenfarbe). -->
     <Style Selector="Border.ring">
       <Setter Property="Padding" Value="3" />
       <Setter Property="CornerRadius" Value="10" />
       <Setter Property="Background" Value="Transparent" />
     </Style>
-    <Style Selector="Border.ring.take">
-      <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
-    </Style>
-    <Style Selector="Border.ring.toss">
-      <Setter Property="Background" Value="{StaticResource DangerBrush}" />
-    </Style>
-    <Style Selector="Border.ring.inhand">
-      <Setter Property="Background" Value="White" />
-    </Style>
-    <Style Selector="Border.ring.used">
-      <Setter Property="Opacity" Value="0.16" />
-    </Style>
+    <Style Selector="Border.ring.take"><Setter Property="Background" Value="{StaticResource SuccessBrush}" /></Style>
+    <Style Selector="Border.ring.toss"><Setter Property="Background" Value="{StaticResource DangerBrush}" /></Style>
+    <Style Selector="Border.ring.inhand"><Setter Property="Background" Value="White" /></Style>
+    <Style Selector="Border.ring.used"><Setter Property="Opacity" Value="0.16" /></Style>
     <Style Selector="Border.cardtile TextBlock">
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="HorizontalAlignment" Value="Center" />
@@ -64,9 +55,16 @@
       <Setter Property="FontSize" Value="22" />
       <Setter Property="FontWeight" Value="Bold" />
     </Style>
+    <Style Selector="Border.combo">
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
     <Style Selector="Button.chestrow">
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="Padding" Value="10,8" />
       <Setter Property="CornerRadius" Value="10" />
       <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
@@ -79,9 +77,9 @@
   </UserControl.Styles>
 
   <ScrollViewer>
-    <StackPanel Margin="18" Spacing="14" MaxWidth="980" HorizontalAlignment="Left">
+    <StackPanel Margin="18" Spacing="14" MaxWidth="1120" HorizontalAlignment="Left">
 
-      <!-- Kopf: Titel links, Punkte/Truhe rechts -->
+      <!-- Kopf -->
       <Grid ColumnDefinitions="*,Auto">
         <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
           <TextBlock Classes="h1" Text="{loc:T okey.title}" />
@@ -93,233 +91,201 @@
             <TextBlock Classes="stat" HorizontalAlignment="Right" Text="{Binding PointsText}" />
             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
               <Image Source="{Binding ChestImage}" Width="26" Height="26" VerticalAlignment="Center" />
-              <TextBlock VerticalAlignment="Center" FontWeight="Bold"
-                         Foreground="{Binding ChestBrush}" Text="{Binding ChestText}" />
+              <TextBlock VerticalAlignment="Center" FontWeight="Bold" Foreground="{Binding ChestBrush}" Text="{Binding ChestText}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
               <Button Classes="chip" Background="#e0a92e" Foreground="#0b0614" FontWeight="Bold"
                       IsVisible="{Binding HasLoot}" Content="{loc:T okey.loot}" Command="{Binding ToggleLootCommand}" />
-              <Button Classes="chip" Content="{loc:T okey.help}" Command="{Binding ToggleHelpCommand}" />
+              <Button Classes="chip" Content="{loc:T okey.help}">
+                <Button.Flyout>
+                  <Flyout Placement="Bottom">
+                    <StackPanel Width="520" Spacing="12">
+                      <TextBlock Classes="h2" Text="{loc:T okey.helpTitle}" />
+                      <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.helpIntro}" />
+                      <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.helpExamples}" />
+                      <Border Classes="combo">
+                        <Grid ColumnDefinitions="180,*,Auto">
+                          <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindSet}" />
+                          <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleSet.Cards}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate DataType="vm:OkeyExampleCard">
+                                <Border Classes="excard" Background="{Binding Fill}"><TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" /></Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleSet.PointsText}" />
+                        </Grid>
+                      </Border>
+                      <Border Classes="combo">
+                        <Grid ColumnDefinitions="180,*,Auto">
+                          <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowSame}" />
+                          <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowSame.Cards}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate DataType="vm:OkeyExampleCard">
+                                <Border Classes="excard" Background="{Binding Fill}"><TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" /></Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowSame.PointsText}" />
+                        </Grid>
+                      </Border>
+                      <Border Classes="combo">
+                        <Grid ColumnDefinitions="180,*,Auto">
+                          <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowMixed}" />
+                          <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowMixed.Cards}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate DataType="vm:OkeyExampleCard">
+                                <Border Classes="excard" Background="{Binding Fill}"><TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" /></Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowMixed.PointsText}" />
+                        </Grid>
+                      </Border>
+                    </StackPanel>
+                  </Flyout>
+                </Button.Flyout>
+              </Button>
               <Button Classes="chip" Content="{loc:T okey.newSet}" Command="{Binding NewSetCommand}" />
             </StackPanel>
           </StackPanel>
         </Border>
       </Grid>
 
-      <!-- Hilfe: Event-Erklaerung + animierte Beispielkombos -->
-      <Border Classes="card" IsVisible="{Binding IsHelpOpen}">
-        <StackPanel Spacing="12">
-          <TextBlock Classes="h2" Text="{loc:T okey.helpTitle}" />
-          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.helpIntro}" />
-          <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.helpExamples}" />
+      <!-- Links der Helfer, rechts (schmaler) der Truhen-Loot -->
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Spacing="14">
 
-          <Border Classes="combo">
-            <Grid ColumnDefinitions="190,*,Auto">
-              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindSet}" />
-              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleSet.Cards}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <!-- Hand + Rat -->
+          <Border Classes="card">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="muted" FontSize="12" Text="{Binding HandCountText}" />
+              <ItemsControl ItemsSource="{Binding Hand}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate DataType="vm:OkeyExampleCard">
-                    <Border Classes="excard" Background="{Binding Fill}">
-                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
-                    </Border>
+                  <DataTemplate DataType="vm:OkeyCardVM">
+                    <Button Classes="cardbtn" Command="{Binding $parent[ItemsControl].DataContext.ClickHandCommand}" CommandParameter="{Binding}">
+                      <Border Classes="ring" Classes.take="{Binding IsTake}" Classes.toss="{Binding IsToss}">
+                        <Border Classes="cardtile big" Background="{Binding Fill}">
+                          <TextBlock FontSize="26" Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                        </Border>
+                      </Border>
+                    </Button>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
-                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleSet.PointsText}" />
-            </Grid>
+              <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding AdviceText}" />
+              <Border IsVisible="{Binding OnlyBronze}" CornerRadius="8" Padding="12,8"
+                      Background="#241a0e" BorderBrush="{StaticResource AmberBrush}" BorderThickness="1">
+                <TextBlock Foreground="{StaticResource AmberBrush}" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding EndHintText}" />
+              </Border>
+            </StackPanel>
           </Border>
 
-          <Border Classes="combo">
-            <Grid ColumnDefinitions="190,*,Auto">
-              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowSame}" />
-              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowSame.Cards}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <!-- Live-Planer -->
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T okey.planTitle}" />
+              <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.planHint}" />
+              <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding OrientationText}" />
+              <Grid ColumnDefinitions="*,*,*,*" Margin="0,4,0,0">
+                <StackPanel Grid.Column="0" Spacing="2">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.gold}" />
+                  <TextBlock Classes="stat" Foreground="{StaticResource AmberBrush}" Text="{Binding GoldText}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="2">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.silver}" />
+                  <TextBlock Classes="stat" Text="{Binding SilverText}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="2">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.bronze}" />
+                  <TextBlock Classes="stat" Foreground="{StaticResource MutedBrush}" Text="{Binding BronzeText}" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" Spacing="2">
+                  <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.mean}" />
+                  <TextBlock Classes="stat" Foreground="{StaticResource PrimaryBrush}" Text="{Binding MeanText}" />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Palette -->
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.palette}" />
+              <ItemsControl ItemsSource="{Binding Palette}" HorizontalAlignment="Left">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate DataType="vm:OkeyExampleCard">
-                    <Border Classes="excard" Background="{Binding Fill}">
-                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
-                    </Border>
+                  <DataTemplate DataType="vm:OkeyCardVM">
+                    <Button Classes="cardbtn" IsEnabled="{Binding !Used}" Command="{Binding $parent[ItemsControl].DataContext.ClickPaletteCommand}" CommandParameter="{Binding}">
+                      <Border Classes="ring" Classes.inhand="{Binding InHand}" Classes.used="{Binding Used}">
+                        <Border Classes="cardtile" Background="{Binding Fill}">
+                          <TextBlock FontSize="22" Text="{Binding Number}" Foreground="{Binding Foreground}" />
+                        </Border>
+                      </Border>
+                    </Button>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
-                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowSame.PointsText}" />
-            </Grid>
+            </StackPanel>
           </Border>
 
-          <Border Classes="combo">
-            <Grid ColumnDefinitions="190,*,Auto">
-              <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{loc:T okey.kindRowMixed}" />
-              <ItemsControl Grid.Column="1" ItemsSource="{Binding ExampleRowMixed.Cards}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate DataType="vm:OkeyExampleCard">
-                    <Border Classes="excard" Background="{Binding Fill}">
-                      <TextBlock Text="{Binding Number}" Foreground="{Binding Foreground}" />
-                    </Border>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
-                         Foreground="{StaticResource SuccessBrush}" Text="{Binding ExampleRowMixed.PointsText}" />
-            </Grid>
-          </Border>
         </StackPanel>
-      </Border>
 
-      <!-- Loot der Truhen -->
-      <Border Classes="card" IsVisible="{Binding IsLootOpen}">
-        <StackPanel Spacing="12">
-          <TextBlock Classes="h2" Text="{loc:T okey.lootTitle}" />
-          <ItemsControl ItemsSource="{Binding LootSeasons}">
-            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:LootSeasonVM">
-                <Button Classes="chip" Classes.active="{Binding IsActive}" Margin="0,0,6,0"
-                        Content="{Binding Name}"
-                        Command="{Binding $parent[ItemsControl].DataContext.SelectSeasonCommand}"
-                        CommandParameter="{Binding}" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+        <!-- Truhen-Loot, rechts, schmaler -->
+        <Border Grid.Column="1" Classes="card" Width="340" Margin="14,0,0,0" VerticalAlignment="Top"
+                IsVisible="{Binding IsLootOpen}">
+          <StackPanel Spacing="10">
+            <TextBlock Classes="h2" Text="{loc:T okey.lootTitle}" />
+            <ItemsControl ItemsSource="{Binding LootSeasons}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:LootSeasonVM">
+                  <Button Classes="chip" Classes.active="{Binding IsActive}" Margin="0,0,6,6" Content="{Binding Name}"
+                          Command="{Binding $parent[ItemsControl].DataContext.SelectSeasonCommand}" CommandParameter="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-          <Grid ColumnDefinitions="300,340" HorizontalAlignment="Left">
-            <!-- Truhen waehlen -->
-            <ItemsControl Grid.Column="0" ItemsSource="{Binding SelectedChests}">
-              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl ItemsSource="{Binding SelectedChests}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="vm:LootChestVM">
                   <Button Classes="chestrow" Classes.open="{Binding IsOpen}"
-                          Command="{Binding $parent[ItemsControl].DataContext.SelectChestCommand}"
-                          CommandParameter="{Binding}">
+                          Command="{Binding $parent[ItemsControl].DataContext.SelectChestCommand}" CommandParameter="{Binding}">
                     <Grid ColumnDefinitions="Auto,*,Auto">
-                      <Image Grid.Column="0" Source="{Binding Icon}" Width="34" Height="34" VerticalAlignment="Center" />
-                      <TextBlock Grid.Column="1" Margin="10,0" VerticalAlignment="Center" FontWeight="Bold"
+                      <Image Grid.Column="0" Source="{Binding Icon}" Width="30" Height="30" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" Margin="8,0" VerticalAlignment="Center" FontWeight="Bold" FontSize="13"
                                  Foreground="{Binding TierBrush}" Text="{Binding Name}" />
-                      <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="16"
-                                 Foreground="{StaticResource MutedBrush}" Text="▸" />
+                      <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="16" Foreground="{StaticResource MutedBrush}" Text="▸" />
                     </Grid>
                   </Button>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Sidebar: Loot der gewaehlten Truhe -->
-            <Border Grid.Column="1" Classes="card" Margin="12,0,0,0" VerticalAlignment="Top"
-                    IsVisible="{Binding HasSelectedChest}">
-              <StackPanel Spacing="8" DataContext="{Binding SelectedChest}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Image Source="{Binding Icon}" Width="28" Height="28" />
-                  <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontSize="15"
-                             Foreground="{Binding TierBrush}" Text="{Binding Name}" />
-                </StackPanel>
-                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{loc:T okey.lootRare}" />
-                <ItemsControl ItemsSource="{Binding Items}">
-                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="vm:LootItemVM">
-                      <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3">
-                        <Image Grid.Column="0" Source="{Binding Image}" Width="28" Height="28" />
-                        <TextBlock Grid.Column="1" Margin="8,0" VerticalAlignment="Center" FontSize="12.5"
-                                   TextWrapping="Wrap" Text="{Binding Name}" />
-                        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold"
-                                   Foreground="{StaticResource AmberBrush}" Text="{Binding Chance}" />
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </Border>
-            <TextBlock Grid.Column="1" Classes="muted" Margin="12,8,0,0" VerticalAlignment="Top"
-                       TextWrapping="Wrap" IsVisible="{Binding !HasSelectedChest}" Text="{loc:T okey.lootPick}" />
-          </Grid>
-        </StackPanel>
-      </Border>
-
-      <!-- Hand + Rat -->
-      <Border Classes="card">
-        <StackPanel Spacing="12">
-          <TextBlock Classes="muted" FontSize="12" Text="{Binding HandCountText}" />
-          <ItemsControl ItemsSource="{Binding Hand}">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:OkeyCardVM">
-                <Button Classes="cardbtn" Command="{Binding $parent[ItemsControl].DataContext.ClickHandCommand}"
-                        CommandParameter="{Binding}">
-                  <Border Classes="ring" Classes.take="{Binding IsTake}" Classes.toss="{Binding IsToss}">
-                    <Border Classes="cardtile big" Background="{Binding Fill}">
-                      <TextBlock FontSize="26" Text="{Binding Number}" Foreground="{Binding Foreground}" />
-                    </Border>
-                  </Border>
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding AdviceText}" />
-
-          <Border IsVisible="{Binding OnlyBronze}" CornerRadius="8" Padding="12,8"
-                  Background="#241a0e" BorderBrush="{StaticResource AmberBrush}" BorderThickness="1">
-            <TextBlock Foreground="{StaticResource AmberBrush}" FontWeight="SemiBold"
-                       TextWrapping="Wrap" Text="{Binding EndHintText}" />
-          </Border>
-        </StackPanel>
-      </Border>
-
-      <!-- Live-Planer -->
-      <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Classes="h2" Text="{loc:T okey.planTitle}" />
-          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{loc:T okey.planHint}" />
-          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding OrientationText}" />
-          <Grid ColumnDefinitions="*,*,*,*" Margin="0,4,0,0">
-            <StackPanel Grid.Column="0" Spacing="2">
-              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.gold}" />
-              <TextBlock Classes="stat" Foreground="{StaticResource AmberBrush}" Text="{Binding GoldText}" />
+            <StackPanel Spacing="6" IsVisible="{Binding HasSelectedChest}" DataContext="{Binding SelectedChest}">
+              <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{loc:T okey.lootRare}" />
+              <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:LootItemVM">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3">
+                      <Image Grid.Column="0" Source="{Binding Image}" Width="26" Height="26" />
+                      <TextBlock Grid.Column="1" Margin="8,0" VerticalAlignment="Center" FontSize="12" TextWrapping="Wrap" Text="{Binding Name}" />
+                      <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource AmberBrush}" Text="{Binding Chance}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
             </StackPanel>
-            <StackPanel Grid.Column="1" Spacing="2">
-              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.silver}" />
-              <TextBlock Classes="stat" Text="{Binding SilverText}" />
-            </StackPanel>
-            <StackPanel Grid.Column="2" Spacing="2">
-              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.bronze}" />
-              <TextBlock Classes="stat" Foreground="{StaticResource MutedBrush}" Text="{Binding BronzeText}" />
-            </StackPanel>
-            <StackPanel Grid.Column="3" Spacing="2">
-              <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.mean}" />
-              <TextBlock Classes="stat" Foreground="{StaticResource PrimaryBrush}" Text="{Binding MeanText}" />
-            </StackPanel>
-          </Grid>
-        </StackPanel>
-      </Border>
-
-      <!-- Palette -->
-      <Border Classes="card">
-        <StackPanel Spacing="8">
-          <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.palette}" />
-          <ItemsControl ItemsSource="{Binding Palette}" HorizontalAlignment="Left">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate><UniformGrid Columns="8" /></ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="vm:OkeyCardVM">
-                <Button Classes="cardbtn" IsEnabled="{Binding !Used}"
-                        Command="{Binding $parent[ItemsControl].DataContext.ClickPaletteCommand}"
-                        CommandParameter="{Binding}">
-                  <Border Classes="ring" Classes.inhand="{Binding InHand}" Classes.used="{Binding Used}">
-                    <Border Classes="cardtile" Background="{Binding Fill}">
-                      <TextBlock FontSize="22" Text="{Binding Number}" Foreground="{Binding Foreground}" />
-                    </Border>
-                  </Border>
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-      </Border>
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding !HasSelectedChest}" Text="{loc:T okey.lootPick}" />
+          </StackPanel>
+        </Border>
+      </Grid>
 
     </StackPanel>
   </ScrollViewer>

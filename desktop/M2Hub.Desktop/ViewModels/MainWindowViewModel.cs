@@ -42,7 +42,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Itemshop = new ItemshopViewModel(store, forum, images);
         Costumes = new CostumesHostViewModel();
         LootFilter = new LootFilterHostViewModel(store);
-        Helper = new HelperHostViewModel();
+        Helper = new HelperHostViewModel(store);
         Stream = new StreamOverlay(store);
         Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);

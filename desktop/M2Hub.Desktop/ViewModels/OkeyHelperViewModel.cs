@@ -36,6 +36,7 @@ public sealed class OkeyHelperViewModel : ViewModelBase
         _helpTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1100) };
         _helpTimer.Tick += (_, _) => AdvanceExamples();
         AdvanceExamples();
+        _helpTimer.Start();   // das Hilfe-Popup zeigt die animierten Beispiele
 
         ToggleLootCommand = new RelayCommand(_ => IsLootOpen = !IsLootOpen);
         SelectSeasonCommand = new RelayCommand(p => { if (p is LootSeasonVM s) SelectSeason(s); });

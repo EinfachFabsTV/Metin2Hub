@@ -12,9 +12,10 @@ public sealed class HelperHostViewModel : ViewModelBase
 {
     private object? _current;
 
-    public HelperHostViewModel()
+    public HelperHostViewModel(LocalStore store)
     {
         Okey = new OkeyHelperViewModel();
+        AutoRes = new AutoResViewModel(store);
 
         OpenCommand = new RelayCommand(p => Open(p as string));
         GoHomeCommand = new RelayCommand(_ => GoHome());
@@ -23,9 +24,11 @@ public sealed class HelperHostViewModel : ViewModelBase
         {
             Icon = OkeyLoot.Icon,
         });
+        Tiles.Add(new HelperTile("autores", Loc.T("helper.autores.title"), Loc.T("helper.autores.desc")));
     }
 
     public OkeyHelperViewModel Okey { get; }
+    public AutoResViewModel AutoRes { get; }
 
     public ObservableCollection<HelperTile> Tiles { get; } = new();
 
@@ -46,6 +49,7 @@ public sealed class HelperHostViewModel : ViewModelBase
         Current = key switch
         {
             "okey" => Okey,
+            "autores" => AutoRes,
             _ => null,
         };
     }
@@ -55,8 +59,12 @@ public sealed class HelperHostViewModel : ViewModelBase
     public void RelabelAfterLanguageChange()
     {
         Okey.RelabelAfterLanguageChange();
+        AutoRes.RelabelAfterLanguageChange();
         foreach (var t in Tiles)
+        {
             if (t.Key == "okey") { t.Title = Loc.T("helper.okey.title"); t.Desc = Loc.T("helper.okey.desc"); }
+            else if (t.Key == "autores") { t.Title = Loc.T("helper.autores.title"); t.Desc = Loc.T("helper.autores.desc"); }
+        }
     }
 }
 

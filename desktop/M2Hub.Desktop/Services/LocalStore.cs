@@ -332,6 +332,28 @@ public sealed class SettingsData
     /// ist alles aktiviert; was der Nutzer aendert, bleibt beim Schliessen
     /// gemerkt (nur die Abweichungen stehen hier).
     public LootFilterData LootFilter { get; set; } = new();
+
+    /// Auto-Res: der Pfad zur metin2.cfg und die Aufloesungs-Presets.
+    public AutoResData AutoRes { get; set; } = new();
+}
+
+/// Auto-Res: aendert nur WIDTH/HEIGHT in der metin2.cfg des Clients.
+public sealed class AutoResData
+{
+    /// Die Ziel-metin2.cfg, die beim Setzen ersetzt wird.
+    public string ConfigPath { get; set; } = "";
+
+    public List<ResPreset> Presets { get; set; } = new();
+}
+
+/// Ein Aufloesungs-Preset. `File` ist die im Profil abgelegte, vollstaendige
+/// Config (mit dieser Aufloesung), die beim Setzen die Ziel-cfg ersetzt.
+public sealed class ResPreset
+{
+    public string Name { get; set; } = "";
+    public int Width { get; set; } = 800;
+    public int Height { get; set; } = 600;
+    public string File { get; set; } = "";
 }
 
 /// Der gemerkte Stand des Loot-Filter-Editors, je Oberkategorie. Fehlt ein
