@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             x:Class="M2Hub.Desktop.Views.LootFilterHostView"
+             x:DataType="vm:LootFilterHostViewModel">
+
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Padding="18,14,18,0">
+      <ItemsControl ItemsSource="{Binding Pages}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:RunChip">
+            <Button Classes="chip" Classes.active="{Binding IsActive}" IsEnabled="{Binding Enabled}"
+                    Margin="0,0,6,0" Content="{Binding Label}"
+                    Command="{Binding $parent[UserControl].DataContext.ChooseCommand}"
+                    CommandParameter="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+
+    <ContentControl Content="{Binding Current}" />
+  </DockPanel>
+</UserControl>

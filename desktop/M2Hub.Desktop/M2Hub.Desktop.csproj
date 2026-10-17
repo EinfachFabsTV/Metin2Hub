@@ -18,7 +18,7 @@
          die App hielt sich damit fuer veraltet und wies bei jedem Start auf ein
          Update hin, das sie schon hatte. Ohne die beiden Zeilen folgen sie
          <Version>. -->
-    <Version>1.75.0</Version>
+    <Version>1.76.0</Version>
     <RootNamespace>M2Hub.Desktop</RootNamespace>
   </PropertyGroup>
 
@@ -28,6 +28,9 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
+    <!-- Tonausgabe ueber WASAPI: folgt - anders als das alte winmm/PlaySound -
+         dem App-Audiorouting von Windows (wichtig bei mehreren Ausgaben). -->
+    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 

@@ -41,6 +41,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Events = new EventsViewModel(store, forum, images);
         Itemshop = new ItemshopViewModel(store, forum, images);
         Costumes = new CostumesHostViewModel();
+        LootFilter = new LootFilterHostViewModel(store);
         Stream = new StreamOverlay(store);
         Calc = new CalcHostViewModel();
         RunTracker = new RunsViewModel(store, dialogs, Stream);
@@ -56,6 +57,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowEventsCommand = new RelayCommand(_ => Show("events"));
         ShowItemshopCommand = new RelayCommand(_ => Show("itemshop"));
         ShowCostumesCommand = new RelayCommand(_ => Show("costumes"));
+        ShowLootFilterCommand = new RelayCommand(_ => Show("lootfilter"));
         ShowCalcCommand = new RelayCommand(_ => Show("calc"));
         ShowRunsCommand = new RelayCommand(_ => Show("runs"));
         ShowGoalsCommand = new RelayCommand(_ => Show("goals"));
@@ -71,6 +73,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Accounts.RelabelAfterLanguageChange();
             Calc.RelabelAfterLanguageChange();
             Costumes.RelabelAfterLanguageChange();
+            LootFilter.RelabelAfterLanguageChange();
             Goals.RelabelAfterLanguageChange();
             RunTracker.RelabelAfterLanguageChange();
             Timers.RelabelAfterLanguageChange();
@@ -97,6 +100,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     /// Kostueme: Katalog + Simulator - reines Nachschlagewerk, keine Ablage.
     public CostumesHostViewModel Costumes { get; }
+
+    /// Loot-Filter: Nachschlagen (Item -> Kategorie) + interaktiver Editor.
+    public LootFilterHostViewModel LootFilter { get; }
 
     /// Der Rechner-Bereich (Gilde, Pet, Biologen) rechnet nur - er braucht
     /// weder Ablage noch Abruf.
@@ -128,6 +134,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Raise(nameof(IsEvents));
             Raise(nameof(IsItemshop));
             Raise(nameof(IsCostumes));
+            Raise(nameof(IsLootFilter));
             Raise(nameof(IsRuns));
             Raise(nameof(IsCalc));
             Raise(nameof(IsGoals));
@@ -140,6 +147,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsEvents => _currentKey == "events";
     public bool IsItemshop => _currentKey == "itemshop";
     public bool IsCostumes => _currentKey == "costumes";
+    public bool IsLootFilter => _currentKey == "lootfilter";
     public bool IsRuns => _currentKey == "runs";
     public bool IsCalc => _currentKey == "calc";
     public bool IsGoals => _currentKey == "goals";
@@ -194,6 +202,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand ShowEventsCommand { get; }
     public RelayCommand ShowItemshopCommand { get; }
     public RelayCommand ShowCostumesCommand { get; }
+    public RelayCommand ShowLootFilterCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
     public AsyncRelayCommand RefreshCommand { get; }
 
@@ -249,7 +258,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         if (!_store.Settings.CheckUpdates) return;
 
-        var info = await _updates.CheckAsync();
+        // Mit Dev-Schluessel zuerst den Test-Build pruefen, sonst das
+        // oeffentliche Release.
+        var token = _store.Settings.DevUpdateToken;
+        var info = !string.IsNullOrWhiteSpace(token)
+            ? await _updates.CheckDevAsync(token) ?? await _updates.CheckAsync()
+            : await _updates.CheckAsync();
         if (info is null || info.Version == _store.Settings.SkippedVersion) return;
 
         var ok = await Dialogs.ShowAsync(new UpdateDialogViewModel(_updates, info, Restart));
@@ -292,7 +306,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public void Shutdown() => _timer.Stop();
 
     /// Reihenfolge der Reiter fuer die Pfeiltasten.
-    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "costumes", "calc", "settings"];
+    private static readonly string[] PageOrder = ["start", "accounts", "runs", "goals", "events", "itemshop", "costumes", "lootfilter", "calc", "settings"];
 
     /// Zum Nachbarreiter springen; am Ende geht es vorn weiter.
     public void ShowNeighbour(int step)
@@ -353,6 +367,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             "accounts" => Accounts,
             "itemshop" => Itemshop,
             "costumes" => Costumes,
+            "lootfilter" => LootFilter,
             "calc" => Calc,
             "settings" => Settings,
             _ => Events,

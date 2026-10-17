@@ -14,6 +14,9 @@
     <DataTemplate DataType="vm:CostumesHostViewModel"><views:CostumesHostView /></DataTemplate>
     <DataTemplate DataType="vm:CostumesViewModel"><views:CostumesView /></DataTemplate>
     <DataTemplate DataType="vm:SimulatorViewModel"><views:SimulatorView /></DataTemplate>
+    <DataTemplate DataType="vm:LootFilterHostViewModel"><views:LootFilterHostView /></DataTemplate>
+    <DataTemplate DataType="vm:LootFilterLookupViewModel"><views:LootFilterLookupView /></DataTemplate>
+    <DataTemplate DataType="vm:LootFilterEditorViewModel"><views:LootFilterEditorView /></DataTemplate>
     <DataTemplate DataType="vm:GoalsHostViewModel"><views:GoalsHostView /></DataTemplate>
     <DataTemplate DataType="vm:GoalsViewModel"><views:GoalsView /></DataTemplate>
     <DataTemplate DataType="vm:CalcHostViewModel"><views:CalcHostView /></DataTemplate>

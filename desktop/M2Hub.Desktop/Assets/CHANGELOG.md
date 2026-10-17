@@ -7,6 +7,34 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.76.0
+
+**Neu**
+
+- **Loot-Filter (neuer Bereich):** Tippe einen Item-Namen und sieh sofort, unter
+  welche Kategorie es im Beuteoptionen-Fenster fällt (mit Bild), oder blättere
+  den Kategoriebaum durch. Dazu ein **Filter-Fenster** als interaktiver Editor –
+  Nachbildung der Beuteoptionen, standardmäßig alles an, dein Stand bleibt
+  gemerkt. Die Item-Daten wachsen mit, sobald mehr Bilder nachgelegt werden.
+  (Import/Export einer Char-Datei folgt später.)
+- **Test-Updates (M2hubDev):** In den Einstellungen unter „Programm" lässt sich
+  ein Zugangsschlüssel zum Dev-Repo eintragen. Ist einer hinterlegt, sucht die
+  App auch nach dem neuesten Test-Build und tauscht sich auf Wunsch darauf aus –
+  erkannt am Commit-Stand, nicht an der Versionsnummer. Der Schlüssel bleibt nur
+  lokal auf dem Rechner.
+
+**Behoben**
+
+- **Timer-Ton bei mehreren Audio-Ausgaben:** Die Ausgabe läuft jetzt über
+  WASAPI und folgt demselben Audiogerät wie deine anderen Programme. Vorher
+  ging der Ton über den alten Windows-Weg immer aufs Standardgerät – wer
+  mehrere Ausgänge nutzt, hörte dann nichts, obwohl alles richtig eingestellt
+  war.
+- **Katalog-Übersicht nutzt die Breite besser:** die Set-Karten skalieren jetzt
+  mit der Fensterbreite. War das Fenster knapp zu schmal, brach bisher eine
+  Spalte um und rechts blieb eine Leerfläche – jetzt werden die Karten etwas
+  schmaler, statt die Spalte zu verlieren.
+
 ## 1.75.0
 
 **Geändert**

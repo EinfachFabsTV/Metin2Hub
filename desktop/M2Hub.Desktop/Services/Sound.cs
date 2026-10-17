@@ -1,19 +1,23 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Avalonia.Platform;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
 
 namespace M2Hub.Desktop.Services;
 
 /// Der Ton am Ende einer Abklingzeit.
 ///
-/// Avalonia bringt keine Tonausgabe mit, und ein Audio-Paket waere fuer zwei
-/// Glockentoene zu viel. Unter Windows uebernimmt `PlaySound` aus der winmm,
-/// die zu Windows selbst gehoert; auf den anderen Plattformen wird das
-/// uebliche Abspielprogramm angestossen.
+/// Unter Windows laeuft die Ausgabe ueber **WASAPI** (NAudio). Das alte
+/// `PlaySound` aus der winmm folgte nur dem globalen Standardgeraet - bei
+/// mehreren Audio-Ausgaben landete der Ton dann auf einem Geraet, das der
+/// Nutzer gar nicht hoert, waehrend andere Programme liefen. WASAPI folgt
+/// demselben App-Routing wie der Browser. Auf den anderen Plattformen wird
+/// weiter das uebliche Abspielprogramm angestossen.
 ///
 /// Die Dateien liegen als `Assets/Sound/timer-<name>.wav` bei (erzeugt von
 /// `desktop/tools/timer-sound.py`) und werden beim ersten Mal in den
-/// Profilordner gelegt: `PlaySound` liest von der Platte, nicht aus der Exe.
+/// Profilordner gelegt: gelesen wird von der Platte, nicht aus der Exe.
 ///
 /// **Faellt der Ton aus, laeuft die App weiter.** Ein fehlender Lautsprecher
 /// ist kein Grund, eine Abklingzeit scheitern zu lassen.
@@ -32,21 +36,12 @@ public static class Sound
 
     private static readonly Dictionary<string, string> Paths = new();
 
-    /// Asynchron - der Aufruf kehrt sofort zurueck, damit die Uhr im selben
-    /// Takt weiterlaeuft.
-    ///
-    /// **Ohne SND_NOSTOP**: das Flag liess `PlaySound` stillschweigend nichts
-    /// tun, sobald irgendein anderer Ton lief - deshalb blieb der Ton in
-    /// 1.56.0 oft ganz aus.
-    private const uint Async = 0x0001;
-    private const uint FileName = 0x00020000;
-
-    [DllImport("winmm.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern bool PlaySound(string? sound, IntPtr module, uint flags);
-
     /// Spielt den eingestellten Ton. `name` ist einer aus `All`; was nicht
     /// dabei ist, faellt auf den Standard zurueck - eine umbenannte Datei
     /// soll die Uhr nicht stumm machen.
+    ///
+    /// Asynchron: der Aufruf kehrt sofort zurueck, damit die Uhr im selben
+    /// Takt weiterlaeuft.
     public static void Timer(string? name = null)
     {
         try
@@ -56,7 +51,7 @@ public static class Sound
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                PlaySound(file, IntPtr.Zero, Async | FileName);
+                PlayWasapi(file);
                 return;
             }
 
@@ -73,6 +68,29 @@ public static class Sound
             // Kein Lautsprecher, kein Abspielprogramm, gesperrte Datei - der
             // Timer ist wichtiger als sein Ton.
         }
+    }
+
+    /// Windows: ueber WASAPI (geteilter Modus = folgt dem App-Routing und dem
+    /// Standardgeraet des Nutzers). Auf einem Hintergrund-Thread, damit die Uhr
+    /// nicht wartet; der Thread spielt die kurze Datei zu Ende und raeumt auf.
+    private static void PlayWasapi(string file)
+    {
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                using var reader = new AudioFileReader(file);
+                using var output = new WasapiOut(AudioClientShareMode.Shared, 200);
+                output.Init(reader);
+                output.Play();
+                while (output.PlaybackState == PlaybackState.Playing)
+                    System.Threading.Thread.Sleep(50);
+            }
+            catch
+            {
+                // Faellt die Ausgabe aus, bleibt es still - der Timer zaehlt weiter.
+            }
+        });
     }
 
     /// Legt die Datei einmal im Profil ab und merkt sich den Weg dorthin.

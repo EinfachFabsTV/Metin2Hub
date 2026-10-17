@@ -89,6 +89,7 @@ public sealed class SettingsViewModel : ViewModelBase
     private LanguageOption _language;
     private HeaderServerOption _headerServer;
     private bool _checkUpdates;
+    private string _devUpdateToken;
     private bool _teamPostsOnly;
     private StartPageOption _startPage;
 
@@ -118,6 +119,7 @@ public sealed class SettingsViewModel : ViewModelBase
         _showUpdate = showUpdate;
 
         _checkUpdates = store.Settings.CheckUpdates;
+        _devUpdateToken = store.Settings.DevUpdateToken;
         _teamPostsOnly = store.Settings.TeamPostsOnly;
 
         StartPages = BuildStartPages();
@@ -582,6 +584,23 @@ public sealed class SettingsViewModel : ViewModelBase
         }
     }
 
+    /// Zugangsschluessel fuer Test-Updates (M2hubDev) aus dem privaten Dev-Repo.
+    /// Leer heisst: keine Dev-Updates. Nur lokal gespeichert.
+    public string DevUpdateToken
+    {
+        get => _devUpdateToken;
+        set
+        {
+            if (!Set(ref _devUpdateToken, value)) return;
+            _store.Settings.DevUpdateToken = value?.Trim() ?? "";
+            _store.SaveSettings();
+            Raise(nameof(HasDevUpdateToken));
+        }
+    }
+
+    /// Ob ein Dev-Schluessel hinterlegt ist - steuert den Hinweis daneben.
+    public bool HasDevUpdateToken => !string.IsNullOrWhiteSpace(_devUpdateToken);
+
     /* ---------- Startseite ---------- */
 
     /// Die Abschnitte der Startseite in ihrer Reihenfolge, samt Haken. Welche
@@ -965,7 +984,12 @@ public sealed class SettingsViewModel : ViewModelBase
         Status = null;
         try
         {
-            var info = await _updates.CheckAsync();
+            // Mit Dev-Schluessel zuerst den Test-Build pruefen, sonst das
+            // oeffentliche Release.
+            var token = _store.Settings.DevUpdateToken;
+            var info = !string.IsNullOrWhiteSpace(token)
+                ? await _updates.CheckDevAsync(token) ?? await _updates.CheckAsync()
+                : await _updates.CheckAsync();
             Status = info is null
                 ? Loc.T("settings.update.none", UpdateService.CurrentVersion)
                 : Loc.T("update.title", info.Version);

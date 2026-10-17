@@ -1,0 +1,178 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:M2Hub.Desktop.ViewModels"
+             xmlns:loc="using:M2Hub.Desktop.Services"
+             x:Class="M2Hub.Desktop.Views.LootFilterLookupView"
+             x:DataType="vm:LootFilterLookupViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Button.cat">
+      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource SubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="11,8" />
+    </Style>
+    <Style Selector="Button.cat.active">
+      <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+      <Setter Property="Background" Value="#16233c" />
+    </Style>
+    <Style Selector="Border.count">
+      <Setter Property="Background" Value="#1c2a44" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="6,1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14">
+
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h1" Text="{loc:T lootfilter.title}" />
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:T lootfilter.subtitle}" />
+      </StackPanel>
+
+      <!-- Was ist gerade im Filter aktiv -->
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" FontWeight="SemiBold" VerticalAlignment="Center"
+                       Text="{loc:T lootfilter.active}" />
+            <Button Grid.Column="1" Classes="chip" Content="{loc:T lootfilter.activateAll}"
+                    Command="{Binding ActivateAllCommand}" IsVisible="{Binding NotAllActive}" />
+          </Grid>
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" IsVisible="{Binding AllActive}"
+                     Text="{loc:T lootfilter.allActive}" />
+          <TextBlock Classes="muted" FontSize="13" IsVisible="{Binding ShowNoneActive}"
+                     Text="{loc:T lootfilter.noneActive}" />
+          <ItemsControl ItemsSource="{Binding Active}" IsVisible="{Binding ShowActiveList}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:ActiveEntry">
+                <Border Classes="count" Margin="0,0,8,8" Padding="10,4">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock VerticalAlignment="Center" FontSize="13" Text="{Binding Label}" />
+                    <Button Width="20" Height="20" Padding="0" FontSize="11" Content="✕"
+                            Background="Transparent" BorderThickness="0"
+                            Command="{Binding RemoveCommand}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <TextBox Watermark="{loc:T lootfilter.search}" Text="{Binding Query}" />
+
+      <!-- Treffer -->
+      <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding HasResults}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:LookupResultViewModel">
+            <Border Classes="card">
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="10"
+                        Background="{StaticResource SurfaceBrush}">
+                  <Image Source="{Binding Image}" Width="44" Height="44" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" Spacing="3">
+                  <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                  <TextBlock Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"
+                             FontSize="13" Text="{Binding Crumb}" />
+                  <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Text="{Binding Hint}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+                  <Button Classes="chip" Padding="10,4" FontSize="12" HorizontalAlignment="Right"
+                          Content="{loc:T lootfilter.only}" Command="{Binding SoloCommand}" />
+                  <CheckBox IsChecked="{Binding Active}" Content="{loc:T lootfilter.inFilter}" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <Border Classes="card" IsVisible="{Binding NoResults}">
+        <TextBlock Classes="muted" HorizontalAlignment="Center" Text="{loc:T lootfilter.noResults}" />
+      </Border>
+
+      <!-- Blaettern (wenn nicht gerade gesucht wird) -->
+      <StackPanel Spacing="10" IsVisible="{Binding !HasQuery}">
+        <TextBlock Classes="muted" Text="{loc:T lootfilter.browse}" />
+
+        <ItemsControl ItemsSource="{Binding TopCats}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:CatChip">
+              <Button Classes="cat" Classes.active="{Binding IsActive}" Margin="0,0,8,8"
+                      Command="{Binding $parent[ItemsControl].DataContext.PickTopCommand}"
+                      CommandParameter="{Binding}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                  <Border Classes="count">
+                    <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding Count}" />
+                  </Border>
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Spacing="8" IsVisible="{Binding HasSubCats}">
+          <TextBlock Classes="muted" Text="{loc:T lootfilter.pickSub}" />
+          <ItemsControl ItemsSource="{Binding SubCats}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:CatChip">
+                <Button Classes="cat" Classes.active="{Binding IsActive}" Margin="0,0,8,8"
+                        Command="{Binding $parent[ItemsControl].DataContext.PickSubCommand}"
+                        CommandParameter="{Binding}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                    <Border Classes="count">
+                      <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding Count}" />
+                    </Border>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <Border Classes="card" IsVisible="{Binding HasBrowseHint}">
+          <TextBlock Classes="muted" HorizontalAlignment="Center" Text="{Binding BrowseHint}" />
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:LookupTile">
+              <Border Classes="card" Width="150" Margin="0,0,10,10" Padding="10">
+                <StackPanel Spacing="8">
+                  <Border Width="54" Height="54" CornerRadius="10" HorizontalAlignment="Center"
+                          Background="{StaticResource SurfaceBrush}">
+                    <Image Source="{Binding Image}" Width="46" Height="46" />
+                  </Border>
+                  <TextBlock FontSize="12.5" TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Name}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

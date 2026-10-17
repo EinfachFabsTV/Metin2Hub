@@ -277,6 +277,12 @@ public sealed class SettingsData
     /// Beim Start nach einer neueren Version sehen.
     public bool CheckUpdates { get; set; } = true;
 
+    /// Zugangsschluessel fuer Test-Updates aus dem privaten Dev-Repo. Nur lokal
+    /// in dieser Datei, nie im Code und nie im oeffentlichen Spiegel. Leer =
+    /// keine Dev-Updates; ist ein Schluessel hinterlegt, prueft die App auch den
+    /// neuesten Test-Build (M2hubDev) und tauscht sich auf Wunsch darauf aus.
+    public string DevUpdateToken { get; set; } = "";
+
     /// Beitraege im Event-Board ohne erkannten Zeitraum mitzeigen.
     /// Standardmaessig aus - meist sind es gar keine Events.
     public bool ShowUndatedEvents { get; set; }
@@ -321,6 +327,36 @@ public sealed class SettingsData
 
     /// Die Abklingzeiten der Setups und das Fenster, das sie zeigt.
     public TimersData Timers { get; set; } = new();
+
+    /// Der zuletzt eingestellte Stand des Loot-Filter-Editors. Standardmaessig
+    /// ist alles aktiviert; was der Nutzer aendert, bleibt beim Schliessen
+    /// gemerkt (nur die Abweichungen stehen hier).
+    public LootFilterData LootFilter { get; set; } = new();
+}
+
+/// Der gemerkte Stand des Loot-Filter-Editors, je Oberkategorie. Fehlt ein
+/// Eintrag, gilt die Vorgabe „alles an" - gespeichert werden nur Abweichungen.
+public sealed class LootFilterData
+{
+    /// Schluessel der Oberkategorie -> ihr Zustand.
+    public Dictionary<string, LootCatState> Categories { get; set; } = new();
+}
+
+/// Zustand einer Oberkategorie im Editor. Was nicht gesetzt ist, gilt als an.
+public sealed class LootCatState
+{
+    public bool On { get; set; } = true;
+
+    /// Klassen-Haken (Name -> an) fuer Ausruestung/Fertigkeitsbuch.
+    public Dictionary<string, bool> Classes { get; set; } = new();
+
+    /// Unterkategorie-Haken (Name -> an).
+    public Dictionary<string, bool> Subs { get; set; } = new();
+
+    public int RefineMin { get; set; }
+    public int RefineMax { get; set; } = 200;
+    public int LevelMin { get; set; }
+    public int LevelMax { get; set; } = 120;
 }
 
 /// Die Abklingzeit-Knoepfe (`RunTimersViewModel`, `TimerOverlayWindow`).
