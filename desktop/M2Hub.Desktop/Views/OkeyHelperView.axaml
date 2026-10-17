@@ -79,7 +79,7 @@
   </UserControl.Styles>
 
   <ScrollViewer>
-    <StackPanel Margin="18" Spacing="14">
+    <StackPanel Margin="18" Spacing="14" MaxWidth="980" HorizontalAlignment="Left">
 
       <!-- Kopf: Titel links, Punkte/Truhe rechts -->
       <Grid ColumnDefinitions="*,Auto">
@@ -185,7 +185,7 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
 
-          <Grid ColumnDefinitions="*,300">
+          <Grid ColumnDefinitions="300,340" HorizontalAlignment="Left">
             <!-- Truhen waehlen -->
             <ItemsControl Grid.Column="0" ItemsSource="{Binding SelectedChests}">
               <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -300,7 +300,7 @@
       <Border Classes="card">
         <StackPanel Spacing="8">
           <TextBlock Classes="muted" FontSize="12" Text="{loc:T okey.palette}" />
-          <ItemsControl ItemsSource="{Binding Palette}">
+          <ItemsControl ItemsSource="{Binding Palette}" HorizontalAlignment="Left">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate><UniformGrid Columns="8" /></ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>

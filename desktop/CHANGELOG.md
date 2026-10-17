@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.78.1
+
+**Behoben**
+
+- **Okey-Helfer kompakter:** Die Kartenpalette sitzt jetzt linksbündig und
+  enger beieinander, die Loot-Truhen und ihre Sidebar stehen direkt
+  nebeneinander, und der Bereich hat eine Maximalbreite – das Layout wirkt auf
+  breiten Bildschirmen nicht mehr auseinandergezogen.
+
 ## 1.78.0
 
 **Neu**
