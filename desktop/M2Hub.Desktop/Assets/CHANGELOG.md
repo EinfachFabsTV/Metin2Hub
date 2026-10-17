@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.76.1
+
+**Behoben**
+
+- **Test-Updates nur in der Dev-Version:** Das Feld für den Dev-Token
+  („Test-Updates (M2hubDev)") erscheint jetzt nur noch im Test-Build, nicht im
+  offiziellen Release. Auch die Suche nach Test-Builds läuft nur dort.
+
 ## 1.76.0
 
 **Neu**

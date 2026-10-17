@@ -396,14 +396,16 @@
                 <Button Content="{loc:T settings.update.page}" Command="{Binding OpenReleasesCommand}" />
               </StackPanel>
 
-              <Separator Margin="0,4" />
-              <TextBlock FontWeight="SemiBold" Text="{loc:T settings.update.dev}" />
-              <TextBlock Classes="muted" Text="{loc:T settings.update.devHint}" TextWrapping="Wrap" />
-              <TextBox PasswordChar="•"
-                       Watermark="{loc:T settings.update.devPlaceholder}"
-                       Text="{Binding DevUpdateToken, UpdateSourceTrigger=LostFocus}" />
-              <TextBlock Classes="muted" FontSize="12" IsVisible="{Binding HasDevUpdateToken}"
-                         Text="{loc:T settings.update.devActive}" TextWrapping="Wrap" />
+              <StackPanel Spacing="10" IsVisible="{Binding ShowDevUpdates}">
+                <Separator Margin="0,4" />
+                <TextBlock FontWeight="SemiBold" Text="{loc:T settings.update.dev}" />
+                <TextBlock Classes="muted" Text="{loc:T settings.update.devHint}" TextWrapping="Wrap" />
+                <TextBox PasswordChar="•"
+                         Watermark="{loc:T settings.update.devPlaceholder}"
+                         Text="{Binding DevUpdateToken, UpdateSourceTrigger=LostFocus}" />
+                <TextBlock Classes="muted" FontSize="12" IsVisible="{Binding HasDevUpdateToken}"
+                           Text="{loc:T settings.update.devActive}" TextWrapping="Wrap" />
+              </StackPanel>
             </StackPanel>
           </Border>
         </StackPanel>

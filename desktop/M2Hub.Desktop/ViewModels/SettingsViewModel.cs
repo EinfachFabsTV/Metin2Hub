@@ -601,6 +601,10 @@ public sealed class SettingsViewModel : ViewModelBase
     /// Ob ein Dev-Schluessel hinterlegt ist - steuert den Hinweis daneben.
     public bool HasDevUpdateToken => !string.IsNullOrWhiteSpace(_devUpdateToken);
 
+    /// Das Feld fuer Test-Updates erscheint nur im Test-Build (M2hubDev), nicht
+    /// im offiziellen Release.
+    public bool ShowDevUpdates => UpdateService.IsDevBuild;
+
     /* ---------- Startseite ---------- */
 
     /// Die Abschnitte der Startseite in ihrer Reihenfolge, samt Haken. Welche
@@ -987,7 +991,7 @@ public sealed class SettingsViewModel : ViewModelBase
             // Mit Dev-Schluessel zuerst den Test-Build pruefen, sonst das
             // oeffentliche Release.
             var token = _store.Settings.DevUpdateToken;
-            var info = !string.IsNullOrWhiteSpace(token)
+            var info = (UpdateService.IsDevBuild && !string.IsNullOrWhiteSpace(token))
                 ? await _updates.CheckDevAsync(token) ?? await _updates.CheckAsync()
                 : await _updates.CheckAsync();
             Status = info is null

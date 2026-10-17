@@ -261,7 +261,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         // Mit Dev-Schluessel zuerst den Test-Build pruefen, sonst das
         // oeffentliche Release.
         var token = _store.Settings.DevUpdateToken;
-        var info = !string.IsNullOrWhiteSpace(token)
+        var info = (UpdateService.IsDevBuild && !string.IsNullOrWhiteSpace(token))
             ? await _updates.CheckDevAsync(token) ?? await _updates.CheckAsync()
             : await _updates.CheckAsync();
         if (info is null || info.Version == _store.Settings.SkippedVersion) return;

@@ -76,6 +76,14 @@ public sealed class UpdateService
     /// gibt es keine verlaessliche Dev-Erkennung.
     public static string CurrentCommit { get; } = ReadCommit();
 
+    /// Ob dies der Test-Build (M2hubDev) ist - erkannt am Dateinamen der Exe.
+    /// Der Workflow legt Test-Builds als "M2hubDev.exe" ab, das offizielle
+    /// Release als "M2Hub.exe"; der Selbstaustausch behaelt den Namen. Nur im
+    /// Test-Build gibt es das Feld fuer Dev-Updates und die Dev-Pruefung.
+    public static bool IsDevBuild { get; } = string.Equals(
+        Path.GetFileNameWithoutExtension(Environment.ProcessPath ?? ""),
+        "M2hubDev", StringComparison.OrdinalIgnoreCase);
+
     private static string ReadCommit()
     {
         var informational = Assembly.GetExecutingAssembly()
