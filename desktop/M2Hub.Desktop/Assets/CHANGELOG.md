@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.2
+
+**Neu**
+
+- **Abklingzeiten überstehen einen Neustart:** Laufende Timer merken sich ihren
+  Ablaufzeitpunkt und laufen nach einem Neustart der App einfach weiter. War die
+  Zeit zwischenzeitlich schon um, steht der Knopf wieder bereit (ohne Ton).
+
 ## 1.79.1
 
 **Neu**

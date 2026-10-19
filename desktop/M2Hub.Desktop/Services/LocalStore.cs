@@ -400,6 +400,11 @@ public sealed class TimersData
     /// fuer alles, was danebensteht.
     public List<CustomTimerDto> Custom { get; set; } = new();
 
+    /// Laufende Abklingzeiten: Timer-Schluessel -> Ablaufzeitpunkt. So laufen
+    /// sie ueber einen Neustart hinweg weiter; war die Zeit beim Start schon
+    /// um, steht der Knopf wieder bereit.
+    public Dictionary<string, DateTime> Running { get; set; } = new();
+
     /// Wo das Fenster zuletzt stand. Es laesst sich ziehen; beim naechsten
     /// Start steht es wieder dort.
     public double X { get; set; } = 40;

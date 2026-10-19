@@ -137,8 +137,12 @@ public sealed class RunTimersViewModel : ViewModelBase
     /// anderen nicht verlieren.
     public void Build()
     {
-        var running = Timers.Where(t => t.EndsAt is not null)
-            .ToDictionary(t => t.Key, t => t.EndsAt);
+        // Laufende Uhren bleiben erhalten - aus dem Speicher (Neustart) und aus
+        // den schon gebauten Knoepfen (Timer dazugenommen). Der Speicher ist der
+        // Stand, der ueber den Neustart traegt.
+        var running = new Dictionary<string, DateTime>(Data.Running);
+        foreach (var t in Timers.Where(t => t.EndsAt is not null))
+            running[t.Key] = t.EndsAt!.Value;
 
         Timers.Clear();
 
@@ -167,6 +171,9 @@ public sealed class RunTimersViewModel : ViewModelBase
         Raise(nameof(HasTimers));
         Raise(nameof(HasChestRows));
         Update();
+
+        // Abgelaufene oder entfallene Timer aus dem Speicher nehmen.
+        PersistRunning();
     }
 
     /// Eine Zeile je Lauf, fuer den Timer eingerichtet sind - was keinen
@@ -185,10 +192,15 @@ public sealed class RunTimersViewModel : ViewModelBase
         }
     }
 
-    private void Add(string key, string label, int seconds, Dictionary<string, DateTime?> running)
+    private void Add(string key, string label, int seconds, Dictionary<string, DateTime> running)
     {
         var timer = new RunTimerViewModel(key, label, seconds);
-        if (running.TryGetValue(key, out var ends)) timer.EndsAt = ends;
+
+        // Nur wiederherstellen, wenn noch Restzeit ist. War die Zeit beim Start
+        // schon um, steht der Knopf wieder bereit - ohne Ton (der Lauf ist ja
+        // laengst fertig, kein Grund, jetzt zu klingeln).
+        if (running.TryGetValue(key, out var ends) && ends > DateTime.Now)
+            timer.EndsAt = ends;
 
         Timers.Add(timer);
     }
@@ -201,6 +213,7 @@ public sealed class RunTimersViewModel : ViewModelBase
         if (timer is null) return;
 
         timer.EndsAt = timer.EndsAt is null ? DateTime.Now.AddSeconds(timer.Seconds) : null;
+        PersistRunning();
         Update();
     }
 
@@ -211,6 +224,7 @@ public sealed class RunTimersViewModel : ViewModelBase
         if (timer is null) return;
 
         timer.EndsAt = null;
+        PersistRunning();
         Update();
     }
 
@@ -222,14 +236,41 @@ public sealed class RunTimersViewModel : ViewModelBase
 
         foreach (var timer in Timers) done |= timer.Refresh(now);
 
-        // Einmal, auch wenn zwei Uhren im selben Takt ablaufen - zwei Toene
-        // uebereinander klaengen nach Fehler.
-        if (done && Data.Sound) Sound.Timer(Data.SoundName);
+        if (done)
+        {
+            // Einmal, auch wenn zwei Uhren im selben Takt ablaufen - zwei Toene
+            // uebereinander klaengen nach Fehler.
+            if (Data.Sound) Sound.Timer(Data.SoundName);
+            // Die abgelaufene Uhr aus dem Speicher nehmen.
+            PersistRunning();
+        }
 
         // Ohne Timer gibt es nichts zu schreiben - sonst legte die App
         // Dateien an, die niemand bestellt hat.
         if (Data.WriteFiles && Timers.Count > 0)
             _stream.WriteTimers(Timers.Select(t => (t.Key, t.Label, t.Text, t.IsRunning)).ToList());
+    }
+
+    /// Schreibt die laufenden Abklingzeiten ins Profil, damit sie einen
+    /// Neustart ueberdauern. Nur bei Aenderung - der Sekundentakt soll nicht
+    /// jede Sekunde speichern.
+    private void PersistRunning()
+    {
+        var running = Timers.Where(t => t.EndsAt is not null)
+            .ToDictionary(t => t.Key, t => t.EndsAt!.Value);
+
+        if (SameRunning(running, Data.Running)) return;
+
+        Data.Running = running;
+        _store.SaveSettings();
+    }
+
+    private static bool SameRunning(Dictionary<string, DateTime> a, Dictionary<string, DateTime> b)
+    {
+        if (a.Count != b.Count) return false;
+        foreach (var (k, v) in a)
+            if (!b.TryGetValue(k, out var bv) || bv != v) return false;
+        return true;
     }
 
     /// Nach einem Sprachwechsel - die Namen stehen als feste Zeichenketten.
