@@ -96,8 +96,13 @@ public sealed class GoalsViewModel : ViewModelBase
 
     private decimal Expenses(GoalDto goal) =>
         goal.Bookings
-            .Where(b => b.Kind != GoalBooking.Income && b.Kind != GoalBooking.Shop)
+            .Where(b => b.Kind != GoalBooking.Income && b.Kind != GoalBooking.Shop && b.Kind != GoalBooking.Paid)
             .Sum(b => b.Amount);
+
+    /// Was direkt aufs Ziel eingezahlt/bezahlt wurde - zaehlt wie eine
+    /// Einnahme aufs Netto und senkt so „Noch offen".
+    private decimal Paid(GoalDto goal) =>
+        goal.Bookings.Where(b => b.Kind == GoalBooking.Paid).Sum(b => b.Amount);
 
     /// Zusatzeinnahmen und, was im Shop liegt - letzteres ohne die Truhen,
     /// die ueber die Laeufe schon im Gewinn stehen.
@@ -123,11 +128,13 @@ public sealed class GoalsViewModel : ViewModelBase
     }
 
     private decimal Net(GoalDto goal) =>
-        GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn);
+        GoalCalc.Net(RunProfit(goal), Income(goal) + Paid(goal), Expenses(goal), goal.CarryIn);
 
     public string ProfitLabel => Active is null ? "—" : Won(RunProfit(Active));
     public string ExpensesLabel => Active is null ? "—" : Won(Expenses(Active));
     public string IncomeLabel => Active is null ? "—" : Won(Income(Active));
+    public string PaidLabel => Active is null ? "—" : Won(Paid(Active));
+    public bool HasPaid => Active is not null && Paid(Active) > 0m;
     public string CarryLabel => Active is null ? "—" : Won(Active.CarryIn);
     public bool HasCarry => Active is { CarryIn: > 0m };
     public string NetLabel => Active is null ? "—" : Won(Net(Active));
@@ -489,6 +496,8 @@ public sealed class GoalsViewModel : ViewModelBase
         Raise(nameof(ProfitLabel));
         Raise(nameof(ExpensesLabel));
         Raise(nameof(IncomeLabel));
+        Raise(nameof(PaidLabel));
+        Raise(nameof(HasPaid));
         Raise(nameof(CarryLabel));
         Raise(nameof(HasCarry));
         Raise(nameof(NetLabel));
@@ -516,6 +525,7 @@ public sealed class GoalsViewModel : ViewModelBase
     private void BuildKinds()
     {
         Kinds.Clear();
+        Kinds.Add(new RunChip(GoalBooking.Paid, Loc.T("goals.kind.paid")));
         Kinds.Add(new RunChip(GoalBooking.Push, Loc.T("goals.kind.push")));
         Kinds.Add(new RunChip(GoalBooking.Extra, Loc.T("goals.kind.extra")));
         Kinds.Add(new RunChip(GoalBooking.Expense, Loc.T("goals.kind.expense")));
@@ -552,6 +562,9 @@ public static class GoalBooking
     public const string Expense = "expense";
     public const string Income = "income";
 
+    /// Direkt aufs Ziel bezahlt/eingezahlt - senkt „Noch offen".
+    public const string Paid = "paid";
+
     /// Was im Shop liegt und noch nicht verkauft ist.
     public const string Shop = "shop";
 
@@ -583,7 +596,7 @@ public sealed class GoalBookingViewModel(GoalBookingDto dto, string amount, stri
 
     /// Zusatzeinnahmen stehen gruen da, Ausgaben in Bernstein - man sieht auf
     /// einen Blick, was dazukam und was abging.
-    public bool IsIncome { get; } = dto.Kind is GoalBooking.Income or GoalBooking.Shop;
+    public bool IsIncome { get; } = dto.Kind is GoalBooking.Income or GoalBooking.Shop or GoalBooking.Paid;
 }
 
 /// Eine Truhenzeile eines Shop-Bestands, so wie sie in der Maske steht.

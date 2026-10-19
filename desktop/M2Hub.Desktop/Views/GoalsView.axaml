@@ -68,6 +68,14 @@
                                  Text="{Binding IncomeLabel}" />
                     </Grid>
                   </Border>
+                  <Border Classes="statrow" IsVisible="{Binding HasPaid}">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.paid}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold"
+                                 Foreground="{StaticResource SuccessBrush}"
+                                 Text="{Binding PaidLabel}" />
+                    </Grid>
+                  </Border>
                   <Border Classes="statrow">
                     <Grid ColumnDefinitions="*,Auto">
                       <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.expenses}" />

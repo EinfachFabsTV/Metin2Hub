@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.3
+
+**Neu**
+
+- **Ziele: „Bezahlt" eintragen.** Hast du schon etwas aufs Ziel bezahlt
+  (z. B. 700w von 2700w), trägst du das jetzt als Posten **„Bezahlt"** ein –
+  „Noch offen" sinkt entsprechend (2700w → 2000w), und der Betrag bleibt im
+  Verlauf stehen.
+
 ## 1.79.2
 
 **Neu**
