@@ -168,7 +168,9 @@ internal static class SetFmt
                    ?? imgs.FirstOrDefault(i => i.Part == "Body")
                    ?? imgs.FirstOrDefault();
         if (body is not null) return body.File;
-        return s.Mounts.Concat(s.Pets).Concat(s.Weapons).FirstOrDefault()?.File ?? "";
+        var slot = s.Mounts.Concat(s.Pets).Concat(s.Weapons).FirstOrDefault()?.File;
+        // Gegenstand-Sets (z. B. Ringe in „Nezeraths Kopf") haben ein eigenes Icon.
+        return !string.IsNullOrEmpty(slot) ? slot : s.Icon;
     }
 
     // Reihenfolge der Kostuembilder: Frisur vor Body, m vor w.
@@ -210,6 +212,8 @@ public sealed class SetCardViewModel : ViewModelBase
         ShowRing = showRing;
 
         // Slot-Reihe in fester Reihenfolge; nur Slots, die das Set hat.
+        // Gegenstand-Sets (Ringe in „Nezeraths Kopf") zeigen ihr eigenes Icon.
+        AddSlot("costumes.card.item", [set.Icon]);
         AddSlot("costumes.card.weapon", set.Weapons.Select(w => w.File));
         AddSlot("costumes.card.armor", set.Costumes.SelectMany(c => c.Images).Where(i => i.Part == "Body").Select(i => i.File));
         AddSlot("costumes.card.hair", set.Costumes.SelectMany(c => c.Images).Where(i => i.Part == "Frisur").Select(i => i.File));
@@ -238,7 +242,9 @@ public sealed class SetCardViewModel : ViewModelBase
     public RelayCommand SelectTierCommand { get; }
 
     public IReadOnlyList<EffectLine> Effects =>
-        SetFmt.Lines(Set.Effects.TryGetValue(_tier.ToString(), out var l) ? l : null);
+        Set.Effects.Count > 0
+            ? SetFmt.Lines(Set.Effects.TryGetValue(_tier.ToString(), out var l) ? l : null)
+            : SetFmt.Lines(Set.Stats);   // Gegenstand-Set: eigene Werte statt Stufen
 
     /// Bilder der Slots mit mehreren Varianten eins weiterdrehen.
     public void Advance()
@@ -313,6 +319,10 @@ public sealed class SetDetailViewModel
                 SetFmt.Lines(set.Effects.TryGetValue(n.ToString(), out var l) ? l : null)))
             .ToList();
 
+        // Eigene Werte des Sets (Gegenstand-Sets wie die Ringe in „Nezeraths Kopf").
+        Stats = SetFmt.Lines(set.Stats);
+        HasStats = Stats.Count > 0;
+
         Costumes = set.Costumes.Select(c => new CostumeGroupViewModel(c)).ToList();
 
         // Waffen links, rechts Pet und Reittier (Pet zuerst).
@@ -330,6 +340,8 @@ public sealed class SetDetailViewModel
     public string RingName { get; }
     public string Name { get; }
     public Bitmap? Icon { get; }
+    public IReadOnlyList<EffectLine> Stats { get; }
+    public bool HasStats { get; }
     public IReadOnlyList<EffectTier> Tiers { get; }
     public IReadOnlyList<CostumeGroupViewModel> Costumes { get; }
     public IReadOnlyList<SlotViewModel> Weapons { get; }

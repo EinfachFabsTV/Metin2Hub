@@ -122,8 +122,19 @@ while IFS= read -r -d '' ringDir; do
       esac
     done < <(find "$setDir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
+    # Ist das Set selbst ein Gegenstand (eigenes <Set>.png + <Set>.txt direkt im
+    # Ordner, keine Kostueme)? Dann Icon und Werte erfassen - so wie die
+    # Push-Ringe im Set-Ordner "Nezeraths Kopf".
+    setIcon=""
+    if [ -f "$setDir/$setName.png" ]; then
+      mkdir -p "$DEST/$folderK/$setK"
+      cp "$setDir/$setName.png" "$DEST/$folderK/$setK/_set-$setK.png"
+      setIcon="Sets/$folderK/$setK/_set-$setK.png"
+    fi
+    setStats="$(lines_json "$setDir/$setName.txt")"
+
     if [ $sfirst -eq 1 ]; then sfirst=0; else sets_json+=","; fi
-    sets_json+="{\"key\":\"$(js "$setK")\",\"name\":\"$(js "$setName")\",\"effects\":{$effects},\"costumes\":[$costumes],\"mounts\":$mounts,\"pets\":$pets,\"weapons\":$weapons}"
+    sets_json+="{\"key\":\"$(js "$setK")\",\"name\":\"$(js "$setName")\",\"icon\":\"$(js "$setIcon")\",\"stats\":$setStats,\"effects\":{$effects},\"costumes\":[$costumes],\"mounts\":$mounts,\"pets\":$pets,\"weapons\":$weapons}"
   done < <(find "$ringDir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
   # Ordnername "A & B" -> ein Ring je Name, dieselben Sets. Icon je Ring: die

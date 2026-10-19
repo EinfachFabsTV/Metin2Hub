@@ -234,6 +234,20 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <!-- Eigene Werte (Gegenstand-Sets, z. B. Ringe in „Nezeraths Kopf") -->
+        <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasStats}">
+          <StackPanel Spacing="6">
+            <TextBlock FontWeight="Bold" Text="{loc:T costumes.stats}" />
+            <ItemsControl ItemsSource="{Binding Selected.Stats}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:EffectLine">
+                  <TextBlock FontSize="13" TextWrapping="Wrap" Classes.exp="{Binding IsExp}" Text="{Binding Text}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
         <!-- Kostuem-Varianten: Frisur m/w, dann Body m/w -->
         <Border Classes="card" Padding="14" IsVisible="{Binding Selected.HasCostumes}">
           <StackPanel Spacing="10">

@@ -81,6 +81,14 @@ public sealed class CostumeSet
     public string Key { get; set; } = "";
     public string Name { get; set; } = "";
 
+    /// Eigenes Icon des Sets - gesetzt, wenn das Set selbst ein Gegenstand ist
+    /// (z. B. die Push-Ringe im Set „Nezeraths Kopf"), sonst leer.
+    public string Icon { get; set; } = "";
+
+    /// Eigene Werte des Sets (aus der gleichnamigen .txt), fuer Gegenstand-Sets
+    /// wie die Ringe in „Nezeraths Kopf".
+    public List<string> Stats { get; set; } = [];
+
     /// Schluessel "2"/"3"/"4" -> die Effektzeilen.
     public Dictionary<string, List<string>> Effects { get; set; } = new();
 

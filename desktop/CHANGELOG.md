@@ -7,6 +7,19 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.1
+
+**Neu**
+
+- **Set „Nezeraths Kopf":** Das Set zeigt jetzt die enthaltenen Push-Ringe und
+  Amulette (Ring der Freude, Segen der Macht, Nazar-Amulett, …) jeweils mit
+  eigenem Icon und ihren Werten – vorher standen sie leer da.
+
+**Geändert**
+
+- **Auto-Res** hat jetzt ein eigenes Symbol auf der Helper-Kachel.
+- Alle Event-Daten (Kostüm-Sets, Loot-Filter, Okey-Loot) neu eingelesen.
+
 ## 1.79.0
 
 **Neu**
