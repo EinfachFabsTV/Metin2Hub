@@ -7,6 +7,14 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.4
+
+**Geändert**
+
+- **Ziele: „Bezahlt" senkt den Zielbetrag.** Ein „Bezahlt"-Posten verringert
+  jetzt das **Ziel selbst** (2700w − 500w bezahlt = **2200w Ziel**) statt nur
+  „Noch offen" zu senken.
+
 ## 1.79.3
 
 **Neu**

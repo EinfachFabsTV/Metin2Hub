@@ -78,7 +78,7 @@ public sealed class GoalsViewModel : ViewModelBase
     public bool HasNoGoals => Data.Goals.Count == 0;
 
     public string Title => Active?.Title ?? "—";
-    public string TargetLabel => Active is null ? "—" : Won(Active.Target);
+    public string TargetLabel => Active is null ? "—" : Won(EffectiveTarget(Active));
 
     /// Was die Laeufe seit dem Start des Ziels eingebracht haben, in Won.
     private decimal RunProfit(GoalDto goal) =>
@@ -99,10 +99,13 @@ public sealed class GoalsViewModel : ViewModelBase
             .Where(b => b.Kind != GoalBooking.Income && b.Kind != GoalBooking.Shop && b.Kind != GoalBooking.Paid)
             .Sum(b => b.Amount);
 
-    /// Was direkt aufs Ziel eingezahlt/bezahlt wurde - zaehlt wie eine
-    /// Einnahme aufs Netto und senkt so „Noch offen".
+    /// Was direkt aufs Ziel bezahlt wurde - senkt den **Zielbetrag selbst**
+    /// (2700w, 500w bezahlt -> 2200w Ziel).
     private decimal Paid(GoalDto goal) =>
         goal.Bookings.Where(b => b.Kind == GoalBooking.Paid).Sum(b => b.Amount);
+
+    /// Das um bereits Bezahltes verringerte Ziel. Nie unter null.
+    private decimal EffectiveTarget(GoalDto goal) => Math.Max(0m, goal.Target - Paid(goal));
 
     /// Zusatzeinnahmen und, was im Shop liegt - letzteres ohne die Truhen,
     /// die ueber die Laeufe schon im Gewinn stehen.
@@ -128,7 +131,7 @@ public sealed class GoalsViewModel : ViewModelBase
     }
 
     private decimal Net(GoalDto goal) =>
-        GoalCalc.Net(RunProfit(goal), Income(goal) + Paid(goal), Expenses(goal), goal.CarryIn);
+        GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn);
 
     public string ProfitLabel => Active is null ? "—" : Won(RunProfit(Active));
     public string ExpensesLabel => Active is null ? "—" : Won(Expenses(Active));
@@ -138,9 +141,9 @@ public sealed class GoalsViewModel : ViewModelBase
     public string CarryLabel => Active is null ? "—" : Won(Active.CarryIn);
     public bool HasCarry => Active is { CarryIn: > 0m };
     public string NetLabel => Active is null ? "—" : Won(Net(Active));
-    public string RestLabel => Active is null ? "—" : Won(GoalCalc.Rest(Active.Target, Net(Active)));
+    public string RestLabel => Active is null ? "—" : Won(GoalCalc.Rest(EffectiveTarget(Active), Net(Active)));
 
-    public double Progress => Active is null ? 0 : GoalCalc.Progress(Active.Target, Net(Active));
+    public double Progress => Active is null ? 0 : GoalCalc.Progress(EffectiveTarget(Active), Net(Active));
     public string ProgressLabel => Progress.ToString("0.#", CultureInfo.CurrentCulture) + " %";
 
     /// Wie viele Laeufe des aktiven Laufs noch fehlen - geschaetzt aus dem,
@@ -151,7 +154,7 @@ public sealed class GoalsViewModel : ViewModelBase
         {
             if (Active is null) return "—";
 
-            var rest = GoalCalc.Rest(Active.Target, Net(Active));
+            var rest = GoalCalc.Rest(EffectiveTarget(Active), Net(Active));
             if (rest <= 0m) return Loc.T("goals.reached");
 
             var perRun = PerRun(Active.ActiveRun);
@@ -422,7 +425,7 @@ public sealed class GoalsViewModel : ViewModelBase
     /// Schliesst ein Ziel ab und bereitet das naechste vor.
     private void Close(GoalDto goal, DateTime at)
     {
-        var surplus = GoalCalc.Surplus(goal.Target, Net(goal));
+        var surplus = GoalCalc.Surplus(EffectiveTarget(goal), Net(goal));
 
         goal.Done = true;
         goal.DoneAt = at;
@@ -447,7 +450,7 @@ public sealed class GoalsViewModel : ViewModelBase
         for (var guard = 0; guard < Data.Goals.Count; guard++)
         {
             var goal = Active;
-            if (goal is null || Net(goal) < goal.Target) return;
+            if (goal is null || Net(goal) < EffectiveTarget(goal)) return;
 
             Close(goal, DateTime.Now);
         }
@@ -470,7 +473,7 @@ public sealed class GoalsViewModel : ViewModelBase
 
         Queue.Clear();
         foreach (var goal in Data.Goals.OrderBy(g => g.Done).ThenBy(g => g.Sort))
-            Queue.Add(new GoalRowViewModel(goal, Won(goal.Target), goal.Id == Active?.Id));
+            Queue.Add(new GoalRowViewModel(goal, Won(EffectiveTarget(goal)), goal.Id == Active?.Id));
 
         Bookings.Clear();
         if (Active is not null)

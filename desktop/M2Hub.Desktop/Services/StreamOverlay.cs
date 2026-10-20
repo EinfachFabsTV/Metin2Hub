@@ -103,17 +103,20 @@ public sealed class StreamOverlay(LocalStore store)
         var income = goal.Bookings.Where(b => b.Kind == "income").Sum(b => b.Amount)
             + goal.Bookings.Where(b => b.Kind == "shop").Sum(ShopNet);
         var expenses = goal.Bookings
-            .Where(b => b.Kind != "income" && b.Kind != "shop")
+            .Where(b => b.Kind != "income" && b.Kind != "shop" && b.Kind != "paid")
             .Sum(b => b.Amount);
+        // „Bezahlt" senkt den Zielbetrag selbst (wie im Bereich Goals).
+        var paid = goal.Bookings.Where(b => b.Kind == "paid").Sum(b => b.Amount);
+        var target = Math.Max(0m, goal.Target - paid);
         var net = GoalCalc.Net(runProfit, income, expenses, goal.CarryIn);
-        var rest = GoalCalc.Rest(goal.Target, net);
-        var progress = GoalCalc.Progress(goal.Target, net);
+        var rest = GoalCalc.Rest(target, net);
+        var progress = GoalCalc.Progress(target, net);
 
         var entries = InScope().ToList();
         var run = RunCatalog.Find(goal.ActiveRun)?.Name ?? goal.ActiveRun;
 
-        WriteFile("ziel.txt", goal.Title.Length > 0 ? goal.Title : Won(goal.Target));
-        WriteFile("ziel-wert.txt", Won(goal.Target));
+        WriteFile("ziel.txt", goal.Title.Length > 0 ? goal.Title : Won(target));
+        WriteFile("ziel-wert.txt", Won(target));
         WriteFile("ziel-netto.txt", Won(net));
         WriteFile("ziel-offen.txt", Won(rest));
         WriteFile("ziel-ausgaben.txt", Won(expenses));
@@ -144,7 +147,7 @@ public sealed class StreamOverlay(LocalStore store)
 
         WriteFile("goal.html", GoalPage(
             goal.Title.Length > 0 ? goal.Title : Loc.T("stream.goal.title"),
-            Won(goal.Target), Won(net), Won(rest), expenses > 0m ? Won(expenses) : "",
+            Won(target), Won(net), Won(rest), expenses > 0m ? Won(expenses) : "",
             progress, entries.Sum(e => e.Chests), entries.Count, run, runsLeft));
     }
 
