@@ -92,7 +92,7 @@ Ayrıca her koşu için düğmeye basınca işleyen bir **bekleme süresi** – 
 ### 🧮 &nbsp;Hesaplayıcı
 
 **Lonca hesaplayıcısı**: seviyeden seviyeye kaç bağış eksik, ne kadar sürer ve
-kaça mal olur.
+kaça mal olur. Ayrıca **Pet** ve **Biyolog** hesaplayıcıları.
 
 Küçük, orta ve yüksek bağış ayrı ayrı açılıp kapatılabilir.
 
@@ -119,7 +119,7 @@ diğerleri.
 
 **Kazanç kendini sayar**: girdiğin koşuların hedef başladığından beri
 getirdiği. Elle yalnızca **giderler** (push, kostüm, diğer), ek gelirler ve
-**dükkânda duran mal** eklenir.
+**dükkânda duran mal** eklenir. Hedefe **ödenen** tutar hedefi düşürür.
 
 Yanında **borç hesaplayıcısı**: borç bitene kadar kaç koşu kaldı.
 
@@ -146,6 +146,38 @@ tek metin dosyası olarak.
 
 **Sunucu yok, port yok**: M2Hub dosyaları kendi profiline yazar, OBS onları
 diskten okur. Saydamlık ve boyut uygulamada ayarlanır.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🎭 &nbsp;Kostümler
+
+**Tüm push-yüzük kostümlerinin kataloğu**: bir yüzük seç ve setleri parçalarıyla
+gör – binek, pet, silah ve kostüm varyantları (erkek/kadın).
+
+Her set için **efekt kademeleri** (2, 3, 4 parça) ve değerleri. Tüm set ve parça
+adlarında arama doğru olanı anında bulur.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔎 &nbsp;Loot filtresi
+
+Bir eşyanın **hangi loot-filtre kategorisine ait olduğunu** hızlıca ara – resim
+ve aramayla.
+
+</td>
+<td width="33%" valign="top">
+
+### 🃏 &nbsp;Yardımcılar
+
+Güncel etkinlikler için küçük **araçlar**. **Okey yardımcısı** kartlarına en iyi
+kombinasyonu gösterir, puanı ve sandığı sayar ve canlı olarak altın/gümüş
+şansını tahmin eder – sandık ganimetiyle birlikte.
+
+**Auto-Res**, istemcinin çözünürlüğünü hazır ayarlarla belirler.
 
 </td>
 </tr>

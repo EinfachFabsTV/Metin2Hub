@@ -92,7 +92,7 @@ mehrere Setups das Timer-Fenster über dem Spiel.
 ### 🧮 &nbsp;Rechner
 
 Der **Gilden-Rechner**: wie viele Spenden von Stufe zu Stufe fehlen, wie lange
-das dauert und was es kostet.
+das dauert und was es kostet. Dazu Rechner für **Pet** und **Biologen**.
 
 Kleine, mittlere und hohe Spende lassen sich einzeln zu- und abschalten.
 
@@ -118,7 +118,8 @@ Ein **Ziel in Won** – „1500w für X" –, dahinter weitere als Warteschlange
 
 Der **Gewinn zählt sich selbst**: was die eingetragenen Läufe seit dem Start
 des Ziels gebracht haben. Von Hand kommen nur **Ausgaben** (Push, Kostüme,
-Sonstiges), Zusatzeinnahmen und **was noch im Shop liegt**.
+Sonstiges), Zusatzeinnahmen und **was noch im Shop liegt**. Schon aufs Ziel
+**Bezahltes** senkt den Zielbetrag.
 
 Daneben der **Schulden-Rechner**: wie viele Läufe bis zur Tilgung fehlen.
 
@@ -145,6 +146,38 @@ einzeln als Textdatei.
 
 **Ohne Server und ohne Port**: M2Hub legt die Dateien im eigenen Profil ab, OBS
 liest sie von der Platte. Deckkraft und Größe stellst du in der App ein.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🎭 &nbsp;Kostüme
+
+Ein **Katalog aller Push-Ring-Kostüme**: Ring wählen und die Sets mit ihren
+Teilen sehen – Reittier, Pet, Waffe und die Kostüm-Varianten (männlich/weiblich).
+
+Zu jedem Set die **Effektstufen** (2, 3, 4 Teile) mit ihren Werten. Eine Suche
+über alle Set- und Teilnamen findet sofort das Richtige.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔎 &nbsp;Loot-Filter
+
+Schnell nachschlagen, **in welche Kategorie des Loot-Filters ein Gegenstand
+gehört** – mit Bild und Suche.
+
+</td>
+<td width="33%" valign="top">
+
+### 🃏 &nbsp;Helfer
+
+Kleine **Werkzeuge für laufende Events**. Der **Okey-Helfer** zeigt die beste
+Kombo zu deinen Karten, zählt Punkte und Truhe mit und schätzt live die Chance
+auf Gold/Silber – samt Truhen-Loot.
+
+**Auto-Res** setzt die Auflösung deines Clients per Preset.
 
 </td>
 </tr>

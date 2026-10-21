@@ -94,7 +94,8 @@ timer window over the game for several setups.
 ### 🧮 &nbsp;Calculator
 
 The **guild calculator**: how many donations are missing from level to level,
-how long that takes and what it costs.
+how long that takes and what it costs. Plus calculators for **pets** and
+**biologists**.
 
 Small, medium and high donations can be switched on and off separately.
 
@@ -121,6 +122,7 @@ A **goal in won** – “1500w for X” – with further goals queued behind it.
 The **profit counts itself**: whatever the runs you entered have brought in
 since the goal started. By hand you only add **expenses** (push, costumes,
 anything else), extra income and **what is still sitting in your shop**.
+Anything **already paid** toward the goal lowers its amount.
 
 Next to it the **debt calculator**: how many runs are missing until it is paid
 off.
@@ -148,6 +150,38 @@ as a text file.
 
 **No server and no port**: M2Hub writes the files into your own profile, OBS
 reads them from disk. Opacity and size are set inside the app.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🎭 &nbsp;Costumes
+
+A **catalog of all push-ring costumes**: pick a ring and see the sets with
+their parts – mount, pet, weapon and the costume variants (male/female).
+
+For each set the **effect tiers** (2, 3, 4 parts) with their stats. A search
+over all set and part names finds the right one instantly.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔎 &nbsp;Loot filter
+
+Quickly look up **which loot-filter category an item belongs to** – with
+picture and search.
+
+</td>
+<td width="33%" valign="top">
+
+### 🃏 &nbsp;Helpers
+
+Small **tools for current events**. The **Okey helper** shows the best combo for
+your cards, keeps count of points and chest, and estimates the live chance of
+gold/silver – including the chest loot.
+
+**Auto-Res** sets your client's resolution via presets.
 
 </td>
 </tr>

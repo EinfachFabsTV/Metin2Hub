@@ -94,7 +94,8 @@ In più un **tempo di recupero** per run che parte alla pressione di un pulsante
 ### 🧮 &nbsp;Calcolatore
 
 Il **calcolatore di gilda**: quante donazioni mancano da un livello all'altro,
-quanto tempo serve e quanto costa.
+quanto tempo serve e quanto costa. In più i calcolatori per **pet** e
+**biologi**.
 
 Donazione piccola, media e alta si attivano e disattivano singolarmente.
 
@@ -120,7 +121,8 @@ Un **obiettivo in won** – «1500w per X» –, con altri in coda dietro.
 
 Il **guadagno si conta da solo**: quanto hanno reso le run inserite dall'inizio
 dell'obiettivo. A mano si aggiungono solo le **spese** (push, costumi, altro),
-le entrate extra e **ciò che è ancora nel negozio**.
+le entrate extra e **ciò che è ancora nel negozio**. Quanto è già stato
+**pagato** sull'obiettivo ne riduce l'importo.
 
 Accanto il **calcolatore dei debiti**: quante run mancano fino all'estinzione.
 
@@ -147,6 +149,39 @@ come file di testo.
 
 **Nessun server e nessuna porta**: M2Hub scrive i file nel tuo profilo, OBS li
 legge dal disco. Opacità e dimensione si impostano nell'app.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🎭 &nbsp;Costumi
+
+Un **catalogo di tutti i costumi degli anelli push**: scegli un anello e vedi i
+set con i loro pezzi – cavalcatura, pet, arma e le varianti del costume
+(uomo/donna).
+
+Per ogni set i **livelli di effetto** (2, 3, 4 pezzi) con i loro valori. Una
+ricerca su tutti i nomi di set e pezzi trova subito quello giusto.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔎 &nbsp;Filtro bottino
+
+Cerca velocemente **in quale categoria del filtro bottino rientra un oggetto** –
+con immagine e ricerca.
+
+</td>
+<td width="33%" valign="top">
+
+### 🃏 &nbsp;Aiuti
+
+Piccoli **strumenti per gli eventi in corso**. L'**aiuto Okey** mostra la
+migliore combo per le tue carte, tiene il conto di punti e forziere e stima dal
+vivo la probabilità di oro/argento – con il bottino dei forzieri.
+
+**Auto-Res** imposta la risoluzione del tuo client tramite preset.
 
 </td>
 </tr>
