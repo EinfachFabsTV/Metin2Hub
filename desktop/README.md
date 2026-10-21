@@ -7,8 +7,10 @@ keinen System-WebView.
 
 Umfang: **Start** (eine Übersicht aus selbst gewählten Abschnitten),
 **Accounts**, **Runs** (der Run Tracker), **Goals** (Ziele und Schulden),
-**Events** (global und serverspezifisch), **Itemshop** und **Rechner** (bisher
-der Gilden-Rechner). Die Bereiche stehen in einer Seitenleiste links.
+**Events** (global und serverspezifisch), **Itemshop**, **Kostüme** (Set-Katalog
+der Push-Ringe), **Loot-Filter** (Nachschlagewerk), **Helfer** (Okey-Helfer und
+Auto-Res) und **Rechner** (Gilde, Pet, Biologen). Die Bereiche stehen in einer
+Seitenleiste links.
 
 Fürs Streamen kommen dazu: ein **Knopffenster mit den Abklingzeiten** über dem
 Spiel und **Einblendungen für OBS**, die als Dateien im Profil liegen – kein
@@ -32,6 +34,8 @@ Registrierung. Alles liegt lokal im Nutzerprofil.
 | Itemshop | Forum-Board 303 „News - Itemshop“ | `cache.json` |
 | Ziele und ihre Posten | nur lokal, von Hand gepflegt | `goals.json` |
 | Schulden, Timer, Einblendungen | nur lokal | `settings.json` |
+| Kostüm-Sets, Loot-Filter, Okey-Loot | mitgeliefert, aus Quellordnern per Importer erzeugt | `Assets/` in der Exe |
+| Auto-Res-Presets | nur lokal (ändert die `metin2.cfg` des Clients) | `settings.json` + `autores/` |
 
 Von den geladenen Forum-Daten bleibt stehen, **was läuft oder erst ansteht** –
 erst abgelaufene Einträge werden nach sieben Tagen verworfen. Das Abrufdatum
@@ -141,13 +145,46 @@ Ein Ziel steht in **Won** („1500w für X"), dahinter weitere als Warteschlange
 eingebracht haben, über alle Laufarten. Von Hand kommen nur Ausgaben
 (Standard-Push, Zusatz-Push, Zusatzausgabe), Zusatzeinnahmen und der
 **Shop-Bestand**: „150w im Shop" zählt mit, aber abzüglich der Truhen, die über
-die Läufe schon im Gewinn stehen – sonst zählte dieselbe Truhe zweimal. Den
+die Läufe schon im Gewinn stehen – sonst zählte dieselbe Truhe zweimal. Ein
+**„Bezahlt"**-Posten senkt den Zielbetrag selbst (2700w − 500w = 2200w). Den
 Gesamtwert rechnet man selbst zusammen; das Spiel zeigt ihn nirgends an.
 
 Der **Schulden-Rechner** sagt, wie viele Läufe bis zur Tilgung fehlen. Truhen je
 Lauf (aus den eigenen Einträgen oder von Hand) und Preis je Truhe (Spanne oder
 Durchschnitt) sind umschaltbar; das Ergebnis ist eine Spanne, weil beide Größen
 schwanken.
+
+## Kostüme
+
+Ein Katalog der Push-Ring-Kostüm-Sets (`CostumeCatalog`, Daten aus
+`Assets/Sets/sets.json`). Oben „Alle" und jeder Push-Ring, darunter Live-Suche
+über Set- und Teilnamen und das Set-Raster. Ein Set zeigt seine Effektstufen
+(2/3/4 Teile) mit Werten, die Kostüm-Varianten (Frisur/Body, m/w) und den
+vierten Slot (Reittier/Pet/Waffe) mit eigenen Werten. Manche Sets sind selbst
+Gegenstände (die Ringe im Set „Nezeraths Kopf") und zeigen Icon und Werte.
+
+Die Bilddaten entstehen aus einem Quellordner über `tools/import-sets.sh` und
+liegen der Exe bei – kein Abruf zur Laufzeit.
+
+## Loot-Filter
+
+Ein Nachschlagewerk: in welche Filter-Kategorie ein Gegenstand gehört, mit Bild
+und Suche (`Assets/LootFilter/lootfilter.json`, aus `tools/import-lootfilter.sh`).
+
+## Helfer
+
+Kleine Werkzeuge für laufende Events, als Kacheln auf einer Startseite:
+
+- **Okey-Helfer** – zu den fünf offenen Karten die beste gültige 3er-Kombo
+  (Set oder Reihe), Punkte und Truhe laufend mit, und per Simulation die
+  **Chance auf Gold/Silber** ab dem aktuellen Stand. Dazu der **Truhen-Loot**
+  je Stufe mit Drop-Wahrscheinlichkeit (`Services/Calc/OkeyCalc.cs`,
+  `Services/Okey/OkeyLoot.cs`). Ein Hilfe-Popup erklärt das Event an
+  animierten Beispielkarten.
+- **Auto-Res** – setzt die Auflösung (`WIDTH`/`HEIGHT`) in der `metin2.cfg`
+  des Clients per Preset (z. B. „Meley Res", „Single Client"). Es wird nur die
+  Auflösung geändert, der Rest der Datei bleibt; den Client startet man selbst
+  (`Services/AutoResConfig.cs`).
 
 ## Abklingzeiten über dem Spiel
 
@@ -158,7 +195,9 @@ dazu lassen sich eigene Timer mit Namen und Zeit anlegen („5:30" sind fünf
 Minuten dreißig).
 
 Ein Klick startet, der nächste hält an, Rechtsklick stellt zurück. Gezogen wird
-an der ganzen Fläche; wo es stand, merkt sich die App.
+an der ganzen Fläche; wo es stand, merkt sich die App. Laufende Uhren
+**überstehen einen Neustart**: sie laufen weiter oder stehen bereit, wenn die
+Zeit zwischenzeitlich schon um war.
 
 **Am Ende läuft ein Ton** – Weich (Standard), Glocke, Doppelton oder Gong, alle
 auf dieselbe Lautstärke gebracht und erzeugt von
@@ -251,6 +290,7 @@ cache.json      Events, Eventkalender, Itemshop (Abgelaufenes nach 7 Tagen)
 images/         heruntergeladene Ankündigungsbilder
 stream/         die Dateien für OBS (timer/ darin für die Abklingzeiten)
 sound/          der Ton der Abklingzeit, einmal aus der Exe gelegt
+autores/        Auto-Res: je Preset eine vollständige metin2.cfg
 ```
 
 Zum Zurücksetzen genügt es, den Ordner zu löschen. `accounts.json`,
@@ -260,16 +300,20 @@ andere lädt oder schreibt sich neu.
 ## Aufbau
 
 ```
-Services/       LocalStore (Ablage), ForumService (Abruf + Drosselung), ImageCache
+Services/       LocalStore (Ablage), ForumService (Abruf + Drosselung), ImageCache, AutoResConfig
 Services/Forum/ Portierte Parser: Html, EventCalendar, Board
-Services/Calc/  GuildCalc, RunCatalog, Money, DebtCalc, GoalCalc – reine Funktionen
+Services/Calc/  GuildCalc, RunCatalog, Money, DebtCalc, GoalCalc, OkeyCalc – reine Funktionen
+Services/Costumes/  CostumeCatalog (Set-Katalog), SetSimulator
+Services/Okey/  OkeyLoot (Truhen-Loot des Okey-Events)
 Services/       StreamOverlay (Dateien für OBS), Sound (Ton der Abklingzeit),
-                Patchnotes, UpdateService, EventIcons
+                Patchnotes, UpdateService, EventIcons, HelperIcons
 Services/I18n/  Loc (Oberflächentexte), Glossary (Forum-Wörter → Anzeigesprache)
 Models/         Datenmodell der App
 ViewModels/     Zustand und Logik je Bereich (INotifyPropertyChanged, ohne Framework-Zusatz)
 Views/          XAML-Oberflächen, ein UserControl je Bereich
 Styles/         Theme.axaml – die Tokens aus Veraltet/app/assets/css/main.css
+Assets/         Bilder und Daten: Sets, LootFilter, Okey (per tools/-Importer erzeugt)
+tools/          Importer (import-sets, import-lootfilter, import-okey-loot), timer-sound.py
 ```
 
 Farben stehen ausschließlich in `Styles/Theme.axaml`; in den Ansichten werden
