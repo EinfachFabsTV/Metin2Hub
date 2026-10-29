@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.5
+
+**Neu**
+
+- **Ziele: vorhandenes Won anrechnen.** Du kannst dein bereits vorhandenes Won
+  eintragen und per Schalter wählen, ob es aufs aktive Ziel zählt. Ist es an,
+  senkt es „Noch offen" (Ziel 150w, 50w vorhanden angerechnet → nur noch 100w
+  offen).
+
 ## 1.79.4
 
 **Geändert**

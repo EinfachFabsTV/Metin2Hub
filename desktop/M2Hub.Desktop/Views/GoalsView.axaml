@@ -60,6 +60,14 @@
                       <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding CarryLabel}" />
                     </Grid>
                   </Border>
+                  <Border Classes="statrow" IsVisible="{Binding HasOnHand}">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.onhand}" />
+                      <TextBlock Grid.Column="1" FontWeight="Bold"
+                                 Foreground="{StaticResource SuccessBrush}"
+                                 Text="{Binding OnHandLabel}" />
+                    </Grid>
+                  </Border>
                   <Border Classes="statrow">
                     <Grid ColumnDefinitions="*,Auto">
                       <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.income}" />
@@ -91,6 +99,19 @@
                     </Grid>
                   </Border>
                 </StackPanel>
+
+                <!-- Vorhandenes Won -->
+                <Border Classes="statrow">
+                  <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center" Text="{loc:T goals.onhand.enter}" />
+                      <TextBox Grid.Column="1" Margin="8,0,0,0" Width="150" HorizontalAlignment="Left"
+                               Watermark="{loc:T goals.onhand.ph}"
+                               Text="{Binding OnHandText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    </Grid>
+                    <CheckBox IsChecked="{Binding OnHandCounts}" Content="{loc:T goals.onhand.counts}" />
+                  </StackPanel>
+                </Border>
 
                 <!-- Der aktive Lauf: Anzeige und Schaetzung, kein Filter -->
                 <StackPanel Spacing="6">

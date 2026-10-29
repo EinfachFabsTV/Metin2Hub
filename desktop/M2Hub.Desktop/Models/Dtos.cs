@@ -313,6 +313,12 @@ public sealed class GoalsData
     /// Nutzer umschaltet).
     public string OnReached { get; set; } = "carry";
 
+    /// Vorhandenes Won, das man schon hat. Wird nur aufs aktive Ziel
+    /// angerechnet, wenn `OnHandCounts` an ist - dann senkt es „Noch offen"
+    /// (Ziel 150w, 50w vorhanden angerechnet -> nur noch 100w offen).
+    public decimal OnHand { get; set; }
+    public bool OnHandCounts { get; set; }
+
     public int NextId { get; set; } = 1;
 
     public int TakeId() => NextId++;
