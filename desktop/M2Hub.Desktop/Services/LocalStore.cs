@@ -52,6 +52,54 @@ public sealed class LocalStore
         Prune();
         StampRunPrices();
         StampTimerSeconds();
+        StampGoals();
+    }
+
+    /// Einmalige Umstellung alter goals.json: Push/Extra/Shop werden zu
+    /// Zusatzeinnahmen (Shop mit eingefrorenem Netto, Truhenzeilen entfallen),
+    /// und die globale Regel „bei Erreichen" wandert in jedes Ziel.
+    /// Idempotent: danach gibt es keine push/extra/shop-Buchungen mehr.
+    private void StampGoals()
+    {
+        var changed = false;
+        foreach (var goal in Goals.Goals)
+        {
+            foreach (var b in goal.Bookings)
+            {
+                if (b.Kind == ViewModels.GoalBooking.Push || b.Kind == ViewModels.GoalBooking.Extra)
+                {
+                    b.Kind = ViewModels.GoalBooking.Income;
+                    changed = true;
+                }
+                else if (b.Kind == ViewModels.GoalBooking.Shop)
+                {
+                    // wie GoalsViewModel.ShopNet/Counted: Truhen * Preis (kk) / 100 = Won
+                    var counted = b.Chests.Sum(c => c.Chests * ChestPriceKk(c)) / Calc.Money.KkPerW;
+                    b.Amount = Calc.GoalCalc.ShopNet(b.Amount, counted);
+                    b.Chests.Clear();
+                    b.Kind = ViewModels.GoalBooking.Income;
+                    changed = true;
+                }
+            }
+
+            // Nur in ein noch nicht gesetztes (leeres) Ziel kopieren - sonst
+            // ueberschriebe die Migration eine je Ziel getroffene Wahl, und ein
+            // zweiter Lauf machte neue Ziele wieder zu "carry".
+            if (string.IsNullOrEmpty(goal.OnReached) && !string.IsNullOrEmpty(Goals.OnReached))
+            {
+                goal.OnReached = Goals.OnReached;
+                changed = true;
+            }
+        }
+
+        if (changed) SaveGoals();
+    }
+
+    /// Preis einer Truhenzeile in kk - wie `GoalsViewModel.ChestPrice`.
+    private decimal ChestPriceKk(GoalChestDto chest)
+    {
+        if (chest.Price > 0m) return chest.Price;
+        return Runs.ChestPrice.TryGetValue(chest.Run, out var p) ? p : Calc.RunCatalog.DefaultChestPrice;
     }
 
     /// Rechnet eigene Timer aus Fassungen vor 1.57.0 von Minuten in Sekunden

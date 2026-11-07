@@ -10,15 +10,12 @@ namespace M2Hub.Desktop.ViewModels;
 ///
 /// **Der Gewinn kommt von selbst.** Was die Laeufe seit dem Start des Ziels
 /// eingebracht haben, rechnet die App aus den Eintraegen im Run Tracker - ueber
-/// alle Laufarten. Von Hand kommen nur die Ausgaben und, als Gegenstueck, die
-/// Zusatzeinnahmen.
-///
-/// **Der aktive Lauf ist Anzeige und Schaetzung**, kein Filter: er steht im
-/// Overlay und bestimmt, womit „noch X Laeufe" gerechnet wird.
+/// alle Laufarten. Von Hand kommen nur Ausgaben, Zusatzeinnahmen und der
+/// Won-Abgleich mit dem Spiel.
 ///
 /// Die Ziele stehen als Warteschlange in `goals.json`; das erste offene ist
-/// das aktive. Was beim Erreichen geschieht, entscheidet der Nutzer
-/// (`GoalsData.OnReached`).
+/// das aktive. Was beim Erreichen geschieht, entscheidet der Nutzer je Ziel
+/// (`GoalDto.OnReached`).
 public sealed class GoalsViewModel : ViewModelBase
 {
     private readonly LocalStore _store;
@@ -29,10 +26,13 @@ public sealed class GoalsViewModel : ViewModelBase
     private string _newTarget = "";
     private string _amount = "";
     private string _note = "";
-    private string _kind = GoalBooking.Push;
-    private RunChip? _chestRun;
-    private string _chestCount = "";
-    private string _chestPrice = "";
+    private string _kind = GoalBooking.Income;
+    private string _setCurrentWon = "";
+
+    /// Beim Bearbeiten gemerkte Buchung: der naechste „Eintragen"-Klick
+    /// ueberschreibt sie, statt eine neue anzulegen.
+    private int? _editId;
+    private int _editGoalId;
 
     public GoalsViewModel(LocalStore store, IDialogService dialogs, StreamOverlay stream)
     {
@@ -40,30 +40,22 @@ public sealed class GoalsViewModel : ViewModelBase
         _dialogs = dialogs;
         _stream = stream;
 
-        foreach (var run in RunCatalog.Runs)
-        {
-            Runs.Add(new RunChip(run.Key, run.Name));
-            ChestRuns.Add(new RunChip(run.Key, run.Name));
-        }
-
-        _chestRun = ChestRuns.FirstOrDefault();
-
         BuildKinds();
         BuildModes();
 
         AddGoalCommand = new RelayCommand(_ => AddGoal());
         AddBookingCommand = new RelayCommand(_ => AddBooking());
-        AddChestCommand = new RelayCommand(_ => AddChest());
-        RemoveChestCommand = new RelayCommand(p => RemoveChest(p as GoalChestRowViewModel));
         ChooseKindCommand = new RelayCommand(p => { if (p is RunChip c) Kind = c.Key; });
-        ChooseRunCommand = new RelayCommand(p => { if (p is RunChip c) ActiveRun = c.Key; });
         ChooseModeCommand = new RelayCommand(p => { if (p is RunChip c) OnReached = c.Key; });
+        SetCurrentWonCommand = new RelayCommand(_ => SetCurrentWon());
+        EditBookingCommand = new RelayCommand(p => EditBooking(p as GoalBookingViewModel));
         FinishCommand = new RelayCommand(_ => Finish());
         DeleteBookingCommand = new AsyncRelayCommand(p => DeleteBookingAsync(p as GoalBookingViewModel));
         DeleteGoalCommand = new AsyncRelayCommand(p => DeleteGoalAsync(p as GoalRowViewModel));
         MoveUpCommand = new RelayCommand(p => Move(p as GoalRowViewModel, -1));
         MoveDownCommand = new RelayCommand(p => Move(p as GoalRowViewModel, +1));
 
+        MigrateCurrentWon();
         Reload();
     }
 
@@ -94,9 +86,13 @@ public sealed class GoalsViewModel : ViewModelBase
         return _store.Runs.ChestPrice.TryGetValue(entry.Run, out var p) ? p : RunCatalog.DefaultChestPrice;
     }
 
+    /// Ausgaben: alles, was abgeht - also nicht Einnahme, nicht Bezahlt und
+    /// nicht der (vorzeichenbehaftete) Abgleich.
     private decimal Expenses(GoalDto goal) =>
         goal.Bookings
-            .Where(b => b.Kind != GoalBooking.Income && b.Kind != GoalBooking.Shop && b.Kind != GoalBooking.Paid)
+            .Where(b => b.Kind != GoalBooking.Income
+                     && b.Kind != GoalBooking.Paid
+                     && b.Kind != GoalBooking.Adjust)
             .Sum(b => b.Amount);
 
     /// Was direkt aufs Ziel bezahlt wurde - senkt den **Zielbetrag selbst**
@@ -107,35 +103,18 @@ public sealed class GoalsViewModel : ViewModelBase
     /// Das um bereits Bezahltes verringerte Ziel. Nie unter null.
     private decimal EffectiveTarget(GoalDto goal) => Math.Max(0m, goal.Target - Paid(goal));
 
-    /// Zusatzeinnahmen und, was im Shop liegt - letzteres ohne die Truhen,
-    /// die ueber die Laeufe schon im Gewinn stehen.
+    /// Reine Zusatzeinnahmen.
     private decimal Income(GoalDto goal) =>
-        goal.Bookings.Where(b => b.Kind == GoalBooking.Income).Sum(b => b.Amount)
-        + goal.Bookings.Where(b => b.Kind == GoalBooking.Shop).Sum(ShopNet);
+        goal.Bookings.Where(b => b.Kind == GoalBooking.Income).Sum(b => b.Amount);
 
-    /// Was ein Shop-Posten unter dem Strich beitraegt.
-    private decimal ShopNet(GoalBookingDto booking) =>
-        GoalCalc.ShopNet(booking.Amount, Counted(booking));
+    /// Der Won-Abgleich mit dem Spiel - die Summe der (vorzeichenbehafteten)
+    /// Abgleich-Buchungen.
+    private decimal Adjust(GoalDto goal) =>
+        goal.Bookings.Where(b => b.Kind == GoalBooking.Adjust).Sum(b => b.Amount);
 
-    /// Der Teil eines Shop-Bestands, der ueber die Laeufe schon gezaehlt ist.
-    private decimal Counted(GoalBookingDto booking) =>
-        booking.Chests.Sum(c => c.Chests * ChestPrice(c)) / Money.KkPerW;
-
-    /// Der Preis einer Truhenzeile in kk: ihr eigener, sonst der Tagespreis,
-    /// den der Run Tracker fuer diesen Lauf zuletzt kennt.
-    private decimal ChestPrice(GoalChestDto chest)
-    {
-        if (chest.Price > 0m) return chest.Price;
-
-        return _store.Runs.ChestPrice.TryGetValue(chest.Run, out var p) ? p : RunCatalog.DefaultChestPrice;
-    }
-
-    /// Netto des Ziels. Ist das aktuelle Won von Hand gesetzt, **ersetzt** es
-    /// die Berechnung; sonst Laeufe + Einnahmen + Uebertrag − Ausgaben.
+    /// Netto des Ziels: Laeufe + Einnahmen + Uebertrag − Ausgaben + Abgleich.
     private decimal Net(GoalDto goal) =>
-        Data.UseCurrentWon
-            ? Data.CurrentWon
-            : GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn);
+        GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn, Adjust(goal));
 
     public string ProfitLabel => Active is null ? "—" : Won(RunProfit(Active));
     public string ExpensesLabel => Active is null ? "—" : Won(Expenses(Active));
@@ -145,40 +124,17 @@ public sealed class GoalsViewModel : ViewModelBase
     public string CarryLabel => Active is null ? "—" : Won(Active.CarryIn);
     public bool HasCarry => Active is { CarryIn: > 0m };
 
-    /* ---------- Aktuelles Won von Hand ---------- */
+    public string AdjustLabel => Active is null ? "—" : Won(Adjust(Active));
+    public bool HasAdjust => Active is not null && Adjust(Active) != 0m;
 
-    /// Der von Hand gesetzte aktuelle Won-Stand (ersetzt die Berechnung, wenn
-    /// `UseCurrentWon` an ist).
-    public decimal CurrentWon
-    {
-        get => Data.CurrentWon;
-        set
-        {
-            if (Data.CurrentWon == value) return;
-            Data.CurrentWon = value;
-            Save();
-        }
-    }
-
-    /// Ob das aktuelle Won von Hand gesetzt wird (und die Berechnung ersetzt).
-    public bool UseCurrentWon
-    {
-        get => Data.UseCurrentWon;
-        set
-        {
-            if (Data.UseCurrentWon == value) return;
-            Data.UseCurrentWon = value;
-            Save();
-        }
-    }
     public string NetLabel => Active is null ? "—" : Won(Net(Active));
     public string RestLabel => Active is null ? "—" : Won(GoalCalc.Rest(EffectiveTarget(Active), Net(Active)));
 
     public double Progress => Active is null ? 0 : GoalCalc.Progress(EffectiveTarget(Active), Net(Active));
     public string ProgressLabel => Progress.ToString("0.#", CultureInfo.CurrentCulture) + " %";
 
-    /// Wie viele Laeufe des aktiven Laufs noch fehlen - geschaetzt aus dem,
-    /// was dieser Lauf bisher im Mittel einbrachte.
+    /// Wie viele Laeufe noch fehlen - geschaetzt aus dem, was der zuletzt
+    /// genutzte Lauf bisher im Mittel einbrachte.
     public string RunsLeftLabel
     {
         get
@@ -188,12 +144,18 @@ public sealed class GoalsViewModel : ViewModelBase
             var rest = GoalCalc.Rest(EffectiveTarget(Active), Net(Active));
             if (rest <= 0m) return Loc.T("goals.reached");
 
-            var perRun = PerRun(Active.ActiveRun);
+            var perRun = PerRun(LastUsedRun());
             if (perRun <= 0m) return "—";
 
             return Loc.T("goals.runsLeft", GoalCalc.Runs(rest, perRun).ToString("N0", CultureInfo.CurrentCulture));
         }
     }
+
+    /// Die Laufart des juengsten Run-Tracker-Eintrags, sonst der erste Lauf
+    /// des Katalogs. Gleiche Wahl wie in der Stream-Einblendung.
+    private string LastUsedRun() =>
+        _store.Runs.Entries.OrderByDescending(e => e.AddedAt).FirstOrDefault()?.Run
+        ?? RunCatalog.Runs[0].Key;
 
     /// Was ein Lauf dieser Art im Mittel einbringt, in Won.
     private decimal PerRun(string runKey)
@@ -203,24 +165,6 @@ public sealed class GoalsViewModel : ViewModelBase
 
         return mine.Sum(e => e.Chests * Price(e)) / mine.Count / Money.KkPerW;
     }
-
-    /* ---------- Der aktive Lauf ---------- */
-
-    public ObservableCollection<RunChip> Runs { get; } = new();
-
-    public string ActiveRun
-    {
-        get => Active?.ActiveRun ?? "hydra";
-        set
-        {
-            if (Active is null || Active.ActiveRun == value) return;
-
-            Active.ActiveRun = value;
-            Save();
-        }
-    }
-
-    public RelayCommand ChooseRunCommand { get; }
 
     /* ---------- Ein Ziel anlegen ---------- */
 
@@ -240,7 +184,9 @@ public sealed class GoalsViewModel : ViewModelBase
             Target = target,
             Sort = Data.Goals.Count == 0 ? 0 : Data.Goals.Max(g => g.Sort) + 1,
             StartedAt = DateTime.Now,
-            ActiveRun = Active?.ActiveRun ?? "hydra",
+            // Die Regel explizit setzen, damit die einmalige Migration sie nicht
+            // nachtraeglich ueberschreibt.
+            OnReached = Data.OnReached is { Length: > 0 } ? Data.OnReached : GoalMode.Carry,
         });
 
         NewTitle = "";
@@ -248,9 +194,9 @@ public sealed class GoalsViewModel : ViewModelBase
         Save();
     }
 
-    /* ---------- Ausgaben und Zusatzeinnahmen ---------- */
+    /* ---------- Ausgaben, Einnahmen, Abgleich ---------- */
 
-    /// Die vier Arten als Knopfreihe.
+    /// Die drei Arten als Knopfreihe.
     public ObservableCollection<RunChip> Kinds { get; } = new();
 
     public string Kind
@@ -261,7 +207,6 @@ public sealed class GoalsViewModel : ViewModelBase
             if (!Set(ref _kind, value)) return;
 
             foreach (var c in Kinds) c.IsActive = c.Key == _kind;
-            Raise(nameof(IsShop));
         }
     }
 
@@ -270,106 +215,59 @@ public sealed class GoalsViewModel : ViewModelBase
 
     public RelayCommand ChooseKindCommand { get; }
     public RelayCommand AddBookingCommand { get; }
+    public RelayCommand EditBookingCommand { get; }
     public AsyncRelayCommand DeleteBookingCommand { get; }
 
     public ObservableCollection<GoalBookingViewModel> Bookings { get; } = new();
-
-    /* ---------- Shop-Bestand: die Truhen, die schon zaehlen ---------- */
-
-    /// Nur beim Shop-Bestand steht die Truhenmaske da - bei einer Ausgabe
-    /// gaebe es nichts herauszurechnen.
-    public bool IsShop => _kind == GoalBooking.Shop;
-
-    /// Alle Laufarten zur Auswahl: in den Gewinn zaehlen sie alle, also kann
-    /// auch aus jeder etwas im Shop liegen - nicht nur aus dem aktiven Lauf.
-    public ObservableCollection<RunChip> ChestRuns { get; } = new();
-
-    public RunChip? ChestRun { get => _chestRun; set => Set(ref _chestRun, value); }
-    public string ChestCount { get => _chestCount; set => Set(ref _chestCount, value); }
-
-    /// Leer heisst: der Tagespreis des Laufs. Verkauft wird aber nicht
-    /// zwingend zu dem, deshalb ist er ueberschreibbar.
-    public string ChestPriceText { get => _chestPrice; set => Set(ref _chestPrice, value); }
-
-    /// Die Zeilen, die beim naechsten „Eintragen" an den Posten gehen.
-    public ObservableCollection<GoalChestRowViewModel> NewChests { get; } = new();
-
-    public bool HasNewChests => NewChests.Count > 0;
-
-    public RelayCommand AddChestCommand { get; }
-    public RelayCommand RemoveChestCommand { get; }
-
-    private void AddChest()
-    {
-        if (_chestRun is null) return;
-        if (!int.TryParse(_chestCount.Trim(), out var count) || count <= 0) return;
-
-        var price = Read(_chestPrice, out var p) ? p : 0m;
-
-        NewChests.Add(new GoalChestRowViewModel(
-            new GoalChestDto { Run = _chestRun.Key, Chests = count, Price = price },
-            _chestRun.Label,
-            ChestPriceLabel(_chestRun.Key, price)));
-
-        ChestCount = "";
-        Raise(nameof(HasNewChests));
-        Raise(nameof(NewChestsLabel));
-    }
-
-    private void RemoveChest(GoalChestRowViewModel? row)
-    {
-        if (row is null) return;
-
-        NewChests.Remove(row);
-        Raise(nameof(HasNewChests));
-        Raise(nameof(NewChestsLabel));
-    }
-
-    /// Was von dem Betrag abginge, wenn man jetzt eintruege.
-    public string NewChestsLabel
-    {
-        get
-        {
-            var counted = NewChests.Sum(r => r.Dto.Chests * ChestPrice(r.Dto)) / Money.KkPerW;
-
-            return Loc.T("goals.shop.counted", Won(counted));
-        }
-    }
-
-    private string ChestPriceLabel(string run, decimal price)
-    {
-        var kk = price > 0m
-            ? price
-            : _store.Runs.ChestPrice.TryGetValue(run, out var p) ? p : RunCatalog.DefaultChestPrice;
-
-        return Money.FormatYang((double)kk) + (price > 0m ? "" : " *");
-    }
 
     private void AddBooking()
     {
         if (Active is null || !Read(_amount, out var amount) || amount <= 0m) return;
 
-        var booking = new GoalBookingDto
+        if (_editId is int id)
         {
-            Id = Data.TakeId(),
-            Kind = _kind,
-            Amount = amount,
-            Note = _note.Trim(),
-            AddedAt = DateTime.Now,
-        };
+            var existing = Active.Bookings.FirstOrDefault(b => b.Id == id);
+            if (existing is not null)
+            {
+                existing.Kind = _kind;
+                existing.Amount = amount;
+                existing.Note = _note.Trim();
+            }
 
-        // Die Truhen gehoeren zum Posten, nicht zum Ziel: wird er geloescht,
-        // verschwindet der Abzug mit ihm.
-        if (IsShop) booking.Chests.AddRange(NewChests.Select(r => r.Dto));
-
-        Active.Bookings.Add(booking);
+            _editId = null;
+        }
+        else
+        {
+            Active.Bookings.Add(new GoalBookingDto
+            {
+                Id = Data.TakeId(),
+                Kind = _kind,
+                Amount = amount,
+                Note = _note.Trim(),
+                AddedAt = DateTime.Now,
+            });
+        }
 
         Amount = "";
         Note = "";
-        NewChests.Clear();
-        Raise(nameof(HasNewChests));
-        Raise(nameof(NewChestsLabel));
         Save();
+    }
+
+    /// Betrag/Notiz/Art der Buchung in die Eingabefelder laden; der naechste
+    /// „Eintragen"-Klick ueberschreibt dann diese Buchung.
+    private void EditBooking(GoalBookingViewModel? row)
+    {
+        if (row is null || Active is null) return;
+
+        var b = Active.Bookings.FirstOrDefault(x => x.Id == row.Id);
+        if (b is null) return;
+        if (b.Kind is not (GoalBooking.Income or GoalBooking.Expense or GoalBooking.Paid)) return;
+
+        _editId = b.Id;
+        _editGoalId = Active.Id;
+        Kind = b.Kind;
+        Amount = b.Amount.ToString(CultureInfo.InvariantCulture);
+        Note = b.Note;
     }
 
     private async Task DeleteBookingAsync(GoalBookingViewModel? row)
@@ -381,13 +279,87 @@ public sealed class GoalsViewModel : ViewModelBase
             Loc.T("goals.booking.deleteAsk", row.AmountLabel, row.KindLabel));
         if (!ok) return;
 
+        if (_editId == row.Id) _editId = null;
         Active.Bookings.RemoveAll(b => b.Id == row.Id);
         Save();
+    }
+
+    /* ---------- Won-Abgleich mit dem Spiel ---------- */
+
+    /// „Ich habe jetzt … Won": der eingetippte Stand des aktiven Ziels.
+    public string SetCurrentWonText { get => _setCurrentWon; set => Set(ref _setCurrentWon, value); }
+
+    public RelayCommand SetCurrentWonCommand { get; }
+
+    /// Gleicht das berechnete Netto an den eingetippten Won-Stand an, indem die
+    /// Differenz als Abgleich-Buchung angehaengt wird (darf negativ sein).
+    private void SetCurrentWon()
+    {
+        if (Active is null || !Read(_setCurrentWon, out var value)) return;
+
+        var delta = value - Net(Active);
+        if (delta != 0m)
+        {
+            Active.Bookings.Add(new GoalBookingDto
+            {
+                Id = Data.TakeId(),
+                Kind = GoalBooking.Adjust,
+                Amount = delta,
+                Note = Loc.T("goals.adjust.note"),
+                AddedAt = DateTime.Now,
+            });
+        }
+
+        SetCurrentWonText = "";
+        CancelEdit();
+        Save();
+    }
+
+    /// Einmalige Umstellung des alten globalen `UseCurrentWon`-Overrides: der
+    /// Unterschied zum berechneten Netto (ohne Override, da entfallen) wird dem
+    /// aktiven Ziel als Abgleich-Buchung angehaengt. Danach wird die Fahne
+    /// geloescht, sodass es genau einmal laeuft.
+    private void MigrateCurrentWon()
+    {
+        if (!Data.UseCurrentWon) return;
+
+        var goal = Data.Goals.Where(g => !g.Done).OrderBy(g => g.Sort).FirstOrDefault();
+        if (goal is not null)
+        {
+            var delta = Data.CurrentWon - Net(goal);
+            if (delta != 0m)
+                goal.Bookings.Add(new GoalBookingDto
+                {
+                    Id = Data.TakeId(),
+                    Kind = GoalBooking.Adjust,
+                    Amount = delta,
+                    Note = Loc.T("goals.adjust.note"),
+                    AddedAt = DateTime.Now,
+                });
+        }
+
+        Data.UseCurrentWon = false;
+        _store.SaveGoals();
+        _stream.Write();
+    }
+
+    /// Verwirft eine angefangene Bearbeitung, damit „Eintragen" nichts ueberschreibt.
+    private void CancelEdit()
+    {
+        if (_editId is null) return;
+        _editId = null;
+        Amount = "";
+        Note = "";
     }
 
     /* ---------- Die Warteschlange ---------- */
 
     public ObservableCollection<GoalRowViewModel> Queue { get; } = new();
+
+    /// Abgeschlossene Ziele, juengstes zuerst.
+    public ObservableCollection<GoalRowViewModel> DoneGoals { get; } = new();
+
+    public bool HasDone => DoneGoals.Count > 0;
 
     public AsyncRelayCommand DeleteGoalCommand { get; }
     public RelayCommand MoveUpCommand { get; }
@@ -424,14 +396,18 @@ public sealed class GoalsViewModel : ViewModelBase
 
     public ObservableCollection<RunChip> Modes { get; } = new();
 
+    /// Leeres `OnReached` gilt als „carry".
+    private static string Mode(GoalDto? goal) =>
+        goal is { OnReached.Length: > 0 } ? goal.OnReached : GoalMode.Carry;
+
     public string OnReached
     {
-        get => Data.OnReached;
+        get => Mode(Active);
         set
         {
-            if (Data.OnReached == value) return;
+            if (Active is null || Active.OnReached == value) return;
 
-            Data.OnReached = value;
+            Active.OnReached = value;
             foreach (var c in Modes) c.IsActive = c.Key == value;
             Save();
         }
@@ -467,21 +443,20 @@ public sealed class GoalsViewModel : ViewModelBase
         // Ab hier zaehlen die Laeufe fuer das naechste Ziel - sonst zaehlte
         // der Abend doppelt.
         next.StartedAt = at;
-        next.CarryIn = Data.OnReached == GoalMode.Carry ? surplus : 0m;
+        next.CarryIn = Mode(goal) == GoalMode.Carry ? surplus : 0m;
     }
 
     /// Prueft nach jeder Aenderung, ob das aktive Ziel erreicht ist. Bei
     /// „stehen bleiben" passiert nichts - dort schaltet der Nutzer selbst.
     private void Settle()
     {
-        if (Data.OnReached == GoalMode.Manual) return;
-
         // Mehrere auf einmal sind moeglich: wer ein kleines Ziel ueberrennt,
         // soll nicht erst beim naechsten Eintrag weiterruecken.
         for (var guard = 0; guard < Data.Goals.Count; guard++)
         {
             var goal = Active;
-            if (goal is null || Net(goal) < EffectiveTarget(goal)) return;
+            if (goal is null || Mode(goal) == GoalMode.Manual) return;
+            if (Net(goal) < EffectiveTarget(goal)) return;
 
             Close(goal, DateTime.Now);
         }
@@ -502,25 +477,24 @@ public sealed class GoalsViewModel : ViewModelBase
     {
         Settle();
 
+        // Zielwechsel: angefangene Bearbeitung gehoert zum alten Ziel.
+        if (_editId is not null && Active?.Id != _editGoalId) CancelEdit();
+
         Queue.Clear();
-        foreach (var goal in Data.Goals.OrderBy(g => g.Done).ThenBy(g => g.Sort))
+        foreach (var goal in Data.Goals.Where(g => !g.Done).OrderBy(g => g.Sort))
             Queue.Add(new GoalRowViewModel(goal, Won(EffectiveTarget(goal)), goal.Id == Active?.Id));
+
+        DoneGoals.Clear();
+        foreach (var goal in Data.Goals.Where(g => g.Done).OrderByDescending(g => g.DoneAt))
+            DoneGoals.Add(new GoalRowViewModel(goal, Won(EffectiveTarget(goal)), false));
 
         Bookings.Clear();
         if (Active is not null)
             foreach (var b in Active.Bookings.OrderByDescending(b => b.AddedAt))
-                Bookings.Add(new GoalBookingViewModel(
-                    b,
-                    Won(b.Kind == GoalBooking.Shop ? ShopNet(b) : b.Amount),
-                    b.Kind == GoalBooking.Shop && b.Chests.Count > 0
-                        ? Loc.T("goals.shop.minus",
-                            b.Chests.Sum(c => c.Chests).ToString("N0", CultureInfo.CurrentCulture),
-                            Won(Counted(b)))
-                        : ""));
+                Bookings.Add(new GoalBookingViewModel(b, Won(b.Amount)));
 
-        foreach (var c in Runs) c.IsActive = c.Key == ActiveRun;
         foreach (var c in Kinds) c.IsActive = c.Key == _kind;
-        foreach (var c in Modes) c.IsActive = c.Key == Data.OnReached;
+        foreach (var c in Modes) c.IsActive = c.Key == Mode(Active);
 
         Raise(nameof(HasActive));
         Raise(nameof(HasNoGoals));
@@ -534,18 +508,16 @@ public sealed class GoalsViewModel : ViewModelBase
         Raise(nameof(HasPaid));
         Raise(nameof(CarryLabel));
         Raise(nameof(HasCarry));
-        Raise(nameof(CurrentWon));
-        Raise(nameof(UseCurrentWon));
+        Raise(nameof(AdjustLabel));
+        Raise(nameof(HasAdjust));
         Raise(nameof(NetLabel));
         Raise(nameof(RestLabel));
         Raise(nameof(Progress));
         Raise(nameof(ProgressLabel));
         Raise(nameof(RunsLeftLabel));
-        Raise(nameof(ActiveRun));
+        Raise(nameof(OnReached));
         Raise(nameof(HasBookings));
-        Raise(nameof(IsShop));
-        Raise(nameof(HasNewChests));
-        Raise(nameof(NewChestsLabel));
+        Raise(nameof(HasDone));
     }
 
     public bool HasBookings => Bookings.Count > 0;
@@ -561,12 +533,9 @@ public sealed class GoalsViewModel : ViewModelBase
     private void BuildKinds()
     {
         Kinds.Clear();
-        Kinds.Add(new RunChip(GoalBooking.Paid, Loc.T("goals.kind.paid")));
-        Kinds.Add(new RunChip(GoalBooking.Push, Loc.T("goals.kind.push")));
-        Kinds.Add(new RunChip(GoalBooking.Extra, Loc.T("goals.kind.extra")));
-        Kinds.Add(new RunChip(GoalBooking.Expense, Loc.T("goals.kind.expense")));
         Kinds.Add(new RunChip(GoalBooking.Income, Loc.T("goals.kind.income")));
-        Kinds.Add(new RunChip(GoalBooking.Shop, Loc.T("goals.kind.shop")));
+        Kinds.Add(new RunChip(GoalBooking.Expense, Loc.T("goals.kind.expense")));
+        Kinds.Add(new RunChip(GoalBooking.Paid, Loc.T("goals.kind.paid")));
         foreach (var c in Kinds) c.IsActive = c.Key == _kind;
     }
 
@@ -576,7 +545,7 @@ public sealed class GoalsViewModel : ViewModelBase
         Modes.Add(new RunChip(GoalMode.Carry, Loc.T("goals.mode.carry")));
         Modes.Add(new RunChip(GoalMode.Reset, Loc.T("goals.mode.reset")));
         Modes.Add(new RunChip(GoalMode.Manual, Loc.T("goals.mode.manual")));
-        foreach (var c in Modes) c.IsActive = c.Key == Data.OnReached;
+        foreach (var c in Modes) c.IsActive = c.Key == Mode(Active);
     }
 
     /* ---------- Zahlen ---------- */
@@ -590,19 +559,24 @@ public sealed class GoalsViewModel : ViewModelBase
             NumberStyles.Float, CultureInfo.InvariantCulture, out value) && value >= 0m;
 }
 
-/// Die vier Arten eines Postens.
+/// Die Arten eines Postens.
 public static class GoalBooking
 {
+    /// Verbleibt fuer Migration/Abgleich alter Dateien.
     public const string Push = "push";
     public const string Extra = "extra";
+
     public const string Expense = "expense";
     public const string Income = "income";
 
     /// Direkt aufs Ziel bezahlt/eingezahlt - senkt „Noch offen".
     public const string Paid = "paid";
 
-    /// Was im Shop liegt und noch nicht verkauft ist.
+    /// Was im Shop liegt und noch nicht verkauft ist (nur Altbestand).
     public const string Shop = "shop";
+
+    /// Won-Abgleich mit dem Spiel; der Betrag darf negativ sein.
+    public const string Adjust = "adjust";
 
     public static string Label(string kind) => Loc.T("goals.kind." + kind);
 }
@@ -616,32 +590,25 @@ public static class GoalMode
 }
 
 /// Ein Posten in der Liste.
-public sealed class GoalBookingViewModel(GoalBookingDto dto, string amount, string minus = "")
+public sealed class GoalBookingViewModel(GoalBookingDto dto, string amount)
 {
     public int Id { get; } = dto.Id;
     public string KindLabel { get; } = GoalBooking.Label(dto.Kind);
     public string AmountLabel { get; } = amount;
-
-    /// Beim Shop-Bestand: was abgezogen wurde, weil es ueber die Laeufe schon
-    /// zaehlt. Sonst leer.
-    public string MinusLabel { get; } = minus;
-    public bool HasMinus { get; } = minus.Length > 0;
     public string Note { get; } = dto.Note;
     public bool HasNote { get; } = dto.Note.Length > 0;
     public string DayLabel { get; } = dto.AddedAt.ToString("dd.MM.");
 
-    /// Zusatzeinnahmen stehen gruen da, Ausgaben in Bernstein - man sieht auf
-    /// einen Blick, was dazukam und was abging.
-    public bool IsIncome { get; } = dto.Kind is GoalBooking.Income or GoalBooking.Shop or GoalBooking.Paid;
-}
+    /// Nur Einnahme, Ausgabe und Bezahltes sind bearbeitbar; Abgleich und
+    /// Altarten haben keine Chip-Entsprechung in der Eingabe.
+    public bool CanEdit { get; } =
+        dto.Kind is GoalBooking.Income or GoalBooking.Expense or GoalBooking.Paid;
 
-/// Eine Truhenzeile eines Shop-Bestands, so wie sie in der Maske steht.
-public sealed class GoalChestRowViewModel(GoalChestDto dto, string run, string price)
-{
-    public GoalChestDto Dto { get; } = dto;
-    public string RunLabel { get; } = run;
-    public string ChestsLabel { get; } = dto.Chests.ToString("N0", CultureInfo.CurrentCulture);
-    public string PriceLabel { get; } = price;
+    /// Einnahmen und Bezahltes stehen gruen da, Ausgaben in Bernstein - man
+    /// sieht auf einen Blick, was dazukam und was abging.
+    public bool IsIncome { get; } =
+        dto.Kind is GoalBooking.Income or GoalBooking.Paid
+        || (dto.Kind == GoalBooking.Adjust && dto.Amount > 0m);
 }
 
 /// Eine Zeile der Warteschlange.

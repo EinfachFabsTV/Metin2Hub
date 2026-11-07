@@ -246,13 +246,19 @@ public sealed class GoalDto
     /// uebertragen werden soll.
     public decimal CarryIn { get; set; }
 
-    /// Der Lauf, mit dem gerade gearbeitet wird. **Nur Anzeige und
-    /// Schaetzung**: in den Gewinn zaehlen alle Laeufe ab `StartedAt`.
+    /// Legacy/ungenutzt: wird seit dem Goals-Umbau weder geschrieben noch
+    /// gelesen, bleibt nur fuer die Kompatibilitaet mit alten Dateien.
     public string ActiveRun { get; set; } = "hydra";
 
     /// Abgeschlossen - dann ist das naechste Ziel an der Reihe.
     public bool Done { get; set; }
     public DateTime? DoneAt { get; set; }
+
+    /// Regel bei Erreichung dieses Ziels: "carry", "reset" oder "manual" (wie
+    /// frueher global in `GoalsData.OnReached`, jetzt je Ziel). Leer heisst
+    /// „noch nicht gesetzt" (gilt als "carry") - so erkennt die Migration, ob
+    /// die alte globale Regel noch hereinkopiert werden muss.
+    public string OnReached { get; set; } = "";
 
     /// Reihenfolge der Warteschlange: das kleinste offene Ziel ist das aktive.
     public int Sort { get; set; }
@@ -269,10 +275,12 @@ public sealed class GoalBookingDto
 
     /// "push" (Standard: Traenke, Taus, Energiekristall), "extra"
     /// (Zusatz-Push, etwa Kostueme), "expense" (einmalige Ausgabe),
-    /// "income" (Zusatzeinnahme) oder "shop" (was im Shop liegt).
+    /// "income" (Zusatzeinnahme), "shop" (was im Shop liegt) oder "adjust"
+    /// (Won-Abgleich mit dem Spiel; der Betrag darf negativ sein).
     public string Kind { get; set; } = "push";
 
     /// Betrag in **Won**, immer positiv - das Vorzeichen steckt in der Art.
+    /// Ausnahme: bei "adjust" darf er negativ sein (Abzug).
     public decimal Amount { get; set; }
 
     public string Note { get; set; } = "";

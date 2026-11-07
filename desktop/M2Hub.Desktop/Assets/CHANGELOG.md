@@ -7,6 +7,33 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.8
+
+**Neu**
+
+- **Ziele: Won-Abgleich.** Statt im Kopf zu rechnen, trägst du einfach ein, wie
+  viel Won du gerade **tatsächlich** hast. Die App bucht die Differenz zum
+  errechneten Stand als sichtbare Korrektur („Abgleich") – danach zählen Läufe
+  und Buchungen ganz normal weiter.
+- **Erledigte Ziele** stehen jetzt als eigene Liste unter der Warteschlange.
+- **Der Fortschritts-Ring wechselt die Farbe** mit dem Fortschritt (rot → gelb
+  → grün).
+
+**Geändert**
+
+- **Buchen ist einfacher.** Statt vier Arten gibt es nur noch **+ Einnahme**,
+  **− Ausgabe** und **Bezahlt**. Das Notizfeld steht immer offen, in der Liste
+  steht die Notiz groß und die Art klein daneben; Buchungen lassen sich
+  bearbeiten.
+- **„Bei Zielerreichung" wird jetzt pro Ziel gewählt** (weiter mit Überschuss /
+  bei null / stehen bleiben) statt für alle gemeinsam.
+
+**Entfernt**
+
+- **Der Shop-Bestand** (einzelne Truhen eintragen) und der **Push** als eigene
+  Buchungsart. Alte Einträge werden beim ersten Start automatisch übernommen:
+  Shop-Posten werden zu einer Einnahme, Push zu einer Einnahme.
+
 ## 1.79.7
 
 **Geändert**

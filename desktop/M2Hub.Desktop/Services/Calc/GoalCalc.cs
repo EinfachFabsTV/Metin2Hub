@@ -14,8 +14,17 @@ public static class GoalCalc
     /// weiterverkauft), `Expenses` die Ausgaben aller Arten.
     ///
     /// `CarryIn` ist, was vom vorigen Ziel uebrig blieb - falls so eingestellt.
+    /// Ohne Abgleich-Buchungen; Aufrufer ohne `adjust` rechnen wie bisher.
     public static decimal Net(decimal runs, decimal income, decimal expenses, decimal carryIn) =>
-        runs + income + carryIn - expenses;
+        Net(runs, income, expenses, carryIn, 0m);
+
+    /// Wie `Net`, mit den Abgleich-Buchungen.
+    ///
+    /// `adjust` ist die Summe der Abgleich-Buchungen und wird vorzeichenbehaftet
+    /// addiert: negativ = Korrektur-Ausgabe. Soll-Werte: `Net(540, 200, 180, 0, 120)`
+    /// ergibt 680, `Net(540, 0, 0, 0, -120)` ergibt 420, `Net(0, 0, 0, 0, 0)` ergibt 0.
+    public static decimal Net(decimal runs, decimal income, decimal expenses, decimal carryIn, decimal adjust) =>
+        runs + income + carryIn + adjust - expenses;
 
     /// Was ein Shop-Bestand zusaetzlich einbringt.
     ///

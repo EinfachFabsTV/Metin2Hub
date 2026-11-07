@@ -97,26 +97,24 @@ public sealed class StreamOverlay(LocalStore store)
             .Where(e => e.AddedAt >= goal.StartedAt)
             .Sum(e => e.Chests * PriceOf(e)) / Money.KkPerW;
 
-        // Dieselbe Aufteilung wie im Bereich Goals: der Shop-Bestand ist
-        // weder Ausgabe noch volle Einnahme - von ihm zaehlt nur, was nicht
-        // ueber die Laeufe schon im Gewinn steht.
-        var income = goal.Bookings.Where(b => b.Kind == "income").Sum(b => b.Amount)
-            + goal.Bookings.Where(b => b.Kind == "shop").Sum(ShopNet);
+        var income = goal.Bookings.Where(b => b.Kind == "income").Sum(b => b.Amount);
+        // Abgleich (vorzeichenbehaftet) zaehlt weder als Ausgabe noch als Einnahme.
+        var adjust = goal.Bookings.Where(b => b.Kind == "adjust").Sum(b => b.Amount);
         var expenses = goal.Bookings
-            .Where(b => b.Kind != "income" && b.Kind != "shop" && b.Kind != "paid")
+            .Where(b => b.Kind != "income" && b.Kind != "shop" && b.Kind != "paid" && b.Kind != "adjust")
             .Sum(b => b.Amount);
         // „Bezahlt" senkt den Zielbetrag selbst (wie im Bereich Goals).
         var paid = goal.Bookings.Where(b => b.Kind == "paid").Sum(b => b.Amount);
         var target = Math.Max(0m, goal.Target - paid);
-        // Aktuelles Won von Hand ersetzt die Berechnung (wie im Bereich Goals).
-        var net = store.Goals.UseCurrentWon
-            ? store.Goals.CurrentWon
-            : GoalCalc.Net(runProfit, income, expenses, goal.CarryIn);
+        var net = GoalCalc.Net(runProfit, income, expenses, goal.CarryIn, adjust);
         var rest = GoalCalc.Rest(target, net);
         var progress = GoalCalc.Progress(target, net);
 
         var entries = InScope().ToList();
-        var run = RunCatalog.Find(goal.ActiveRun)?.Name ?? goal.ActiveRun;
+        // Prognose-Lauf: der zuletzt genutzte Lauf (wie im ViewModel).
+        var lastRun = store.Runs.Entries.OrderByDescending(e => e.AddedAt).FirstOrDefault()?.Run
+            ?? RunCatalog.Runs[0].Key;
+        var run = RunCatalog.Find(lastRun)?.Name ?? lastRun;
 
         WriteFile("ziel.txt", goal.Title.Length > 0 ? goal.Title : Won(target));
         WriteFile("ziel-wert.txt", Won(target));
@@ -136,7 +134,7 @@ public sealed class StreamOverlay(LocalStore store)
         // „Noch ungefaehr X Laeufe" - geschaetzt aus dem, was der aktive Lauf
         // bisher im Mittel einbrachte. Ohne Eintraege dazu bleibt es leer, und
         // die Karte zeigt stattdessen, was offen ist.
-        var perRun = PerRun(goal.ActiveRun);
+        var perRun = PerRun(lastRun);
         var runsLeft = perRun > 0m && rest > 0m
             ? Loc.T("goals.runsLeft", GoalCalc.Runs(rest, perRun).ToString("N0", CultureInfo.CurrentCulture))
             : "";
@@ -152,25 +150,6 @@ public sealed class StreamOverlay(LocalStore store)
             goal.Title.Length > 0 ? goal.Title : Loc.T("stream.goal.title"),
             Won(target), Won(net), Won(rest), expenses > 0m ? Won(expenses) : "",
             progress, entries.Sum(e => e.Chests), entries.Count, run, runsLeft));
-    }
-
-    /// Was ein Shop-Posten beitraegt: der Betrag ohne die Truhen, die ueber
-    /// die Laeufe schon gezaehlt sind.
-    private decimal ShopNet(GoalBookingDto booking)
-    {
-        var counted = booking.Chests.Sum(c => c.Chests * ChestPrice(c)) / Money.KkPerW;
-
-        return GoalCalc.ShopNet(booking.Amount, counted);
-    }
-
-    /// Der Preis einer Truhenzeile in kk: ihr eigener, sonst der des Laufs.
-    private decimal ChestPrice(GoalChestDto chest)
-    {
-        if (chest.Price > 0m) return chest.Price;
-
-        return store.Runs.ChestPrice.TryGetValue(chest.Run, out var p)
-            ? p
-            : RunCatalog.DefaultChestPrice;
     }
 
     /// Was ein Lauf dieser Art im Mittel einbringt, in Won.
