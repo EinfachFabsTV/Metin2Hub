@@ -33,7 +33,6 @@ public sealed class GoalsViewModel : ViewModelBase
     private RunChip? _chestRun;
     private string _chestCount = "";
     private string _chestPrice = "";
-    private string _onHandText = "";
 
     public GoalsViewModel(LocalStore store, IDialogService dialogs, StreamOverlay stream)
     {
@@ -64,8 +63,6 @@ public sealed class GoalsViewModel : ViewModelBase
         DeleteGoalCommand = new AsyncRelayCommand(p => DeleteGoalAsync(p as GoalRowViewModel));
         MoveUpCommand = new RelayCommand(p => Move(p as GoalRowViewModel, -1));
         MoveDownCommand = new RelayCommand(p => Move(p as GoalRowViewModel, +1));
-
-        _onHandText = Data.OnHand > 0m ? Data.OnHand.ToString("0.##", CultureInfo.CurrentCulture) : "";
 
         Reload();
     }
@@ -133,12 +130,12 @@ public sealed class GoalsViewModel : ViewModelBase
         return _store.Runs.ChestPrice.TryGetValue(chest.Run, out var p) ? p : RunCatalog.DefaultChestPrice;
     }
 
+    /// Netto des Ziels. Ist das aktuelle Won von Hand gesetzt, **ersetzt** es
+    /// die Berechnung; sonst Laeufe + Einnahmen + Uebertrag − Ausgaben.
     private decimal Net(GoalDto goal) =>
-        GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn + OnHandApplied);
-
-    /// Vorhandenes Won, das aufs aktive Ziel angerechnet wird (nur wenn der
-    /// Schalter an ist).
-    private decimal OnHandApplied => Data.OnHandCounts ? Data.OnHand : 0m;
+        Data.UseCurrentWon
+            ? Data.CurrentWon
+            : GoalCalc.Net(RunProfit(goal), Income(goal), Expenses(goal), goal.CarryIn);
 
     public string ProfitLabel => Active is null ? "—" : Won(RunProfit(Active));
     public string ExpensesLabel => Active is null ? "—" : Won(Expenses(Active));
@@ -148,34 +145,32 @@ public sealed class GoalsViewModel : ViewModelBase
     public string CarryLabel => Active is null ? "—" : Won(Active.CarryIn);
     public bool HasCarry => Active is { CarryIn: > 0m };
 
-    /* ---------- Vorhandenes Won ---------- */
+    /* ---------- Aktuelles Won von Hand ---------- */
 
-    /// Wie viel Won man schon hat (frei eingetippt, in Won).
-    public string OnHandText
+    /// Der von Hand gesetzte aktuelle Won-Stand (ersetzt die Berechnung, wenn
+    /// `UseCurrentWon` an ist).
+    public decimal CurrentWon
     {
-        get => _onHandText;
+        get => Data.CurrentWon;
         set
         {
-            if (!Set(ref _onHandText, value)) return;
-            Data.OnHand = Read(value, out var v) ? v : 0m;
+            if (Data.CurrentWon == value) return;
+            Data.CurrentWon = value;
             Save();
         }
     }
 
-    /// Ob das vorhandene Won aufs aktive Ziel angerechnet wird.
-    public bool OnHandCounts
+    /// Ob das aktuelle Won von Hand gesetzt wird (und die Berechnung ersetzt).
+    public bool UseCurrentWon
     {
-        get => Data.OnHandCounts;
+        get => Data.UseCurrentWon;
         set
         {
-            if (Data.OnHandCounts == value) return;
-            Data.OnHandCounts = value;
+            if (Data.UseCurrentWon == value) return;
+            Data.UseCurrentWon = value;
             Save();
         }
     }
-
-    public string OnHandLabel => Won(OnHandApplied);
-    public bool HasOnHand => Data.OnHandCounts && Data.OnHand > 0m;
     public string NetLabel => Active is null ? "—" : Won(Net(Active));
     public string RestLabel => Active is null ? "—" : Won(GoalCalc.Rest(EffectiveTarget(Active), Net(Active)));
 
@@ -539,9 +534,8 @@ public sealed class GoalsViewModel : ViewModelBase
         Raise(nameof(HasPaid));
         Raise(nameof(CarryLabel));
         Raise(nameof(HasCarry));
-        Raise(nameof(OnHandCounts));
-        Raise(nameof(OnHandLabel));
-        Raise(nameof(HasOnHand));
+        Raise(nameof(CurrentWon));
+        Raise(nameof(UseCurrentWon));
         Raise(nameof(NetLabel));
         Raise(nameof(RestLabel));
         Raise(nameof(Progress));

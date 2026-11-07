@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.6
+
+**Geändert**
+
+- **Ziele: „Aktuelles Won" ersetzt die Berechnung.** Statt vorhandenes Won zu
+  *addieren*, kannst du jetzt das **aktuelle Won selbst setzen** – der Wert
+  **ersetzt** die berechnete Summe (z. B. die 300w aus den Läufen werden zu den
+  eingetragenen 400w). Der Wert lässt sich zuverlässig setzen und greift sofort.
+
 ## 1.79.5
 
 **Neu**

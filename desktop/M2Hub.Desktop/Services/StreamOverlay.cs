@@ -108,9 +108,10 @@ public sealed class StreamOverlay(LocalStore store)
         // „Bezahlt" senkt den Zielbetrag selbst (wie im Bereich Goals).
         var paid = goal.Bookings.Where(b => b.Kind == "paid").Sum(b => b.Amount);
         var target = Math.Max(0m, goal.Target - paid);
-        // Vorhandenes Won zaehlt mit, wenn der Schalter an ist (wie im Bereich Goals).
-        var onHand = store.Goals.OnHandCounts ? store.Goals.OnHand : 0m;
-        var net = GoalCalc.Net(runProfit, income, expenses, goal.CarryIn + onHand);
+        // Aktuelles Won von Hand ersetzt die Berechnung (wie im Bereich Goals).
+        var net = store.Goals.UseCurrentWon
+            ? store.Goals.CurrentWon
+            : GoalCalc.Net(runProfit, income, expenses, goal.CarryIn);
         var rest = GoalCalc.Rest(target, net);
         var progress = GoalCalc.Progress(target, net);
 

@@ -313,11 +313,11 @@ public sealed class GoalsData
     /// Nutzer umschaltet).
     public string OnReached { get; set; } = "carry";
 
-    /// Vorhandenes Won, das man schon hat. Wird nur aufs aktive Ziel
-    /// angerechnet, wenn `OnHandCounts` an ist - dann senkt es „Noch offen"
-    /// (Ziel 150w, 50w vorhanden angerechnet -> nur noch 100w offen).
-    public decimal OnHand { get; set; }
-    public bool OnHandCounts { get; set; }
+    /// Aktuelles Won, von Hand gesetzt. Ist `UseCurrentWon` an, **ersetzt**
+    /// dieser Wert die berechnete Summe des aktiven Ziels (statt der z. B. 300w
+    /// aus den Laeufen zaehlt dann der eingetragene Wert, z. B. 400w).
+    public decimal CurrentWon { get; set; }
+    public bool UseCurrentWon { get; set; }
 
     public int NextId { get; set; } = 1;
 
