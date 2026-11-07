@@ -7,6 +7,16 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.7
+
+**Geändert**
+
+- **Ziele: neues Layout mit Fortschritts-Ring.** Das aktive Ziel steht jetzt als
+  große Karte: ein **Prozent-Ring** zeigt den Fortschritt, in der Mitte das
+  vorhandene Won, daneben drei Kacheln mit **Zielbetrag**, **Noch offen** und
+  **Prognose**. Die Rechnung dahinter und das Setzen des aktuellen Won stehen in
+  einer eigenen Karte. Shop-Bestand und alles andere arbeiten wie bisher.
+
 ## 1.79.6
 
 **Geändert**

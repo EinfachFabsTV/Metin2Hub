@@ -5,6 +5,10 @@
              x:Class="M2Hub.Desktop.Views.GoalsView"
              x:DataType="vm:GoalsViewModel">
 
+  <UserControl.Resources>
+    <loc:ProgressArcConverter x:Key="arc" />
+  </UserControl.Resources>
+
   <ScrollViewer>
     <StackPanel Margin="18" Spacing="14">
 
@@ -18,122 +22,163 @@
         <!-- ===== Das aktive Ziel ===== -->
         <StackPanel Grid.Column="0" Spacing="14">
 
-          <Border Classes="card" Padding="18">
-            <StackPanel Spacing="14">
+          <!-- Kein aktives Ziel -->
+          <Border Classes="card" Padding="18" IsVisible="{Binding !HasActive}">
+            <TextBlock Classes="muted" Text="{loc:T goals.none}" TextWrapping="Wrap" />
+          </Border>
 
-              <TextBlock Classes="muted" Text="{loc:T goals.none}" TextWrapping="Wrap"
-                         IsVisible="{Binding !HasActive}" />
+          <!-- Hero: Prozent-Ring + Kennzahlen -->
+          <Border Classes="card" Padding="22" IsVisible="{Binding HasActive}">
+            <StackPanel Spacing="18">
 
-              <StackPanel Spacing="14" IsVisible="{Binding HasActive}">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="18">
 
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Grid.Column="0" Classes="h2" Text="{Binding Title}"
-                             TextWrapping="Wrap" />
-                  <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="18"
-                             Foreground="{StaticResource PrimaryBrush}"
-                             VerticalAlignment="Center" Text="{Binding TargetLabel}" />
-                </Grid>
+                <!-- Links: Titel, Zielbetrag, Kennzahl-Kacheln -->
+                <StackPanel Grid.Column="0" Spacing="14" VerticalAlignment="Center">
 
-                <StackPanel Spacing="4">
-                  <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" FontSize="22" FontWeight="Bold"
+                  <StackPanel Spacing="4">
+                    <Border Classes="chip active" Padding="8,3" HorizontalAlignment="Left">
+                      <TextBlock FontSize="11" Text="{loc:T goals.hero.active}" />
+                    </Border>
+                    <TextBlock Classes="h2" Text="{Binding Title}" TextWrapping="Wrap" />
+                  </StackPanel>
+
+                  <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Border Grid.Column="0" Classes="panel" Padding="10,8">
+                      <StackPanel Spacing="2">
+                        <TextBlock Classes="muted" FontSize="10" Text="{loc:T goals.hero.target}" />
+                        <TextBlock FontWeight="Bold" FontSize="14"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   Text="{Binding TargetLabel}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Classes="panel" Padding="10,8">
+                      <StackPanel Spacing="2">
+                        <TextBlock Classes="muted" FontSize="10" Text="{loc:T goals.rest}" />
+                        <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding RestLabel}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Classes="panel" Padding="10,8">
+                      <StackPanel Spacing="2">
+                        <TextBlock Classes="muted" FontSize="10" Text="{loc:T goals.hero.forecast}" />
+                        <TextBlock FontWeight="Bold" FontSize="12"
+                                   Text="{Binding RunsLeftLabel}" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </Grid>
+                </StackPanel>
+
+                <!-- Rechts: der Prozent-Ring -->
+                <Grid Grid.Column="1" Width="168" Height="168" VerticalAlignment="Center">
+                  <Viewbox>
+                    <Canvas Width="100" Height="100">
+                      <Ellipse Width="84" Height="84" Canvas.Left="8" Canvas.Top="8"
+                               Stroke="{StaticResource SubtleBrush}" StrokeThickness="7"
+                               Fill="Transparent" />
+                      <Path Stroke="{StaticResource PrimaryBrush}" StrokeThickness="7"
+                            StrokeLineCap="Round"
+                            Data="{Binding Progress, Converter={StaticResource arc}}" />
+                    </Canvas>
+                  </Viewbox>
+                  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="1">
+                    <TextBlock HorizontalAlignment="Center" FontSize="26" FontWeight="Bold"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               Text="{Binding ProgressLabel}" />
+                    <TextBlock HorizontalAlignment="Center" Classes="muted" FontSize="10"
+                               Text="{loc:T goals.hero.onhand}" />
+                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="13"
                                Foreground="{StaticResource SuccessBrush}"
                                Text="{Binding NetLabel}" />
-                    <TextBlock Grid.Column="1" Classes="muted" VerticalAlignment="Bottom"
-                               Text="{Binding ProgressLabel}" />
-                  </Grid>
-                  <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" Height="10" />
-                  <TextBlock Classes="muted" FontSize="12" Text="{Binding RunsLeftLabel}" />
-                </StackPanel>
+                  </StackPanel>
+                </Grid>
+              </Grid>
 
-                <!-- Die Rechnung dahinter (bei manuellem Won ausgeblendet) -->
-                <StackPanel Spacing="7" IsVisible="{Binding !UseCurrentWon}">
-                  <Border Classes="statrow">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.profit}" />
-                      <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding ProfitLabel}" />
-                    </Grid>
-                  </Border>
-                  <Border Classes="statrow" IsVisible="{Binding HasCarry}">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.carry}" />
-                      <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding CarryLabel}" />
-                    </Grid>
-                  </Border>
-                  <Border Classes="statrow">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.income}" />
-                      <TextBlock Grid.Column="1" FontWeight="Bold"
-                                 Foreground="{StaticResource SuccessBrush}"
-                                 Text="{Binding IncomeLabel}" />
-                    </Grid>
-                  </Border>
-                  <Border Classes="statrow" IsVisible="{Binding HasPaid}">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.paid}" />
-                      <TextBlock Grid.Column="1" FontWeight="Bold"
-                                 Foreground="{StaticResource SuccessBrush}"
-                                 Text="{Binding PaidLabel}" />
-                    </Grid>
-                  </Border>
-                  <Border Classes="statrow">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.expenses}" />
-                      <TextBlock Grid.Column="1" FontWeight="Bold"
-                                 Foreground="{StaticResource AmberBrush}"
-                                 Text="{Binding ExpensesLabel}" />
-                    </Grid>
-                  </Border>
-                </StackPanel>
+              <!-- Der aktive Lauf: Anzeige und Schaetzung, kein Filter -->
+              <StackPanel Spacing="6">
+                <TextBlock Classes="muted" Text="{loc:T goals.run}" />
+                <ItemsControl ItemsSource="{Binding Runs}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:RunChip">
+                      <Button Classes="chip" Classes.active="{Binding IsActive}"
+                              Margin="0,0,6,6" Content="{Binding Label}"
+                              Command="{Binding $parent[UserControl].DataContext.ChooseRunCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{loc:T goals.run.note}" />
+              </StackPanel>
 
-                <!-- Noch offen (immer sichtbar) -->
+              <Button Classes="chip" HorizontalAlignment="Left"
+                      Content="{loc:T goals.finish}"
+                      IsEnabled="{Binding CanFinish}"
+                      Command="{Binding FinishCommand}" />
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Die Rechnung dahinter (bei manuellem Won ausgeblendet) ===== -->
+          <Border Classes="card" Padding="18"
+                  IsVisible="{Binding HasActive}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="{loc:T goals.breakdown}" />
+
+              <StackPanel Spacing="7" IsVisible="{Binding !UseCurrentWon}">
                 <Border Classes="statrow">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.rest}" />
-                    <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding RestLabel}" />
+                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.profit}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding ProfitLabel}" />
                   </Grid>
                 </Border>
-
-                <!-- Aktuelles Won selbst setzen (ersetzt die Berechnung) -->
-                <Border Classes="statrow">
-                  <StackPanel Spacing="8">
-                    <CheckBox IsChecked="{Binding UseCurrentWon}" Content="{loc:T goals.currentwon.use}" />
-                    <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding UseCurrentWon}">
-                      <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center" Text="{loc:T goals.currentwon.label}" />
-                      <NumericUpDown Grid.Column="1" Margin="8,0,0,0" Width="170" HorizontalAlignment="Left"
-                                     Minimum="0" Maximum="1000000" Increment="1" FormatString="0.##"
-                                     Value="{Binding CurrentWon}" />
-                    </Grid>
-                    <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
-                               IsVisible="{Binding UseCurrentWon}" Text="{loc:T goals.currentwon.note}" />
-                  </StackPanel>
+                <Border Classes="statrow" IsVisible="{Binding HasCarry}">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.carry}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold" Text="{Binding CarryLabel}" />
+                  </Grid>
                 </Border>
-
-                <!-- Der aktive Lauf: Anzeige und Schaetzung, kein Filter -->
-                <StackPanel Spacing="6">
-                  <TextBlock Classes="muted" Text="{loc:T goals.run}" />
-                  <ItemsControl ItemsSource="{Binding Runs}">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate DataType="vm:RunChip">
-                        <Button Classes="chip" Classes.active="{Binding IsActive}"
-                                Margin="0,0,6,6" Content="{Binding Label}"
-                                Command="{Binding $parent[UserControl].DataContext.ChooseRunCommand}"
-                                CommandParameter="{Binding}" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                  <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
-                             Text="{loc:T goals.run.note}" />
-                </StackPanel>
-
-                <Button Classes="chip" HorizontalAlignment="Left"
-                        Content="{loc:T goals.finish}"
-                        IsEnabled="{Binding CanFinish}"
-                        Command="{Binding FinishCommand}" />
+                <Border Classes="statrow">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.income}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold"
+                               Foreground="{StaticResource SuccessBrush}"
+                               Text="{Binding IncomeLabel}" />
+                  </Grid>
+                </Border>
+                <Border Classes="statrow" IsVisible="{Binding HasPaid}">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.paid}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold"
+                               Foreground="{StaticResource SuccessBrush}"
+                               Text="{Binding PaidLabel}" />
+                  </Grid>
+                </Border>
+                <Border Classes="statrow">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.expenses}" />
+                    <TextBlock Grid.Column="1" FontWeight="Bold"
+                               Foreground="{StaticResource AmberBrush}"
+                               Text="{Binding ExpensesLabel}" />
+                  </Grid>
+                </Border>
               </StackPanel>
+
+              <!-- Aktuelles Won selbst setzen (ersetzt die Berechnung) -->
+              <Border Classes="statrow">
+                <StackPanel Spacing="8">
+                  <CheckBox IsChecked="{Binding UseCurrentWon}" Content="{loc:T goals.currentwon.use}" />
+                  <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding UseCurrentWon}">
+                    <TextBlock Grid.Column="0" Classes="muted" VerticalAlignment="Center" Text="{loc:T goals.currentwon.label}" />
+                    <NumericUpDown Grid.Column="1" Margin="8,0,0,0" Width="170" HorizontalAlignment="Left"
+                                   Minimum="0" Maximum="1000000" Increment="1" FormatString="0.##"
+                                   Value="{Binding CurrentWon}" />
+                  </Grid>
+                  <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                             IsVisible="{Binding UseCurrentWon}" Text="{loc:T goals.currentwon.note}" />
+                </StackPanel>
+              </Border>
             </StackPanel>
           </Border>
 
