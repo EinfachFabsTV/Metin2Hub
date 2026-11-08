@@ -52,6 +52,7 @@ public sealed class GoalsViewModel : ViewModelBase
         FinishCommand = new RelayCommand(_ => Finish());
         DeleteBookingCommand = new AsyncRelayCommand(p => DeleteBookingAsync(p as GoalBookingViewModel));
         DeleteGoalCommand = new AsyncRelayCommand(p => DeleteGoalAsync(p as GoalRowViewModel));
+        EditGoalCommand = new RelayCommand(p => StartEditGoal(p as GoalRowViewModel));
         MoveUpCommand = new RelayCommand(p => Move(p as GoalRowViewModel, -1));
         MoveDownCommand = new RelayCommand(p => Move(p as GoalRowViewModel, +1));
 
@@ -178,26 +179,62 @@ public sealed class GoalsViewModel : ViewModelBase
     public string NewTarget { get => _newTarget; set => Set(ref _newTarget, value); }
 
     public RelayCommand AddGoalCommand { get; }
+    public RelayCommand EditGoalCommand { get; }
+
+    /// Das Ziel, das gerade in der Maske bearbeitet wird; null heisst „neu".
+    private int? _goalEditId;
+
+    /// Beschriftung des Knopfs: beim Bearbeiten „Speichern", sonst „Anlegen".
+    public string AddGoalLabel =>
+        _goalEditId is null ? Loc.T("goals.new.add") : Loc.T("goals.edit.save");
 
     private void AddGoal()
     {
         if (!Read(_newTarget, out var target) || target <= 0m) return;
 
-        Data.Goals.Add(new GoalDto
+        // Ein bestehendes Ziel bearbeiten: Titel und Zielbetrag ueberschreiben.
+        // Noetig, weil der aus alten Fassungen uebernommene Zielbetrag nicht
+        // immer der eigentliche ist.
+        if (_goalEditId is { } id)
         {
-            Id = Data.TakeId(),
-            Title = _newTitle.Trim(),
-            Target = target,
-            Sort = Data.Goals.Count == 0 ? 0 : Data.Goals.Max(g => g.Sort) + 1,
-            StartedAt = DateTime.Now,
-            // Die Regel explizit setzen, damit die einmalige Migration sie nicht
-            // nachtraeglich ueberschreibt.
-            OnReached = Data.OnReached is { Length: > 0 } ? Data.OnReached : GoalMode.Carry,
-        });
+            var goal = Data.Goals.FirstOrDefault(g => g.Id == id);
+            if (goal is not null)
+            {
+                goal.Title = _newTitle.Trim();
+                goal.Target = target;
+            }
+            _goalEditId = null;
+            Raise(nameof(AddGoalLabel));
+        }
+        else
+        {
+            Data.Goals.Add(new GoalDto
+            {
+                Id = Data.TakeId(),
+                Title = _newTitle.Trim(),
+                Target = target,
+                Sort = Data.Goals.Count == 0 ? 0 : Data.Goals.Max(g => g.Sort) + 1,
+                StartedAt = DateTime.Now,
+                // Die Regel explizit setzen, damit die einmalige Migration sie nicht
+                // nachtraeglich ueberschreibt.
+                OnReached = Data.OnReached is { Length: > 0 } ? Data.OnReached : GoalMode.Carry,
+            });
+        }
 
         NewTitle = "";
         NewTarget = "";
         Save();
+    }
+
+    /// Lae­dt ein Ziel in die Maske, der naechste „Speichern"-Klick ueberschreibt es.
+    private void StartEditGoal(GoalRowViewModel? row)
+    {
+        if (row is null) return;
+
+        NewTitle = row.RawTitle;
+        NewTarget = row.Target.ToString(CultureInfo.InvariantCulture);
+        _goalEditId = row.Id;
+        Raise(nameof(AddGoalLabel));
     }
 
     /* ---------- Ausgaben, Einnahmen, Abgleich ---------- */
@@ -395,6 +432,14 @@ public sealed class GoalsViewModel : ViewModelBase
         if (!ok) return;
 
         Data.Goals.RemoveAll(g => g.Id == row.Id);
+        // Falls genau dieses Ziel in der Maske lag, die Bearbeitung abbrechen.
+        if (_goalEditId == row.Id)
+        {
+            _goalEditId = null;
+            NewTitle = "";
+            NewTarget = "";
+            Raise(nameof(AddGoalLabel));
+        }
         Save();
     }
 
@@ -626,4 +671,9 @@ public sealed class GoalRowViewModel(GoalDto dto, string target, bool isActive)
     public string TargetLabel { get; } = target;
     public bool IsActive { get; } = isActive;
     public bool IsDone { get; } = dto.Done;
+
+    /// Der rohe Titel (ohne Ersatztext) und der urspruengliche Zielbetrag -
+    /// fuers Zurueckladen in die Bearbeiten-Maske.
+    public string RawTitle { get; } = dto.Title;
+    public decimal Target { get; } = dto.Target;
 }

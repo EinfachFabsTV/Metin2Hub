@@ -242,7 +242,7 @@
               <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <TextBox Grid.Column="0" Text="{Binding NewTarget, Mode=TwoWay}"
                          Watermark="{loc:T goals.new.target}" KeyDown="AddGoalKeyDown" />
-                <Button Grid.Column="1" Classes="primary" Content="{loc:T goals.new.add}"
+                <Button Grid.Column="1" Classes="primary" Content="{Binding AddGoalLabel}"
                         Command="{Binding AddGoalCommand}" />
               </Grid>
             </StackPanel>
@@ -256,7 +256,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:GoalRowViewModel">
                     <Border Classes="panel" Padding="10,7" Margin="0,0,0,6">
-                      <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="5">
+                      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="5">
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                           <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding Title}"
                                      TextTrimming="CharacterEllipsis" />
@@ -267,13 +267,17 @@
                                        IsVisible="{Binding IsActive}" />
                           </StackPanel>
                         </StackPanel>
-                        <Button Grid.Column="1" Classes="icon" Content="↑"
+                        <Button Grid.Column="1" Classes="icon" Content="✎"
+                                ToolTip.Tip="{loc:T goals.edit}"
+                                Command="{Binding $parent[UserControl].DataContext.EditGoalCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="2" Classes="icon" Content="↑"
                                 Command="{Binding $parent[UserControl].DataContext.MoveUpCommand}"
                                 CommandParameter="{Binding}" />
-                        <Button Grid.Column="2" Classes="icon" Content="↓"
+                        <Button Grid.Column="3" Classes="icon" Content="↓"
                                 Command="{Binding $parent[UserControl].DataContext.MoveDownCommand}"
                                 CommandParameter="{Binding}" />
-                        <Button Grid.Column="3" Classes="icon danger" Content="✕"
+                        <Button Grid.Column="4" Classes="icon danger" Content="✕"
                                 ToolTip.Tip="{loc:T goals.delete}"
                                 Command="{Binding $parent[UserControl].DataContext.DeleteGoalCommand}"
                                 CommandParameter="{Binding}" />

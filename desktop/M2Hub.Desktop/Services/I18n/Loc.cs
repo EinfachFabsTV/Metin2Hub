@@ -667,6 +667,8 @@ public sealed class Loc : INotifyPropertyChanged
         ["goals.new.title"] = ["Wofür", "What for", "Ne için", "Per cosa"],
         ["goals.new.target"] = ["Ziel (Won)", "Goal (won)", "Hedef (Won)", "Obiettivo (won)"],
         ["goals.new.add"] = ["Anlegen", "Add", "Ekle", "Crea"],
+        ["goals.edit"] = ["Ziel bearbeiten", "Edit goal", "Hedefi düzenle", "Modifica obiettivo"],
+        ["goals.edit.save"] = ["Speichern", "Save", "Kaydet", "Salva"],
         ["goals.queue"] = ["Warteschlange", "Queue", "Sıra", "Coda"],
         ["goals.queue.active"] = ["aktiv", "active", "aktif", "attivo"],
         ["goals.queue.done"] = ["erreicht", "reached", "ulaşıldı", "raggiunto"],
