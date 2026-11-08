@@ -121,6 +121,12 @@ public sealed class GoalsViewModel : ViewModelBase
     public string IncomeLabel => Active is null ? "—" : Won(Income(Active));
     public string PaidLabel => Active is null ? "—" : Won(Paid(Active));
     public bool HasPaid => Active is not null && Paid(Active) > 0m;
+
+    /// Fortschritt des Bezahlens am **urspruenglichen** Zielbetrag, z. B.
+    /// „2000w / 2700w" - der reduzierte Restbetrag allein verbirgt, wie teuer
+    /// das Ziel urspruenglich war.
+    public string PaidProgressLabel =>
+        Active is null ? "—" : $"{Won(Paid(Active))} / {Won(Active.Target)}";
     public string CarryLabel => Active is null ? "—" : Won(Active.CarryIn);
     public bool HasCarry => Active is { CarryIn: > 0m };
 
@@ -506,6 +512,7 @@ public sealed class GoalsViewModel : ViewModelBase
         Raise(nameof(IncomeLabel));
         Raise(nameof(PaidLabel));
         Raise(nameof(HasPaid));
+        Raise(nameof(PaidProgressLabel));
         Raise(nameof(CarryLabel));
         Raise(nameof(HasCarry));
         Raise(nameof(AdjustLabel));

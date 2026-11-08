@@ -132,7 +132,7 @@
                     <TextBlock Grid.Column="0" Classes="muted" Text="{loc:T goals.paid}" />
                     <TextBlock Grid.Column="1" FontWeight="Bold"
                                Foreground="{StaticResource SuccessBrush}"
-                               Text="{Binding PaidLabel}" />
+                               Text="{Binding PaidProgressLabel}" />
                   </Grid>
                 </Border>
                 <Border Classes="statrow">

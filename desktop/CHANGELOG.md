@@ -7,6 +7,15 @@ veroeffentlichte Fassung steht hier; die Punkte sind nach **Neu**,
 Diese Datei liegt der App bei und steht in den Einstellungen unter
 „Was ist neu"; dieselben Punkte stehen in den Release-Notizen.
 
+## 1.79.9
+
+**Geändert**
+
+- **Ziele: „Bezahlt" zeigt den Fortschritt am ursprünglichen Ziel.** Statt nur
+  den reduzierten Rest zu sehen, steht jetzt bezahlt gegen den vollen Zielbetrag
+  da – z. B. „2000w / 2700w", damit sichtbar bleibt, wie teuer das Ziel
+  ursprünglich war.
+
 ## 1.79.8
 
 **Neu**
